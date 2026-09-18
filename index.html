@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07191d">
+<title>Portal Sat GPS Agrícola</title>
+<style>
+:root{--bg:#061419;--panel:#0b2228;--text:#f4fbf7;--muted:#9bb2b4;--green:#20e36a;--border:#1b4148}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}
+button,input{font:inherit}button{border:0;cursor:pointer}.app{max-width:480px;margin:auto;min-height:100vh;background:var(--bg)}
+header{height:64px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:#07191d}
+.logo{font-weight:800;font-size:20px}.logo span{color:var(--green)}.status{font-size:12px;color:var(--muted)}
+main{padding:14px 14px 90px}.screen{display:none}.screen.active{display:block}
+.card{background:#0b252b;border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px}
+h2{font-size:20px;margin:4px 0 14px}.muted{color:var(--muted)}
+.map{height:410px;border-radius:18px;border:1px solid var(--border);position:relative;overflow:hidden;background:#173a2b}
+.guideline{position:absolute;left:50%;top:0;bottom:0;width:4px;background:#20e36a;box-shadow:0 0 12px #20e36a;transform:translateX(-50%)}
+.vehicle{position:absolute;left:50%;top:57%;transform:translate(-50%,-50%);font-size:42px}
+.badge{position:absolute;top:12px;left:12px;background:#07191de8;border:1px solid var(--border);padding:9px 12px;border-radius:12px;font-size:13px}
+.deviation{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:#07191df0;padding:7px 14px;border-radius:20px;border:1px solid var(--green);font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.stat{background:#091c21;border:1px solid var(--border);border-radius:12px;padding:11px;text-align:center}.stat b{display:block;font-size:17px}.stat small{color:var(--muted)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.btn{padding:13px 14px;border-radius:12px;background:#17343a;color:white;border:1px solid var(--border);font-weight:750}.btn.primary{background:var(--green);color:#04140a}.btn.danger{background:#5a2222}.btn.full{width:100%;margin-top:10px}
+input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--border);background:#07191d;color:white}.field{margin-bottom:12px}.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.list{display:flex;flex-direction:column;gap:8px}.item{padding:13px;background:#091d22;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:space-between;align-items:center}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:480px;width:100%;height:72px;background:#07191df5;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr)}
+nav button{background:none;color:#91a8aa;font-size:11px}.navico{display:block;font-size:21px;margin-bottom:2px}nav button.active{color:var(--green)}
+.big{font-size:31px;font-weight:850}.empty{padding:35px 10px;text-align:center;color:var(--muted)}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+<div class="app">
+<header><div class="logo">📍 Portal <span>Sat</span></div><div id="gpsStatus" class="status">GPS desligado</div></header>
+
+<main>
+<section id="home" class="screen active">
+<div class="card">
+<div class="muted">GPS agrícola</div>
+<h2>Guiamento de precisão</h2>
+<p class="muted">Use o celular para criar uma linha A-B e acompanhar o deslocamento da máquina.</p>
+<button class="btn primary full" onclick="startGPS()">📡 Iniciar GPS</button>
+</div>
+<div class="card"><div class="muted">Último trabalho</div><div id="lastWork" class="big">—</div><div class="muted" id="lastWorkSub">Nenhum trabalho salvo</div></div>
+</section>
+
+<section id="guide" class="screen">
+<div class="map">
+<div class="badge"><b id="fieldName">Sem talhão</b><br><span id="coords">GPS aguardando…</span></div>
+<div class="deviation" id="dev">Aguardando linha A-B</div>
+<div class="guideline"></div><div class="vehicle">🚜</div>
+</div>
+<div class="stats">
+<div class="stat"><b id="speed">0.0</b><small>km/h</small></div>
+<div class="stat"><b id="worked">0.00</b><small>ha</small></div>
+<div class="stat"><b id="distance">0.00</b><small>km</small></div>
+</div>
+<div class="actions"><button class="btn primary" onclick="setPoint('A')">📍 Marcar A</button><button class="btn primary" onclick="setPoint('B')">📍 Marcar B</button></div>
+<div class="actions"><button class="btn" onclick="toggleWork()" id="workBtn">▶ Iniciar trabalho</button><button class="btn danger" onclick="saveWork()">💾 Salvar</button></div>
+</section>
+
+<section id="fields" class="screen">
+<h2>Meus Talhões</h2>
+<div class="card">
+<div class="field"><label>Nome do novo talhão</label><input id="newField" placeholder="Ex.: Talhão 01 — Soja"></div>
+<button class="btn primary full" onclick="addField()">＋ Criar talhão</button>
+</div>
+<div id="fieldList" class="list"></div>
+</section>
+
+<section id="settings" class="screen">
+<h2>Configurações</h2>
+<div class="card">
+<div class="field"><label>Largura do implemento (metros)</label><input id="width" type="number" step="0.1" value="12"></div>
+<button class="btn primary full" onclick="saveSettings()">Salvar configurações</button>
+</div>
+<div class="card">
+<button class="btn full" onclick="exportData()">📤 Exportar dados</button>
+<button class="btn full" onclick="clearData()">🗑️ Apagar dados locais</button>
+</div>
+</section>
+</main>
+
+<nav>
+<button class="active" data-screen="home"><span class="navico">⌂</span>Início</button>
+<button data-screen="guide"><span class="navico">🧭</span>Guiar</button>
+<button data-screen="fields"><span class="navico">▦</span>Talhões</button>
+<button data-screen="settings"><span class="navico">⚙</span>Config.</button>
+</nav>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let state=JSON.parse(localStorage.getItem('portalSat')||'null')||{fields:[],works:[],settings:{width:12}};
+let pos=null,prev=null,watch=null,running=false,totalM=0,areaM2=0,A=null,B=null,selectedField=null;
+
+function persist(){localStorage.setItem('portalSat',JSON.stringify(state))}
+function showScreen(id){
+document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+$(id).classList.add('active');
+document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
+if(id==='fields')renderFields();if(id==='home')renderHome()
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+
+function startGPS(){
+if(!navigator.geolocation){alert('Este aparelho não oferece GPS.');return}
+if(watch!==null)return;
+$('gpsStatus').textContent='Buscando GPS…';
+watch=navigator.geolocation.watchPosition(updatePosition,e=>{$('gpsStatus').textContent='Erro no GPS';alert('GPS: '+e.message)}, {enableHighAccuracy:true,maximumAge:1000,timeout:10000});
+showScreen('guide')
+}
+function updatePosition(p){
+const q={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy||0,speed:p.coords.speed||0};
+if(prev&&running){let d=dist(prev,q);totalM+=d;areaM2+=d*(+state.settings.width||12);$('distance').textContent=(totalM/1000).toFixed(2);$('worked').textContent=(areaM2/10000).toFixed(2)}
+prev=q;pos=q;
+$('gpsStatus').textContent='GPS ±'+Math.round(q.acc)+' m';
+$('coords').textContent=q.lat.toFixed(6)+', '+q.lon.toFixed(6);
+$('speed').textContent=(q.speed>0?q.speed*3.6:0).toFixed(1);
+if(A&&B)updateDeviation(q)
+}
+function dist(a,b){
+const R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180;
+const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
+return 2*R*Math.asin(Math.sqrt(x))
+}
+function setPoint(which){
+startGPS();
+if(!pos){alert('Aguarde o GPS obter sua posição.');return}
+if(which==='A')A={...pos};else B={...pos};
+$('dev').textContent=which+' marcado';
+if(A&&B)$('dev').textContent='Linha A-B criada — siga a linha verde'
+}
+function updateDeviation(p){
+const lat=p.lat*Math.PI/180,lat0=A.lat*Math.PI/180;
+const x=(p.lon-A.lon)*Math.PI/180*Math.cos(lat0)*6371000;
+const y=(p.lat-A.lat)*Math.PI/180*6371000;
+const bx=(B.lon-A.lon)*Math.PI/180*Math.cos(lat0)*6371000;
+const by=(B.lat-A.lat)*Math.PI/180*6371000;
+const cross=(x*by-y*bx)/Math.sqrt(bx*bx+by*by||1);
+$('dev').textContent=(cross>=0?'← ':'→ ')+Math.abs(cross).toFixed(2)+' m'
+}
+function toggleWork(){
+if(!pos){startGPS();alert('Aguarde o GPS.');return}
+running=!running;
+$('workBtn').textContent=running?'⏸ Pausar trabalho':'▶ Iniciar trabalho';
+if(running)prev=pos
+}
+function addField(){
+const n=$('newField').value.trim();if(!n)return;
+state.fields.push({id:Date.now(),name:n,area:0});persist();$('newField').value='';renderFields()
+}
+function renderFields(){
+const el=$('fieldList');
+if(!state.fields.length){el.innerHTML='<div class="empty">Nenhum talhão criado.</div>';return}
+el.innerHTML=state.fields.map(f=>`<div class="item"><div><b>${esc(f.name)}</b><br><small class="muted">${(f.area||0).toFixed(2)} ha</small></div><button class="btn" onclick="selectField(${f.id})">Usar</button></div>`).join('')
+}
+function selectField(id){
+selectedField=state.fields.find(f=>f.id===id);
+$('fieldName').textContent=selectedField.name;showScreen('guide')
+}
+function saveWork(){
+if(!totalM){alert('Ainda não há percurso para salvar.');return}
+const name=selectedField?.name||'Trabalho '+new Date().toLocaleString('pt-BR');
+state.works.unshift({date:new Date().toISOString(),name,distanceKm:totalM/1000,areaHa:areaM2/10000,A,B});
+if(selectedField)selectedField.area=(selectedField.area||0)+areaM2/10000;
+persist();alert('Trabalho salvo.');renderHome()
+}
+function renderHome(){
+const w=state.works[0];
+$('lastWork').textContent=w?w.areaHa.toFixed(2)+' ha':'—';
+$('lastWorkSub').textContent=w?w.name:'Nenhum trabalho salvo'
+}
+function saveSettings(){
+state.settings.width=Math.max(.1,+$('width').value||12);persist();alert('Configurações salvas.')
+}
+function exportData(){
+const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='portal-sat-dados.json';a.click()
+}
+function clearData(){
+if(confirm('Apagar todos os talhões e trabalhos deste aparelho?')){localStorage.removeItem('portalSat');location.reload()}
+}
+function esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+renderHome();renderFields();$('width').value=state.settings.width;
+</script>
+<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
+</body>
+</html>
