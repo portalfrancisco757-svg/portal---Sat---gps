@@ -1,53 +1,131 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Sat GPS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Sat GPS PRO</title>
 <link rel="manifest" href="manifest.webmanifest">
 <style>
-*{box-sizing:border-box;font-family:Inter,sans-serif}
+*{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
 body{margin:0;background:#E8E2D0;color:#222;display:flex;height:100vh;overflow:hidden}
-#sidebar{width:68px;background:#FFF;border-right:1px solid #DDD;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:18px}
+#sidebar{width:70px;background:#FFF;border-right:1px solid #DDD;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:20px}
+#sidebar div{text-align:center;font-size:11px;cursor:pointer;padding:8px 0;width:100%}
+#sidebar .ativo{background:#F0F0F0}
+.icon{font-size:22px;display:block}
 #main{flex:1;display:flex;flex-direction:column;position:relative}
 #topo{display:flex;justify-content:space-between;padding:8px;gap:8px;position:absolute;top:0;left:0;right:0;z-index:10}
-.box{background:#FFF;border-radius:10px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.15);font-size:13px;min-width:200px}
-.box b{float:right}
-#lightbarBox{background:#FFF;border-radius:10px;padding:6px 14px;box-shadow:0 2px 8px rgba(0,0,0,.15);text-align:center;min-width:220px}
-.leds{display:flex;gap:4px;justify-content:center}.led{width:18px;height:12px;border-radius:3px;background:#DDD}.led.on-green{background:#1A7F37}.led.on-red{background:#D93025}
-#precisao{background:#FFF;border:2px solid #D93025;border-radius:10px;padding:8px 12px;color:#D93025;min-width:155px}
+.box{background:#FFF;border-radius:10px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.15);font-size:13px;min-width:200px}
+.box b{float:right;font-weight:700}
+#lightbarBox{background:#FFF;border-radius:10px;padding:6px 14px;box-shadow:0 2px 8px rgba(0,0,0,0.15);text-align:center;min-width:220px}
+.leds{display:flex;gap:4px;justify-content:center}
+.led{width:18px;height:12px;border-radius:3px;background:#DDD}
+.led.on-green{background:#1A7F37}
+.led.on-red{background:#D93025}
+#precisao{background:#FFF;border:2px solid #D93025;border-radius:10px;padding:8px 12px;color:#D93025;min-width:160px}
 #precisao b{font-size:18px;display:block}
-#mapa3d{flex:1;position:relative;overflow:hidden;perspective:900px;display:flex;align-items:end;justify-content:center;padding-bottom:90px;background:#E8E2D0}
-#grid{position:absolute;top:-20%;left:-35%;right:-35%;bottom:-10%;background-image:linear-gradient(#C4BBA5 1px,transparent 1px),linear-gradient(90deg,#C4BBA5 1px,transparent 1px);background-size:60px 60px;transform:rotateX(68deg);transform-origin:center bottom}
-/* AQUI ESTÁ SUA LOGO CLARINHA */
-#watermark{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%) rotateX(30deg);opacity:0.16;z-index:1;pointer-events:none;width:360px}
-#watermark img{width:100%;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1))}
-#implemento3d{width:0;height:0;border-left:140px solid transparent;border-right:140px solid transparent;border-bottom:30px solid #2A5DB0;position:relative;z-index:3}
-#seta{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:3px;height:42px;background:#2A5DB0}
-#seta::after{content:'▲';position:absolute;top:-12px;left:50%;transform:translateX(-50%);color:#2A5DB0}
-#btnTrabajo{position:absolute;bottom:0;left:0;right:0;background:#2E9E49;color:#fff;padding:17px;text-align:center;font-weight:700;font-size:19px;border:none;z-index:10}
-#btnConfig{position:absolute;left:12px;top:135px;background:#2A7DE1;color:#fff;padding:10px 18px;border-radius:8px;border:none;z-index:5}
+#mapa3d{flex:1;background:#E8E2D0;position:relative;overflow:hidden;perspective:800px;display:flex;align-items:end;justify-content:center;padding-bottom:80px}
+#grid{position:absolute;top:-20%;left:-30%;right:-30%;bottom:-10%;background-image: linear-gradient(#C4BBA5 1px, transparent 1px), linear-gradient(90deg, #C4BBA5 1px, transparent 1px);background-size:60px 60px;transform:rotateX(65deg);transform-origin:center bottom}
+#implemento3d{width:0;height:0;border-left:140px solid transparent;border-right:140px solid transparent;border-bottom:28px solid #2A5DB0;position:relative;z-index:2}
+#implemento3d::before{content:'';position:absolute;left:-140px;top:0;width:40px;height:3px;background:#2A5DB0;transform:rotate(-35deg);transform-origin:right}
+#implemento3d::after{content:'';position:absolute;right:-140px;top:0;width:40px;height:3px;background:#2A5DB0;transform:rotate(35deg);transform-origin:left}
+#seta{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:3px;height:40px;background:#2A5DB0}
+#seta::after{content:'▲';position:absolute;top:-12px;left:50%;transform:translateX(-50%);color:#2A5DB0;font-size:14px}
+#controlesDir{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:5}
+.btnIcon{width:46px;height:46px;background:#FFF;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;border:none;cursor:pointer}
+.btnIcon.azul{background:#2A7DE1;color:#fff;font-weight:900}
+#btnTrabajo{position:absolute;bottom:0;left:0;right:0;background:#2E9E49;color:#fff;padding:16px;text-align:center;font-weight:700;font-size:18px;border:none;cursor:pointer;z-index:10}
+#btnConfig{position:absolute;left:12px;top:135px;background:#2A7DE1;color:#fff;padding:10px 18px;border-radius:8px;border:none;font-weight:600;z-index:5;cursor:pointer}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;align-items:center;justify-content:center}
+#modal.open{display:flex}
+.modalBox{background:#FFF;width:92%;max-width:400px;border-radius:16px;padding:20px}
+.chip{padding:8px 14px;border:1px solid #DDD;border-radius:20px;display:inline-block;margin:5px;cursor:pointer}
+.chip.ativo{background:#2A7DE1;color:#fff}
 </style>
 </head>
 <body>
-<div id="sidebar"><div>☰</div><div>📶<br><small>GPS</small></div><div>📋<br><small>Trabajos</small></div><div style="margin-top:auto;color:#D93025">↪️<br><small>Salir</small></div></div>
+
+<div id="sidebar">
+  <div onclick="abrirMenu()">☰</div>
+  <div><span class="icon">📶</span>GPS</div>
+  <div><span class="icon">📋</span>Trabajos</div>
+  <div style="margin-top:auto;color:#D93025"><span class="icon">↪️</span>Salir</div>
+</div>
+
 <div id="main">
-<div id="topo">
-<div class="box"><div>Ancho <b id="anchoTxt">20.00 m</b></div><div>Desplaz. <b>- / - m</b></div><div>Solapam. <b id="solap">- m</b></div><div>Modo <b>Modo libre</b></div></div>
-<div id="lightbarBox"><div class="leds" id="lb"></div><small id="distTxt">- m</small></div>
-<div><div id="precisao"><small>Precisión baja</small><b>±9.43 m</b><small>GPS del teléfono</small></div></div>
+  <div id="topo">
+    <div class="box" id="infoBox">
+      <div>Ancho <b id="anchoTxt">20.00 m</b></div>
+      <div>Desplaz. <b>- / - m</b></div>
+      <div>Solapam. <b id="solapTxt">- m</b></div>
+      <div>Modo <b>Modo libre</b></div>
+    </div>
+
+    <div id="lightbarBox">
+      <div class="leds" id="lightbar"></div>
+      <small id="distTxt" style="color:#888">- m</small>
+    </div>
+
+    <div>
+      <div id="precisao">
+        <small style="color:#555">📑 Precisión baja</small>
+        <b id="precTxt">±9.43 m</b>
+        <small style="color:#555">GPS del teléfono</small>
+      </div>
+      <div style="background:#FFF;border-radius:20px;padding:6px 10px;margin-top:8px;box-shadow:0 2px 6px rgba(0,0,0,0.15);font-size:13px;text-align:center">☁️ Apagado</div>
+    </div>
+  </div>
+
+  <button id="btnConfig" onclick="abrirConfig()">Cambiar configuración</button>
+
+  <div id="mapa3d">
+    <div id="grid"></div>
+    <div id="implemento3d"><div id="seta"></div></div>
+  </div>
+
+  <div id="controlesDir">
+    <button class="btnIcon" onclick="toggleNoite()">🌙</button>
+    <button class="btnIcon">◎</button>
+    <button class="btnIcon azul" onclick="toggle3D()">3D</button>
+  </div>
+
+  <button id="btnTrabajo" onclick="iniciar()">▶ Comenzar trabajo</button>
 </div>
-<button id="btnConfig">Cambiar configuración</button>
-<div id="mapa3d">
-<div id="grid"></div>
-<div id="watermark"><img src="logo.png"></div>
-<div id="implemento3d"><div id="seta"></div></div>
+
+<div id="modal" onclick="fechar()">
+<div class="modalBox" onclick="event.stopPropagation()">
+<h3>Cambiar configuración</h3>
+<b>Ancho de trabajo</b><br>
+<div id="anchos">
+  <span class="chip" onclick="setAncho(3,this)">3 m</span>
+  <span class="chip" onclick="setAncho(6,this)">6 m</span>
+  <span class="chip" onclick="setAncho(9,this)">9 m</span>
+  <span class="chip ativo" onclick="setAncho(20,this)">20 m</span>
+  <span class="chip" onclick="setAncho(24,this)">24 m</span>
 </div>
-<button id="btnTrabajo">▶ Comenzar trabajo</button>
+<b>Fondo</b><br>
+<span class="chip ativo" onclick="setFondo('#E8E2D0',this)">2D</span>
+<span class="chip" onclick="setFondo('#87CEEB',this)">3D Cielo</span>
+<span class="chip" onclick="setFondo('satelite',this)">Satélite</span>
+<br><br>
+<button style="width:100%;padding:12px;background:#2E9E49;color:#fff;border:none;border-radius:10px;font-weight:700" onclick="fechar()">Guardar</button>
 </div>
+</div>
+
 <script>
-const lb=document.getElementById('lb');for(let i=0;i<13;i++){let d=document.createElement('div');d.className='led';d.id='l'+i;lb.appendChild(d);}
-function barra(v){for(let i=0;i<13;i++)document.getElementById('l'+i).className='led';document.getElementById('l6').classList.add('on-green');let q=Math.round(Math.abs(v)/2);if(v<0)for(let i=0;i<q;i++){let e=document.getElementById('l'+(5-i));if(e)e.classList.add('on-red')}if(v>0)for(let i=0;i<q;i++){let e=document.getElementById('l'+(7+i));if(e)e.classList.add('on-red')}document.getElementById('distTxt').innerText=v.toFixed(2)+' m';document.getElementById('solap').innerText=v.toFixed(2)+' m';}
-setInterval(()=>barra(Math.random()*4-2),700);
+const lb=document.getElementById('lightbar');
+for(let i=0;i<13;i++){let d=document.createElement('div');d.className='led';d.id='led'+i;lb.appendChild(d);}
+function barra(v){for(let i=0;i<13;i++)document.getElementById('led'+i).className='led';document.getElementById('led6').classList.add('on-green');let q=Math.round(Math.abs(v)/2);if(v<0){for(let i=0;i<q;i++){let e=document.getElementById('led'+(5-i));if(e)e.classList.add('on-red')}}if(v>0){for(let i=0;i<q;i++){let e=document.getElementById('led'+(7+i));if(e)e.classList.add('on-red')}}document.getElementById('distTxt').innerText=(v>0?'+':'')+v.toFixed(2)+' m';document.getElementById('solapTxt').innerText=v.toFixed(2)+' m';}
+setInterval(()=>barra((Math.random()*4-2)),600);
+
+function abrirConfig(){document.getElementById('modal').classList.add('open')}
+function fechar(){document.getElementById('modal').classList.remove('open')}
+function setAncho(m,el){document.getElementById('anchoTxt').innerText=m.toFixed(2)+' m';let px=280*(m/20);document.getElementById('implemento3d').style.borderLeftWidth=px/2+'px';document.getElementById('implemento3d').style.borderRightWidth=px/2+'px';el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('ativo'));el.classList.add('ativo');}
+function setFondo(c,el){if(c==='satelite'){document.getElementById('mapa3d').style.background="url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800') center/cover"}else{document.getElementById('mapa3d').style.background=c}if(el){el.parentNode.querySelectorAll('.chip').forEach(ch=>ch.classList.remove('ativo'));el.classList.add('ativo')}}
+function toggleNoite(){document.body.style.filter=document.body.style.filter?'':'brightness(0.7) invert(0.05)'}
+function toggle3D(){let g=document.getElementById('grid');g.style.transform=g.style.transform.includes('65deg')?'rotateX(0deg)':'rotateX(65deg)'}
+function iniciar(){alert('Trabalho iniciado com '+document.getElementById('anchoTxt').innerText)}
+if(navigator.geolocation){navigator.geolocation.watchPosition(p=>{document.getElementById('precTxt').innerText='±'+p.coords.accuracy.toFixed(2)+' m'},null,{enableHighAccuracy:true})}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}
 </script>
 </body>
 </html>
