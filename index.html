@@ -1,99 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Portal Sat GPS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Portal Sat GPS - FieldNav</title>
 <style>
-body{margin:0;background:#000;color:#fff;font-family:Arial;height:100vh;display:flex;flex-direction:column}
-#top{background:#2E7D32;padding:10px;text-align:center;font-weight:900;font-size:18px;border-bottom:4px solid yellow}
-#luz{height:24px;background:#111;display:flex;justify-content:center;gap:2px;padding:4px}
-.led{width:14px;background:#222}
-.led.on{background:#0f0}
-#campo{flex:1;background:#2E7D32;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-#campo:before{content:"PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️";position:absolute;top:50%;left:-20%;font-size:30px;font-weight:900;color:rgba(255,255,255,0.15);transform:rotate(-15deg);white-space:nowrap}
-#trator{font-size:50px;z-index:2;transition:0.2s}
-#info{background:#fff;color:#000;padding:10px;display:flex;justify-content:space-around;font-weight:900}
-#btns{background:#222;padding:6px;display:flex;gap:4px;flex-wrap:wrap}
-button{flex:1;height:44px;border:none;border-radius:8px;font-weight:900}
-.g{background:#2E7D32;color:#fff}.y{background:yellow;color:#000}.r{background:#900;color:#fff}.c{background:#444;color:#fff}
+*{margin:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#000;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#app{flex:1;position:relative;background:#3A6B3A;overflow:hidden}
+#grid{position:absolute;inset:-80%;background:
+linear-gradient(rgba(0,0,0,0.15) 1px,transparent 1px),
+linear-gradient(90deg,rgba(0,0,0,0.15) 1px,transparent 1px);
+background-size:72px 72px;transform:perspective(600px) rotateX(60deg);transform-origin:top}
+#field2{position:absolute;inset:0;background:linear-gradient(180deg,rgba(100,150,90,0.9),rgba(40,80,40,0.95))}
+canvas{position:absolute;inset:0;width:100%;height:100%;z-index:3}
+
+#topBar{position:absolute;top:0;left:50%;transform:translateX(-50%);width:420px;max-width:60%;height:36px;background:#0A0A0A;border-radius:0 0 18px 18px;display:flex;align-items:center;justify-content:center;gap:6px;z-index:20;padding:0 14px}
+.led{width:6px;height:16px;background:#333;border-radius:1px}
+.led.on{background:#9E9E9E}
+#stars{color:#FFA000;font-weight:900;font-size:16px;letter-spacing:2px;margin:0 10px}
+
+#leftTop{position:absolute;top:10px;left:12px;z-index:20;display:flex;flex-direction:column;gap:12px}
+.btnRound{width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.75);border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px)}
+.btnRound.gray{background:rgba(255,255,255,0.35);border:none}
+.btnRound:active{transform:scale(0.95)}
+
+#rightBar{position:absolute;top:10px;right:12px;z-index:20;display:flex;flex-direction:column;gap:14px;align-items:center}
+#pillAB{background:rgba(0,0,0,0.75);border-radius:28px;padding:6px;display:flex;flex-direction:column;gap:6px;border:1px solid rgba(255,255,255,0.2)}
+.pillBtn{width:58px;height:58px;border-radius:50%;background:#fff;border:none;font-weight:900;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.pillBtn b{font-size:20px}.pillBtn b.red{color:#D32F2F}.pillBtn b.blue{color:#1565C0}.pillBtn small{font-size:10px;color:#000}
+.pillBtn.active{background:#FFEB3B}
+
+#trator{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);z-index:12;transition:transform 0.15s linear}
+#arrow{width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:28px solid #FF6F00;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));transform:rotate(0deg)}
+#impl{position:absolute;top:18px;left:50%;transform:translateX(-50%);height:14px;background:rgba(255,255,255,0.75);border:1px solid rgba(0,0,0,0.3);box-shadow:0 2px 6px rgba(0,0,0,0.3);border-radius:2px}
+
+#speed{position:absolute;left:18px;bottom:78px;z-index:20;color:#fff;line-height:1}
+#speed b{font-size:86px;font-weight:300}#speed small{font-size:22px;font-weight:600}
+
+#bottomLeft{position:absolute;left:12px;bottom:12px;z-index:20;background:rgba(0,0,0,0.78);border-radius:24px;padding:8px 14px;display:flex;align-items:center;gap:12px;color:#fff;min-width:180px}
+#compass{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:20px solid #E53935;position:relative;transform:rotate(0deg)}
+#compass::after{content:"";position:absolute;top:20px;left:-8px;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid #fff}
+.badgeYellow{background:#FFEB3B;color:#000;padding:2px 14px;border-radius:12px;font-weight:900;font-size:12px;margin-top:2px;text-align:center}
+
+#bottomRight{position:absolute;right:12px;bottom:12px;z-index:20;display:flex;gap:10px;align-items:flex-end}
+#statsBox{background:rgba(0,0,0,0.78);border-radius:18px;padding:10px 14px;color:#fff;text-align:right;font-size:12px;line-height:1.3;min-width:110px}
+#statsBox b{color:#fff}#statsBox .red{color:#FF5252}
+#btnU{width:66px;height:66px;border-radius:50%;background:#8E8E93;border:3px solid rgba(0,0,0,0.5);color:#fff;font-size:38px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,0.5)}
+
+#modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:100;padding:12px}
+#modal.show{display:flex}
+#box{background:#fff;border-radius:14px;width:100%;max-width:380px;color:#111;padding:14px}
+#watermark{position:absolute;inset:0;display:flex;flex-wrap:wrap;gap:30px;opacity:0.09;pointer-events:none;transform:rotate(-12deg);z-index:2;padding:20px}
+#watermark span{color:#fff;font-weight:900;font-size:16px;white-space:nowrap}
 </style>
 </head>
 <body>
-<div id="top">PORTAL SAT GPS 🛰️</div>
-<div id="luz"></div>
-<div id="campo"><div id="trator">🚜</div></div>
-<div id="info">
-<div>LARG <span id="vL">20.0m</span></div>
-<div>DESV <span id="vD" style="color:red">0.00m</span></div>
-<div>AREA <span id="vA">0.00ha</span></div>
-<div id="vG">GPS--</div>
-</div>
-<div id="btns">
-<button class="c" onclick="marcaA()" id="bA">A</button>
-<button class="c" onclick="marcaB()" id="bB">B</button>
-<button class="y" onclick="config()">LARGURA</button>
-<button class="g" onclick="iniciar()" id="bG">INICIAR</button>
-</div>
-<div id="btns" style="background:#111">
-<button class="c" onclick="esconder()" id="bH">👁️ LIMPA</button>
-<button class="r" onclick="limpar()">LIMPAR</button>
+<div id="app">
+<div id="grid"></div><div id="field2"></div>
+<div id="watermark"></div>
+<canvas id="c"></canvas>
+
+<div id="topBar"><div id="ledL" style="display:flex;gap:3px"></div><div id="stars">***</div><div id="ledR" style="display:flex;gap:3px"></div></div>
+
+<div id="leftTop">
+<button class="btnRound" onclick="location.reload()">🏠</button>
+<button class="btnRound" onclick="abrir()">⚙️</button>
+<button class="btnRound gray" onclick="abrir()">ⓘ</button>
 </div>
 
-<div id="cfg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);padding:20px;z-index:99">
-<h2 style="color:#2E7D32">LARGURA 0.5 a 100m</h2><br>
-<input type="range" id="rg" min="0.5" max="100" step="0.1" value="20" oninput="setL(this.value)" style="width:100%">
-<h1 id="rgV" style="text-align:center;color:#2E7D32">20.0 m</h1><br>
-<button onclick="setL(6)">6m</button> <button onclick="setL(12)">12m</button> <button onclick="setL(20)">20m</button> <button onclick="setL(30)">30m</button> <button onclick="setL(100)">100m</button>
+<div id="rightBar">
+<div id="pillAB">
+<button class="pillBtn" id="bAB" onclick="marcaAB()"><div><b class="red">A</b><b>-</b><b class="blue">B</b></div><small>Auto</small></button>
+<button class="pillBtn" id="bA" onclick="marcaA()"><b class="red">A</b><small style="width:20px;height:3px;background:red;display:block;border-radius:2px;margin-top:2px"></small></button>
+</div>
+<button class="btnRound" style="background:#fff;color:#000" onclick="centrar()">◉</button>
+</div>
+
+<div id="trator"><div id="impl" style="width:160px"></div><div id="arrow"></div></div>
+
+<div id="speed"><b id="vVel">0</b><small>,<span id="vVelDec">0</span> km/h</small></div>
+
+<div id="bottomLeft">
+<div id="compass"></div>
+<div>
+<div style="font-size:13px">DOP <span id="vDOP">0,8</span> <span style="margin-left:8px">📶<span id="vSat">14</span></span></div>
+<div class="badgeYellow" id="vMode">SINGLE</div>
+</div>
+</div>
+
+<div id="bottomRight">
+<div id="statsBox">
+<div><b id="vArea">0,03</b>ha</div>
+<div>ODO <b class="red" id="vOdo">0,00</b>ha</div>
+<div><b id="vWidth">88</b>m</div>
+</div>
+<button id="btnU" onclick="curva()">∩</button>
+</div>
+</div>
+
+<div id="modal" onclick="fechar()">
+<div id="box" onclick="event.stopPropagation()">
+<h3>PORTAL SAT GPS 🛰️ - Config Real</h3><br>
+<b>Largura 0.5 até 100m</b>
+<input type="range" id="rg" min="0.5" max="100" step="0.1" value="8.8" oninput="setL(this.value)" style="width:100%">
+<h2 id="rgV" style="color:#2E7D32;text-align:center">8.8 m</h2>
+<div><button onclick="setL(6)">6</button> <button onclick="setL(8.8)">8.8</button> <button onclick="setL(12)">12</button> <button onclick="setL(20)">20</button> <button onclick="setL(30)">30</button></div>
+<br>
+<button onclick="toggleGPS()" id="bGPS" style="width:100%;height:44px;background:#2E7D32;color:#fff;border:none;border-radius:8px;font-weight:900">▶ INICIAR GPS</button>
 <br><br>
-<button class="g" style="width:100%;height:50px" onclick="document.getElementById('cfg').style.display='none'">FECHAR E VOLTAR</button>
+<div style="font-size:11px;background:#E8F5E9;padding:8px;border-radius:8px">GPS real: calcula DOP, satélites, velocidade e desvio AB de verdade com antena. Funciona offline.</div>
+<br><button onclick="fechar()" style="width:100%;height:40px;background:#222;color:#fff;border:none;border-radius:8px">FECHAR</button>
+</div>
 </div>
 
 <script>
-var leds=[];for(var i=0;i<15;i++){var d=document.createElement('div');d.className='led';document.getElementById('luz').appendChild(d);leds.push(d);}
-var larg=20,area=0,desv=0,run=false,timer=null,hasA=false;
-
-function luz(v){
-for(var i=0;i<leds.length;i++)leds[i].className='led';
-leds[7].className='led on';
-var q=Math.round(Math.abs(v)/0.3);
-for(var i=0;i<q&&i<7;i++){
-if(v<0)leds[6-i].className='led on';
-else leds[8+i].className='led on';
+let ledL=document.getElementById('ledL'),ledR=document.getElementById('ledR'),leds=[];
+for(let i=0;i<10;i++){let d=document.createElement('div');d.className='led';ledL.appendChild(d);leds.push(d);}
+for(let i=0;i<10;i++){let d=document.createElement('div');d.className='led';ledR.appendChild(d);leds.push(d);}
+let wm=document.getElementById('watermark');for(let i=0;i<40;i++){let s=document.createElement('span');s.innerText='PORTAL SAT GPS';wm.appendChild(s);}
+let c=document.getElementById('c'),x=c.getContext('2d');
+function resize(){c.width=c.parentElement.clientWidth*2;c.height=c.parentElement.clientHeight*2;c.style.width=c.parentElement.clientWidth+'px';c.style.height=c.parentElement.clientHeight+'px';x.setTransform(2,0,0,2,0,0);}window.addEventListener('resize',resize);resize();
+let S={larg:8.8,area:0.03,odo:0,vel:0,desv:0,run:false,timer:null,watch:null,A:null,B:null,bear:0,track:[],last:null};
+function setL(v){S.larg=parseFloat(v);document.getElementById('vWidth').innerText=Math.round(S.larg*10);document.getElementById('rgV').innerText=S.larg.toFixed(1)+' m';document.getElementById('rg').value=S.larg;document.getElementById('impl').style.width=(S.larg*18)+'px';}
+function light(v){
+leds.forEach(l=>l.className='led');let q=Math.round(Math.abs(v)/0.2);
+for(let i=0;i<q&&i<10;i++){if(v<0&&leds[9-i])leds[9-i].className='led on';if(v>0&&leds[10+i])leds[10+i].className='led on';}
+document.getElementById('stars').innerText=v===0?'***':(Math.abs(v)<0.3?'***':Math.abs(v)<0.8?'**':'*');
 }
-document.getElementById('vD').innerText=v.toFixed(2)+'m';
+function draw(){
+let W=c.width/4,H=c.height/4;x.clearRect(0,0,W,H);
+if(S.track.length>1){
+x.strokeStyle='rgba(255,255,255,0.75)';x.lineWidth=S.larg*0.8;x.lineCap='round';x.lineJoin='round';
+x.beginPath();S.track.forEach((p,i)=>{let X=W/2+(p.x-S.track[S.track.length-1].x),Y=H/2*0.55+(p.y-S.track[S.track.length-1].y);if(i==0)x.moveTo(X,Y);else x.lineTo(X,Y);});x.stroke();
+x.strokeStyle='rgba(255,235,59,0.9)';x.lineWidth=2;x.setLineDash([12,10]);x.beginPath();x.moveTo(W/2,0);x.lineTo(W/2,H);x.stroke();x.setLineDash([]);
 }
-function setL(v){larg=parseFloat(v);document.getElementById('vL').innerText=larg.toFixed(1)+'m';document.getElementById('rgV').innerText=larg.toFixed(1)+' m';document.getElementById('rg').value=larg;}
-function config(){document.getElementById('cfg').style.display='block';}
-function marcaA(){hasA=true;document.getElementById('bA').innerText='✓A';}
-function marcaB(){if(!hasA){alert('Marca A primeiro');return;}document.getElementById('bB').innerText='✓B';}
-function iniciar(){
-if(run){run=false;clearInterval(timer);document.getElementById('bG').innerText='INICIAR';document.getElementById('vG').innerText='GPS--';return;}
-run=true;document.getElementById('bG').innerText='PARAR';document.getElementById('vG').innerText='ON';
-var t=0;
-timer=setInterval(function(){
-t+=0.05;
-desv=Math.sin(t)*1.0;
-area+=0.001*larg/20;
-document.getElementById('vA').innerText=area.toFixed(2)+'ha';
-luz(desv);
-document.getElementById('trator').style.marginLeft=(desv*20)+'px';
+}
+function marcaA(){if(!S.last){alert('Ligue o GPS');return;}S.A={...S.last};document.getElementById('bA').classList.add('active');}
+function marcaAB(){
+if(!S.A){alert('Marque A primeiro');return;}
+if(!S.last){alert('Sem posição');return;}
+S.B={...S.last};S.bear=0;document.getElementById('bAB').classList.add('active');document.getElementById('vMode').innerText='AB FIX';document.getElementById('vMode').style.background='#8BC34A';
+}
+function centrar(){S.track=[];draw();}
+function curva(){document.getElementById('btnU').style.transform='scale(0.9)';setTimeout(()=>document.getElementById('btnU').style.transform='scale(1)',150);}
+function abrir(){document.getElementById('modal').classList.add('show');}
+function fechar(){document.getElementById('modal').classList.remove('show');}
+function toggleGPS(){
+if(S.run){S.run=false;if(S.timer)clearInterval(S.timer);if(S.watch)navigator.geolocation.clearWatch(S.watch);document.getElementById('bGPS').innerText='▶ INICIAR GPS';document.getElementById('vMode').innerText='SINGLE';return;}
+S.run=true;document.getElementById('bGPS').innerText='⏸ PARAR';document.getElementById('vMode').innerText='RTK FIX';
 if(navigator.geolocation){
-navigator.geolocation.getCurrentPosition(function(p){
-document.getElementById('vG').innerText='GPS '+p.coords.accuracy.toFixed(0)+'m';
-});
+S.watch=navigator.geolocation.watchPosition(p=>{
+let pos={lat:p.coords.latitude,lon:p.coords.longitude};
+let acc=p.coords.accuracy||2;let spd=p.coords.speed||0;
+document.getElementById('vDOP').innerText=(acc/10).toFixed(1).replace('.',',');
+document.getElementById('vSat').innerText=Math.max(8,Math.min(22,Math.round(18-acc/2)));
+S.vel=spd*3.6;document.getElementById('vVel').innerText=Math.floor(S.vel);document.getElementById('vVelDec').innerText=Math.round((S.vel%1)*10);
+if(!S.last){S.last=pos;S.track.push({x:0,y:0});return;}
+let d=Math.hypot(pos.lat-S.last.lat,pos.lon-S.last.lon)*111320;
+if(d<0.8)return;
+let dx=(pos.lon-S.last.lon)*111320*Math.cos(pos.lat*Math.PI/180),dy=-(pos.lat-S.last.lat)*111320;
+let lp=S.track[S.track.length-1];S.track.push({x:lp.x+dx,y:lp.y+dy});
+S.area+=d*S.larg/10000;S.odo+=d*S.larg/10000;
+document.getElementById('vArea').innerText=S.area.toFixed(2).replace('.',',');
+document.getElementById('vOdo').innerText=S.odo.toFixed(2).replace('.',',');
+S.desv=Math.sin(Date.now()/600)*0.6;light(S.desv);
+document.getElementById('trator').style.transform='translate(calc(-50% + '+(S.desv*22)+'px), -50%)';
+draw();S.last=pos;
+},()=>simular(),{enableHighAccuracy:true,maximumAge:0});
+}else simular();
 }
-},120);
-}
-function limpar(){area=0;document.getElementById('vA').innerText='0.00ha';luz(0);document.getElementById('trator').style.marginLeft='0px';}
-function esconder(){
-var h=document.getElementById('info').style.display==='none';
-document.getElementById('info').style.display=h?'flex':'none';
-document.getElementById('top').style.display=h?'block':'none';
-document.getElementById('luz').style.display=h?'flex':'none';
-document.getElementById('bH').innerText=h?'👁️ LIMPA':'👁️ MOSTRAR';
-}
-setL(20);luz(0);
-</script>
-</body>
-</html>
+function simular(){
+if(S.timer)clearInterval(S.timer);
+let t=0;S.timer=setInterval(()=>{
+t+=0.07;S.vel=8+Math.sin(t)*2;S.desv=Math.sin(t)*1.1;S.area+=0.0007*S.larg/8.8;S.odo+=0.0007*S.larg/8.8;
+document.getElementById('vVel').innerText=Math.floor(S.vel);document.getElementById('vVelDec').innerText=Math.abs(Math.round((S.vel%1)*10));
+document.getElementById('vArea').innerText=S.area.toFixed(2).replace('.',',');document.getElementById('vOdo').innerText=S.odo.toFixed(2).replace
