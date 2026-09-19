@@ -2,92 +2,181 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Portal Sat GPS</title>
 <style>
-*{margin:0;box-sizing:border-box;font-family:Arial}
-body{background:#000;display:flex;flex-direction:column;height:100vh}
-#top{background:#367C2B;color:#fff;padding:10px;font-weight:900;text-align:center;border-bottom:4px solid #FFDE00}
-#light{background:#111;height:32px;display:flex;justify-content:center;gap:3px;padding:5px}
-.led{width:12px;background:#222;border-radius:3px}.led.on{background:#2ECC40;box-shadow:0 0 6px #2ECC40}
-#map{flex:1;background:#D9D2B0;position:relative;overflow:hidden}
-#grid{position:absolute;inset:-100%;background:linear-gradient(#bbb 1px,transparent 1px),linear-gradient(90deg,#bbb 1px,transparent 1px);background-size:40px 40px;transition:.4s}
-#grid.d3{transform:perspective(600px) rotateX(60deg)}
+*{margin:0;box-sizing:border-box;font-family:Arial, sans-serif}
+body{background:#000;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#top{height:44px;background:#367C2B;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;letter-spacing:.5px;border-bottom:4px solid #FFDE00;font-size:16px;gap:8px}
+#light{height:34px;background:#0A0A0A;display:flex;justify-content:center;align-items:center;gap:3px;padding:0 6px;border-bottom:2px solid #111}
+.led{width:11px;height:18px;background:#222;border-radius:3px;border:1px solid #000}
+.led.on{background:#2ECC40;box-shadow:0 0 8px #2ECC40}.led.on.y{background:#FFDE00;box-shadow:0 0 8px #FFDE00}.led.on.r{background:#FF3B30;box-shadow:0 0 8px #FF3B30}
+#map{flex:1;position:relative;background:#DDD7B8;overflow:hidden}
+#grid{position:absolute;inset:-120%;background:linear-gradient(#C2BB9A 1px,transparent 1px),linear-gradient(90deg,#C2BB9A 1px,transparent 1px);background-size:48px 48px;transition:.4s}
+#grid.d3{transform:perspective(700px) rotateX(62deg) translateY(-8%)}
 #grid.d2{transform:none}
-#trator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;transition:.2s;text-align:center}
-#cards{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;z-index:6}
-.card{background:#fff;color:#111;padding:10px;border-radius:10px;font-size:12px;min-width:120px;border-left:4px solid #367C2B;box-shadow:0 3px 8px rgba(0,0,0,.3)}
-.card b{font-size:16px;display:block}
-.hide{display:none!important}
-#btns{background:#222;padding:8px;display:flex;gap:6px;flex-wrap:wrap}
-button{flex:1;min-width:70px;height:44px;border-radius:8px;border:none;font-weight:900}
-.g{background:#367C2B;color:#fff}.y{background:#FFDE00}
-#cfg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;z-index:99;align-items:center;justify-content:center;padding:15px}
-#cfg.show{display:flex}
-#box{background:#fff;color:#111;width:100%;max-width:360px;border-radius:14px;padding:15px}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+#cards{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;z-index:10;pointer-events:none}
+.card{background:rgba(255,255,255,.95);backdrop-filter:blur(4px);padding:10px 12px;border-radius:12px;min-width:128px;box-shadow:0 4px 14px rgba(0,0,0,.3);border-left:5px solid #367C2B;pointer-events:auto}
+.card.r{border-left-color:#C1272D}
+.card span{font-size:10px;font-weight:800;color:#666;display:block}
+.card b{font-size:16px;color:#111}
+#tratorWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8;transition:transform.15s linear}
+#bottom{background:#1A1A1A;padding:6px;display:flex;gap:6px;flex-wrap:wrap;border-top:2px solid #333}
+#bottom2{background:#111;padding:6px;display:flex;gap:6px;flex-wrap:wrap}
+.btn{flex:1;min-width:74px;height:44px;border-radius:10px;border:2px solid #555;background:#2A2A2A;color:#fff;font-weight:800;font-size:12px}
+.btn.y{background:#FFDE00;color:#111;border-color:#C9A900}.btn.g{background:#367C2B;border-color:#2A5A22}.btn.w{background:#EEE;color:#111;border-color:#999}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;z-index:99;align-items:center;justify-content:center;padding:12px}
+#modal.show{display:flex}
+#box{background:#fff;width:100%;max-width:420px;border-radius:16px;overflow:hidden;max-height:92vh;overflow-y:auto}
+#boxH{background:#367C2B;color:#fff;padding:12px 14px;font-weight:900;display:flex;justify-content:space-between}
+#boxB{padding:12px}
 input[type=range]{width:100%;accent-color:#367C2B}
+.chip{padding:7px 12px;border:2px solid #CCC;border-radius:20px;display:inline-block;margin:4px;font-weight:800;font-size:12px;background:#F2F2F2;cursor:pointer}
+.chip.on{background:#367C2B;color:#fff;border-color:#367C2B}
+.talhaoItem{padding:10px;border:1px solid #DDD;border-radius:10px;margin:6px 0;display:flex;justify-content:space-between;align-items:center}
 </style>
 </head>
 <body>
-<div id="top">PORTAL SAT GPS - GS4 FUNCIONAL</div>
+<div id="top">PORTAL SAT GPS 🛰️</div>
 <div id="light"></div>
+
 <div id="map">
 <div id="grid" class="d3"></div>
+<canvas id="cLimite"></canvas>
+<canvas id="cRastro"></canvas>
+
 <div id="cards">
-<div class="card" id="c1">LARGURA<b id="vL">20.0 m</b>ÁREA<b id="vA">0.00 ha</b>VEL<b id="vV">0.0 km/h</b></div>
-<div class="card" style="border-color:#c00" id="c2">DESVIO<b id="vD" style="color:#c00">0.00 m</b><span id="vAB">SEM AB</span></div>
+<div class="card" id="cardL">
+<span>LARGURA</span><b id="vL">20.0 m</b>
+<span style="margin-top:6px">ÁREA TRABALHADA</span><b id="vA">0.00 ha</b>
+<span style="margin-top:6px">VELOCIDADE</span><b id="vV">0.0 km/h</b>
 </div>
-<div id="trator">
-<svg width="110" height="50" viewBox="0 0 110 50" id="svgTr">
-<rect x="10" y="8" width="90" height="10" rx="3" fill="#1E5AA7" id="impl"/>
-<rect x="35" y="24" width="32" height="16" rx="3" fill="#367C2B" stroke="#000" stroke-width="1"/>
-<circle cx="38" cy="42" r="6" fill="#111"/><circle cx="62" cy="42" r="6" fill="#111"/>
-<path d="M50 14 L46 22 L54 22 Z" fill="#FFDE00"/>
-</svg>
-<div style="background:#000;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px" id="lLabel">20.0m</div>
+<div class="card r" id="cardR">
+<span>DESVIO DA LINHA</span><b id="vD" style="font-size:20px;color:#C1272D">0.00 m</b>
+<span style="margin-top:6px" id="vAB">SEM LINHA AB</span>
+<span style="margin-top:6px">TALHÃO</span><b id="vTalhao" style="font-size:12px">Nenhum</b>
 </div>
-</div>
-<div id="btns">
-<button onclick="marcaA()" id="bA">MARCAR A</button>
-<button onclick="marcaB()" id="bB">MARCAR B</button>
-<button class="y" onclick="abrir()">LARGURA</button>
-<button class="g" onclick="go()" id="bGo">▶ SIMULAR</button>
-</div>
-<div style="padding:6px;background:#111;display:flex;gap:6px">
-<button onclick="esconde()" style="flex:1">👁️ TELA LIMPA</button>
-<button onclick="muda3D()" style="flex:1" id="b3d">3D / 2D</button>
-<button onclick="limpar()" style="flex:1">🗑️ LIMPAR</button>
 </div>
 
-<div id="cfg" onclick="fechar()">
-<div id="box" onclick="event.stopPropagation()">
-<b>AJUSTE FINO LARGURA - até 100m</b><br><br>
-<div style="display:flex;gap:8px;align-items:center">
-<button onclick="add(-0.1)" style="width:40px">-</button>
-<input type="range" min="0.5" max="100" step="0.1" value="20" id="rg" oninput="setL(this.value)">
-<button onclick="add(0.1)" style="width:40px">+</button>
+<!-- TRATOR REALISTA TOPO - John Deere -->
+<div id="tratorWrap">
+<svg width="120" height="84" viewBox="0 0 120 84" id="svgTr">
+<!-- Sombra -->
+<ellipse cx="60" cy="74" rx="28" ry="5" fill="rgba(0,0,0,0.25)"/>
+<!-- Barra / Implemento -->
+<g id="gImpl"><rect x="5" y="6" width="110" height="10" rx="4" fill="#1565C0" stroke="#0D47A1" stroke-width="1.2"/><g fill="#0D47A1"><rect x="12" y="4" width="4" height="14" rx="1"/><rect x="30" y="4" width="4" height="14" rx="1"/><rect x="50" y="4" width="4" height="14" rx="1"/><rect x="70" y="4" width="4" height="14" rx="1"/><rect x="90" y="4" width="4" height="14" rx="1"/></g></g>
+<!-- Rodas traseiras grandes -->
+<g><circle cx="42" cy="62" r="13" fill="#212121" stroke="#000" stroke-width="1"/><circle cx="42" cy="62" r="9" fill="#444" stroke="#222" stroke-width="1"/><circle cx="42" cy="62" r="4" fill="#FFA000"/></g>
+<g><circle cx="78" cy="62" r="13" fill="#212121" stroke="#000" stroke-width="1"/><circle cx="78" cy="62" r="9" fill="#444" stroke="#222" stroke-width="1"/><circle cx="78" cy="62" r="4" fill="#FFA000"/></g>
+<!-- Corpo trator JD -->
+<path d="M38 26 L 82 26 L 84 48 L 36 48 Z" fill="#2E7D32" stroke="#1B5E20" stroke-width="1.2"/>
+<path d="M44 22 L 76 22 L 78 30 L 42 30 Z" fill="#388E3C" stroke="#1B5E20" stroke-width="1"/>
+<!-- Cabine vidro -->
+<rect x="46" y="24" width="28" height="14" rx="3" fill="#1B5E20" stroke="#000" stroke-width="0.8"/>
+<rect x="48" y="26" width="24" height="10" rx="2" fill="#81D4FA" opacity="0.9"/>
+<!-- Capô -->
+<rect x="58" y="16" width="18" height="10" rx="2" fill="#2E7D32" stroke="#1B5E20" stroke-width="1"/>
+<!-- Escapamento -->
+<rect x="74" y="18" width="3" height="8" rx="1" fill="#333"/>
+<!-- Seta direção -->
+<g id="seta"><path d="M60 8 L54 14 L66 14 Z" fill="#FFEB3B" stroke="#000" stroke-width="0.6"/></g>
+</svg>
+<div style="text-align:center;background:rgba(0,0,0,.75);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:2px" id="lLabel">20.0 m</div>
 </div>
-<div style="display:flex;justify-content:space-between;margin-top:6px"><span>0.5m</span><b id="rgV" style="color:#367C2B">20.0 m</b><span>100m</span></div><br>
-<button onclick="setL(6)">6m</button> <button onclick="setL(12)">12m</button> <button onclick="setL(20)">20m</button> <button onclick="setL(30)">30m</button> <button onclick="setL(50)">50m</button> <button onclick="setL(100)">100m</button>
-<br><br><button class="g" style="width:100%;height:44px" onclick="fechar()">FECHAR</button>
+</div>
+
+<div id="bottom">
+<button class="btn w" onclick="marcaA()" id="bA">📍 MARCAR A</button>
+<button class="btn w" onclick="marcaB()" id="bB">📍 MARCAR B</button>
+<button class="btn y" onclick="abrirCfg()">⚙️ LARGURA</button>
+<button class="btn g" onclick="toggleSim()" id="bSim">▶ SIMULAR</button>
+</div>
+<div id="bottom2">
+<button class="btn" onclick="toggleLimite()" id="bLim">🚩 LIMITE: OFF</button>
+<button class="btn" onclick="abrirTalhoes()">🗺️ TALHÕES</button>
+<button class="btn" onclick="toggleCards()" id="bHide">👁️ TELA LIMPA</button>
+<button class="btn" onclick="toggle3D()" id="b3d">3D / 2D</button>
+<button class="btn" style="background:#5D1F1F" onclick="limparTudo()">🗑️ LIMPAR</button>
+</div>
+
+<!-- MODAL CONFIG LARGURA -->
+<div id="modal" onclick="fecharAll()">
+<div id="box" onclick="event.stopPropagation()">
+<div id="boxH"><span>⚙️ CONFIG - PORTAL SAT GPS 🛰️</span><span onclick="fecharAll()" style="cursor:pointer">✕</span></div>
+<div id="boxB">
+<b>🎯 Largura - Ajuste fino 0.5 até 100m</b>
+<div style="display:flex;align-items:center;gap:8px;margin:10px 0">
+<button onclick="addL(-0.1)" style="width:38px;height:38px;border-radius:8px;border:2px solid #CCC">-</button>
+<input type="range" id="rg" min="0.5" max="100" step="0.1" value="20" oninput="setL(this.value)">
+<button onclick="addL(0.1)" style="width:38px;height:38px;border-radius:8px;border:2px solid #CCC">+</button>
+</div>
+<div style="display:flex;justify-content:space-between"><span>0.5m</span><b id="rgV" style="color:#367C2B;font-size:18px">20.0 m</b><span>100m</span></div>
+<div style="margin-top:10px">
+<span class="chip" onclick="setL(6)">6m</span>
+<span class="chip" onclick="setL(12.2)">12.2m</span>
+<span class="chip on" onclick="setL(20)">20m</span>
+<span class="chip" onclick="setL(24)">24m</span>
+<span class="chip" onclick="setL(30)">30m</span>
+<span class="chip" onclick="setL(36)">36m</span>
+<span class="chip" onclick="setL(50)">50m</span>
+<span class="chip" onclick="setL(100)">100m</span>
+</div>
+<br><button style="width:100%;height:46px;background:#367C2B;color:#fff;border:none;border-radius:10px;font-weight:900" onclick="fecharAll()">SALVAR</button>
+</div>
+</div>
+</div>
+
+<!-- MODAL TALHÕES -->
+<div id="modalT" style="position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;z-index:99;align-items:center;justify-content:center;padding:12px">
+<div style="background:#fff;width:100%;max-width:420px;border-radius:16px;overflow:hidden;max-height:90vh;display:flex;flex-direction:column">
+<div style="background:#367C2B;color:#fff;padding:12px;font-weight:900;display:flex;justify-content:space-between"><span>🗺️ MEUS TALHÕES</span><span onclick="document.getElementById('modalT').style.display='none'" style="cursor:pointer">✕</span></div>
+<div style="padding:12px;overflow-y:auto;flex:1">
+<div style="display:flex;gap:6px;margin-bottom:10px"><input id="nomeTalhao" placeholder="Nome do talhão (ex: Talhão 1 - Soja)" style="flex:1;padding:10px;border:2px solid #CCC;border-radius:8px"><button onclick="salvarTalhao()" style="padding:10px 14px;background:#367C2B;color:#fff;border:none;border-radius:8px;font-weight:900">SALVAR</button></div>
+<div id="listaTalhoes"></div>
+<div style="margin-top:12px;padding:10px;background:#FFF9C4;border-radius:8px;font-size:12px">💡 <b>Como criar limite:</b> 1- Clique em 🚩 LIMITE: OFF para ligar, 2- Ande ou simule ao redor da área, 3- Clique novamente para fechar, 4- Salve com nome. O talhão fica guardado mesmo fechando o app.</div>
+</div>
 </div>
 </div>
 
 <script>
-let leds=[];for(let i=0;i<21;i++){let d=document.createElement('div');d.className='led';document.getElementById('light').appendChild(d);leds.push(d);}
-let larg=20,area=0,desv=0,run=false,timer=null,hide=false,is3d=true,hasA=false;
-function light(v){leds.forEach(l=>l.className='led');leds[10].className='led on';let q=Math.round(Math.abs(v)/0.2);for(let i=0;i<q&&i<10;i++){if(v<0)leds[9-i].className='led on';else leds[11+i].className='led on';}document.getElementById('vD').innerText=v.toFixed(2)+' m';}
-function setL(v){larg=parseFloat(v);document.getElementById('vL').innerText=larg.toFixed(1)+' m';document.getElementById('lLabel').innerText=larg.toFixed(1)+'m';document.getElementById('rgV').innerText=larg.toFixed(1)+' m';document.getElementById('rg').value=larg;document.getElementById('impl').setAttribute('width',20+larg*2.5);}
-function add(d){setL(Math.min(100,Math.max(0.5,larg+d)));}
-function abrir(){document.getElementById('cfg').classList.add('show');}
-function fechar(){document.getElementById('cfg').classList.remove('show');}
-function marcaA(){hasA=true;document.getElementById('bA').innerText='✓ A OK';document.getElementById('vAB').innerText='A OK - AGUARDE B';}
-function marcaB(){if(!hasA){alert('Clique em MARCAR A primeiro');return;}document.getElementById('bB').innerText='✓ B OK';document.getElementById('vAB').innerText='LINHA AB ATIVA';}
-function go(){run=!run;document.getElementById('bGo').innerText=run?'⏸ PAUSAR':'▶ SIMULAR';if(run){let a=0;timer=setInterval(()=>{a+=0.03;desv=Math.sin(a)*1.1;area+=0.001*larg/10;document.getElementById('vA').innerText=area.toFixed(2)+' ha';document.getElementById('vV').innerText=(5+Math.random()*2).toFixed(1)+' km/h';light(desv);document.getElementById('trator').style.transform='translate(calc(-50% + '+(desv*20)+'px), -50%) rotate('+(desv*3)+'deg)';},100);}else{clearInterval(timer);timer=null;}}
-function esconde(){hide=!hide;document.getElementById('cards').classList.toggle('hide',hide);}
-function muda3D(){is3d=!is3d;document.getElementById('grid').className=is3d?'d3':'d2';document.getElementById('b3d').innerText=is3d?'MODO 3D':'MODO 2D';}
-function limpar(){area=0;document.getElementById('vA').innerText='0.00 ha';}
-setL(20);light(0);
+const light=document.getElementById('light');let leds=[];for(let i=0;i<21;i++){let d=document.createElement('div');d.className='led';light.appendChild(d);leds.push(d);}
+const cR=document.getElementById('cRastro'),ctxR=cR.getContext('2d');
+const cL=document.getElementById('cLimite'),ctxL=cL.getContext('2d');
+function resize(){[cR,cL].forEach(c=>{c.width=c.parentElement.clientWidth;c.height=c.parentElement.clientHeight});redrawAll();}
+window.addEventListener('resize',resize);resize();
+
+let st={larg:20,area:0,desv:0,run:false,timer:null,hide:false,is3d:true,hasA:false,hasB:false,bear:0,limiteOn:false,limitePts:[],rastroPts:[],talhaoAtivo:null,talhoes:JSON.parse(localStorage.getItem('portal_talhoes')||'[]')};
+
+function lightBar(v){leds.forEach(l=>l.className='led');leds[10].classList.add('on');let q=Math.round(Math.abs(v)/0.18);let cls=Math.abs(v)<0.25?'on':Math.abs(v)<0.7?'on y':'on r';for(let i=0;i<q&&i<10;i++){if(v<0)leds[9-i].className='led '+cls;else leds[11+i].className='led '+cls;}document.getElementById('vD').innerText=(v>0?'+':'')+v.toFixed(2)+' m';}
+function setL(v){st.larg=parseFloat(v);document.getElementById('vL').innerText=st.larg.toFixed(1)+' m';document.getElementById('lLabel').innerText=st.larg.toFixed(1)+' m';document.getElementById('rgV').innerText=st.larg.toFixed(1)+' m';document.getElementById('rg').value=st.larg;document.getElementById('gImpl').setAttribute('transform','scale('+(0.6+st.larg/40)+',1) translate('+( - (st.larg/2) )+',0)');redrawAll();}
+function addL(d){setL(Math.min(100,Math.max(0.5,st.larg+d)));}
+function redrawAll(){
+ctxR.clearRect(0,0,cR.width,cR.height);ctxL.clearRect(0,0,cL.width,cL.height);
+// Rastro
+if(st.rastroPts.length>1){ctxR.strokeStyle='rgba(54,124,43,0.45)';ctxR.lineWidth=st.larg*0.9;ctxR.lineCap='round';ctxR.lineJoin='round';ctxR.beginPath();let b=st.rastroPts[st.rastroPts.length-1];st.rastroPts.forEach((p,i)=>{let x=cR.width/2+(p.x-b.x)*1.2;let y=cR.height/2+(p.y-b.y)*1.2;if(i==0)ctxR.moveTo(x,y);else ctxR.lineTo(x,y);});ctxR.stroke();}
+// Limite / Talhão
+let pts=st.limiteOn?st.limitePts:(st.talhaoAtivo?st.talhaoAtivo.limite:[]);
+if(pts.length>2){ctxL.strokeStyle='#C1272D';ctxL.lineWidth=3;ctxL.fillStyle='rgba(193,39,45,0.12)';ctxL.setLineDash([8,6]);ctxL.beginPath();let b=st.rastroPts.length?st.rastroPts[st.rastroPts.length-1]:{x:0,y:0};pts.forEach((p,i)=>{let x=cL.width/2+(p.x-b.x)*1.2;let y=cL.height/2+(p.y-b.y)*1.2;if(i==0)ctxL.moveTo(x,y);else ctxL.lineTo(x,y);});ctxL.closePath();ctxL.fill();ctxL.stroke();ctxL.setLineDash([]);}
+}
+function marcaA(){st.hasA=true;document.getElementById('bA').innerText='✓ A OK';document.getElementById('vAB').innerText='A OK - MARQUE B';}
+function marcaB(){if(!st.hasA){alert('Marque A primeiro');return;}st.hasB=true;st.bear=Math.random()*30+10;document.getElementById('bB').innerText='✓ B OK';document.getElementById('vAB').innerText='LINHA AB • '+st.bear.toFixed(0)+'°';}
+function toggleSim(){
+st.run=!st.run;document.getElementById('bSim').innerText=st.run?'⏸ PAUSAR':'▶ SIMULAR';
+if(st.run){let t=0;st.timer=setInterval(()=>{t+=0.025;st.desv=Math.sin(t)*0.9;st.area+=0.0015*st.larg/20;document.getElementById('vA').innerText=st.area.toFixed(2)+' ha';document.getElementById('vV').innerText=(6+Math.sin(t)*1.2).toFixed(1)+' km/h';lightBar(st.hasA&&st.hasB?st.desv:st.desv);let x=st.rastroPts.length?st.rastroPts[st.rastroPts.length-1].x:0;let y=st.rastroPts.length?st.rastroPts[st.rastroPts.length-1].y:0;let nx=x+Math.cos(st.bear*Math.PI/180)*1.8;let ny=y+Math.sin(st.bear*Math.PI/180)*1.8+Math.sin(t)*0.3;st.rastroPts.push({x:nx,y:ny});if(st.limiteOn)st.limitePts.push({x:nx,y:ny});if(st.rastroPts.length>900)st.rastroPts.shift();document.getElementById('tratorWrap').style.transform='translate(calc(-50% + '+(st.desv*22)+'px), -50%) rotate('+(st.bear+st.desv*4)+'deg)';redrawAll();},120);}else{clearInterval(st.timer);st.timer=null;}
+}
+function toggleLimite(){st.limiteOn=!st.limiteOn;document.getElementById('bLim').innerText=st.limiteOn?'🚩 LIMITE: GRAVANDO':'🚩 LIMITE: OFF';document.getElementById('bLim').style.background=st.limiteOn?'#C1272D':'#2A2A2A';if(st.limiteOn)st.limitePts=[];else if(st.limitePts.length>3){if(confirm('Limite gravado com '+(st.limitePts.length)+' pontos. Deseja salvar como talhão?')){abrirTalhoes();}}}
+function abrirCfg(){document.getElementById('modal').classList.add('show');}
+function fecharAll(){document.getElementById('modal').classList.remove('show');}
+function toggleCards(){st.hide=!st.hide;document.getElementById('cards').style.display=st.hide?'none':'flex';document.getElementById('bHide').innerText=st.hide?'👁️ MOSTRAR':'👁️ TELA LIMPA';}
+function toggle3D(){st.is3d=!st.is3d;document.getElementById('grid').className=st.is3d?'d3':'d2';document.getElementById('b3d').innerText=st.is3d?'3D / 2D':'2D / 3D';redrawAll();}
+function limparTudo(){if(!confirm('Limpar rastro atual?'))return;st.rastroPts=[];st.area=0;document.getElementById('vA').innerText='0.00 ha';redrawAll();}
+function abrirTalhoes(){document.getElementById('modalT').style.display='flex';renderTalhoes();}
+function renderTalhoes(){let h='';st.talhoes.forEach((t,i)=>{h+=`<div class="talhaoItem"><div><b>${t.nome}</b><br><small>${t.limite.length} pontos • ${t.area} ha • ${new Date(t.data).toLocaleDateString()}</small></div><div><button onclick="carregarTalhao(${i})" style="padding:6px 10px;background:#367C2B;color:#fff;border:none;border-radius:6px">CARREGAR</button> <button onclick="deletarTalhao(${i})" style="padding:6px 10px;background:#C1272D;color:#fff;border:none;border-radius:6px">X</button></div></div>`});document.getElementById('listaTalhoes').innerHTML=h||'<small>Nenhum talhão salvo ainda</small>';}
+function salvarTalhao(){let nome=document.getElementById('nomeTalhao').value.trim();if(!nome){alert('Digite nome do talhão');return;}let pts=st.limitePts.length?st.limitePts:st.rastroPts;if(pts.length<4){alert('Precisa gravar limite primeiro - clique em LIMITE e ande ao redor');return;}let t={nome:nome,limite:JSON.parse(JSON.stringify(pts)),area:st.area.toFixed(2),data:Date.now()};st.talhoes.push(t);localStorage.setItem('portal_talhoes',JSON.stringify(st.talhoes));document.getElementById('nomeTalhao').value='';renderTalhoes();alert('Talhão '+nome+' salvo!');}
+function carregarTalhao(i){st.talhaoAtivo=st.talhoes[i];document.getElementById('vTalhao').innerText=st.talhaoAtivo.nome;document.getElementById('modalT').style.display='none';redrawAll();}
+function deletarTalhao(i){if(!confirm('Apagar talhão?'))return;st.talhoes.splice(i,1);localStorage.setItem('portal_talhoes',JSON.stringify(st.talhoes));renderTalhoes();}
+setL(20);lightBar(0);
 </script>
 </body>
 </html>
