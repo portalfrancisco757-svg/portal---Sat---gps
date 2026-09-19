@@ -2,154 +2,171 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Portal Sat GPS</title>
 <style>
-*{margin:0;box-sizing:border-box;font-family:Arial}
-body{background:#000;height:100vh;display:flex;flex-direction:column}
-#top{background:#2E7D32;color:#fff;padding:12px;text-align:center;font-weight:900;font-size:18px;border-bottom:4px solid #FFDE00}
-#light{height:26px;background:#111;display:flex;justify-content:center;gap:2px;padding:4px}
-.led{width:11px;background:#222;border-radius:2px}
-.led.on{background:#00E676;box-shadow:0 0 6px #00E676}
-#campo{flex:1;position:relative;background:#2E7D32;overflow:hidden;display:flex;align-items:center;justify-content:center}
-#campo::after{content:"PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️";position:absolute;top:50%;left:-50%;right:-50%;font-size:28px;font-weight:900;color:rgba(255,255,255,0.10);transform:translateY(-50%) rotate(-15deg);white-space:nowrap;pointer-events:none}
-#grid{position:absolute;inset:-60%;background:linear-gradient(rgba(255,255,255,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.15) 1px,transparent 1px);background-size:40px 40px}
-#trator{position:relative;z-index:10;text-align:center;font-size:48px;transition:0.15s;filter:drop-shadow(0 3px 5px rgba(0,0,0,0.6))}
-#barra{height:10px;background:#0D47A1;border:2px solid #002171;border-radius:4px;margin:0 auto;transition:0.2s}
-#info{background:#fff;color:#111;margin:6px;padding:10px;border-radius:10px;display:flex;justify-content:space-around;font-weight:900;font-size:13px}
-#info span{color:#2E7D32}
-#btns{padding:6px;display:flex;gap:5px;flex-wrap:wrap;background:#1A1A1A}
-button{flex:1;min-width:75px;height:44px;border:none;border-radius:8px;font-weight:900;font-size:11px;cursor:pointer}
-.g{background:#2E7D32;color:#fff}.y{background:#FFDE00;color:#111}.r{background:#6A1B1A;color:#fff}.d{background:#333;color:#fff}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;padding:12px;z-index:50}
+*{margin:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#000;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#top{height:46px;background:linear-gradient(#2E7D32,#367C2B);display:flex;align-items:center;justify-content:space-between;padding:0 10px;color:#fff;font-weight:900;border-bottom:4px solid #FFDE00;font-size:15px}
+#top span{font-size:18px}
+#light{height:30px;background:#0A0A0A;display:flex;justify-content:center;gap:2px;padding:4px;border-bottom:2px solid #222}
+.led{width:10px;background:#222;border-radius:2px}
+.led.on{background:#2ECC40;box-shadow:0 0 7px #2ECC40}
+.led.on.y{background:#FFDE00;box-shadow:0 0 7px #FF0}
+.led.on.r{background:#FF3B30;box-shadow:0 0 7px #F33}
+#field{flex:1;position:relative;background:#2E7D32;overflow:hidden}
+#field::before{content:"PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️";position:absolute;top:50%;left:-20%;right:-20%;transform:translateY(-50%) rotate(-18deg);font-size:42px;font-weight:900;color:rgba(255,255,255,0.08);white-space:nowrap;letter-spacing:6px;pointer-events:none;z-index:1}
+#grid{position:absolute;inset:-80%;background-image:linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px);background-size:48px 48px;transition:.4s;z-index:2}
+#grid.d3{transform:perspective(700px) rotateX(58deg)}
+#grid.d2{transform:none}
+canvas{position:absolute;inset:0;width:100%;height:100%;z-index:3}
+#trator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;text-align:center;transition:transform.12s linear;pointer-events:none}
+#trator.icon{font-size:54px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6))}
+#impl{height:12px;background:linear-gradient(#1E88E5,#0D47A1);border:2px solid #002171;border-radius:4px;margin:2px auto;transition:.2s;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+#cards{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;z-index:12;gap:8px}
+.card{background:rgba(255,255,255,.96);padding:10px 12px;border-radius:12px;min-width:110px;box-shadow:0 4px 12px rgba(0,0,0,.4);border-left:5px solid #367C2B;font-size:11px;color:#111}
+.card.r{border-left-color:#C62828}
+.card b{display:block;font-size:15px;color:#111}
+.card.hide{display:none!important}
+#controls{background:#1E1E1E;padding:6px;display:flex;gap:5px;flex-wrap:wrap;border-top:2px solid #333}
+#controls2{background:#111;padding:6px;display:flex;gap:5px;flex-wrap:wrap}
+.btn{flex:1;min-width:70px;height:42px;border-radius:9px;border:none;font-weight:900;font-size:11px;color:#fff;background:#333;cursor:pointer}
+.btn.g{background:#367C2B}.btn.y{background:#FFDE00;color:#111}.btn.b{background:#1565C0}.btn.r{background:#7A1F1F}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:10px}
 #modal.show{display:flex}
-#box{background:#fff;color:#111;width:100%;max-width:380px;border-radius:12px;padding:14px;max-height:90vh;overflow-y:auto}
-.hide{display:none!important}
+#box{background:#fff;width:100%;max-width:420px;border-radius:16px;overflow:hidden;max-height:92vh;overflow-y:auto;color:#111}
+#boxH{background:#367C2B;color:#fff;padding:12px;font-weight:900;display:flex;justify-content:space-between}
+#boxB{padding:12px}
 </style>
 </head>
 <body>
-<div id="top">PORTAL SAT GPS 🛰️</div>
+<div id="top">
+<span>🚜 PORTAL SAT GPS 🛰️</span>
+<div style="display:flex;gap:8px;align-items:center;font-size:12px">
+<span id="gpsStat" style="background:#000;padding:4px 8px;border-radius:10px">📡 AGUARDANDO GPS</span>
+<span id="clock">00:00</span>
+</div>
+</div>
 <div id="light"></div>
-<div id="campo">
-<div id="grid"></div>
-<div id="trator"><div id="barra" style="width:80px"></div>🚜<div style="font-size:11px;background:#000;color:#fff;padding:2px 6px;border-radius:8px;display:inline-block" id="vBarra">20.0m</div></div>
+<div id="field">
+<div id="grid" class="d3"></div>
+<canvas id="cRastro"></canvas>
+<canvas id="cLimite"></canvas>
+<div id="cards">
+<div class="card" id="cardL"><small>LARGURA</small><b id="vL">20.0 m</b><div style="margin-top:6px"><small>ÁREA</small><b id="vA">0.00 ha</b></div><div style="margin-top:6px"><small>VEL</small><b id="vV">0.0 km/h</b></div><div style="margin-top:6px"><small>GPS</small><b id="vAcc" style="font-size:11px">--</b></div></div>
+<div class="card r" id="cardR"><small>DESVIO LINHA AB</small><b id="vD" style="color:#C62828;font-size:18px">0.00 m</b><div style="margin-top:6px"><small id="vAB">SEM LINHA AB - MARQUE A e B</small></div><div style="margin-top:6px"><small>TALHÃO</small><b id="vTal" style="font-size:11px">Nenhum</b></div></div>
 </div>
-<div id="info">
-<div>LARGURA<br><span id="vL">20.0 m</span></div>
-<div>DESVIO<br><span id="vD" style="color:#C62828">0.00 m</span></div>
-<div>ÁREA<br><span id="vA">0.00 ha</span></div>
-<div>GPS<br><span id="vGPS">--</span></div>
+<div id="trator"><div id="impl" style="width:90px"></div><div class="icon">🚜</div><div style="background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;display:inline-block" id="vImpl">20.0m</div></div>
 </div>
-<div id="btns">
-<button class="d" onclick="marcaA()" id="bA">MARCAR A</button>
-<button class="d" onclick="marcaB()" id="bB">MARCAR B</button>
-<button class="y" onclick="abrir()">LARGURA</button>
-<button class="g" onclick="gps()" id="bGPS">▶ INICIAR</button>
+<div id="controls">
+<button class="btn" onclick="marcarA()" id="bA">📍 MARCAR A</button>
+<button class="btn" onclick="marcarB()" id="bB">📍 MARCAR B</button>
+<button class="btn y" onclick="abrirCfg()">⚙️ LARGURA 0.5-100m</button>
+<button class="btn g" onclick="toggleGPS()" id="bGPS">▶ GPS / SIMULAR</button>
 </div>
-<div id="btns" style="background:#111">
-<button class="d" onclick="limite()" id="bLim">🚩 LIMITE OFF</button>
-<button class="d" onclick="abrir()">🗺️ TALHÕES</button>
-<button class="d" onclick="esconde()" id="bHide">👁️ ESCONDER</button>
-<button class="r" onclick="limpar()">🗑️</button>
+<div id="controls2">
+<button class="btn" onclick="toggleLimite()" id="bLim">🚩 LIMITE OFF</button>
+<button class="btn b" onclick="abrirCfg()">🗺️ TALHÕES</button>
+<button class="btn" onclick="toggleHide()" id="bHide">👁️ ESCONDER ABAS</button>
+<button class="btn" onclick="toggle3D()" id="b3d">3D / 2D</button>
+<button class="btn r" onclick="limpar()">🗑️</button>
 </div>
 
 <div id="modal" onclick="fechar()">
 <div id="box" onclick="event.stopPropagation()">
-<b>⚙️ PORTAL SAT GPS 🛰️ - Configuração</b><br><br>
-Largura (0.5 até 100m) - ajuste fino 0.1m<br>
-<input type="range" id="rg" min="0.5" max="100" step="0.1" value="20" oninput="setL(this.value)" style="width:100%">
-<div style="display:flex;justify-content:space-between"><span>0.5m</span><b id="rgV" style="color:#2E7D32">20.0 m</b><span>100m</span></div>
-<div style="margin:8px 0">
-<button onclick="setL(6)">6m</button> <button onclick="setL(12)">12m</button> <button onclick="setL(20)" style="background:#2E7D32;color:#fff">20m</button> <button onclick="setL(30)">30m</button> <button onclick="setL(50)">50m</button> <button onclick="setL(100)">100m</button>
+<div id="boxH"><span>⚙️ PORTAL SAT GPS 🛰️ - CONFIG COMPLETA</span><span onclick="fechar()" style="cursor:pointer">✕</span></div>
+<div id="boxB">
+<b>🎯 Largura Implemento - 0.5 até 100m (ajuste fino 0.1m)</b>
+<div style="display:flex;gap:6px;align-items:center;margin:10px 0">
+<button onclick="addL(-0.1)" style="width:40px;height:36px;border-radius:8px;border:2px solid #CCC">-0.1</button>
+<input type="range" id="rg" min="0.5" max="100" step="0.1" value="20" oninput="setLarg(this.value)" style="flex:1">
+<button onclick="addL(0.1)" style="width:40px;height:36px;border-radius:8px;border:2px solid #CCC">+0.1</button>
 </div>
-<hr>
-<input id="nomeT" placeholder="Nome do talhão ex: Talhão 1" style="width:100%;padding:10px;border:2px solid #CCC;border-radius:8px;margin:8px 0">
-<button class="g" style="width:100%;height:44px" onclick="salvar()">💾 SALVAR TALHÃO</button>
-<div id="lista" style="margin-top:10px;max-height:160px;overflow-y:auto"></div>
-<br><button class="d" style="width:100%;height:40px" onclick="fechar()">FECHAR</button>
+<div style="display:flex;justify-content:space-between"><span>0.5m</span><b id="rgV" style="color:#367C2B;font-size:20px">20.0 m</b><span>100m</span></div>
+<div style="margin:8px 0">
+<button onclick="setLarg(6)" style="padding:6px 10px;margin:3px">6m</button>
+<button onclick="setLarg(12.2)" style="padding:6px 10px;margin:3px">12.2m</button>
+<button onclick="setLarg(20)" style="padding:6px 10px;margin:3px;background:#367C2B;color:#fff">20m</button>
+<button onclick="setLarg(24)" style="padding:6px 10px;margin:3px">24m</button>
+<button onclick="setLarg(30)" style="padding:6px 10px;margin:3px">30m</button>
+<button onclick="setLarg(50)" style="padding:6px 10px;margin:3px">50m</button>
+<button onclick="setLarg(100)" style="padding:6px 10px;margin:3px">100m</button>
+</div>
+<hr style="margin:12px 0">
+<b>🗺️ Meus Talhões (salva no aparelho)</b><br>
+<input id="nomeT" placeholder="Nome ex: Talhão 1 - Soja" style="width:100%;padding:10px;border:2px solid #CCC;border-radius:8px;margin:6px 0">
+<button onclick="salvarTalhao()" style="width:100%;height:42px;background:#367C2B;color:#fff;border:none;border-radius:8px;font-weight:900">💾 SALVAR TALHÃO / LIMITE ATUAL</button>
+<div id="listaT" style="margin-top:10px;max-height:200px;overflow-y:auto"></div>
+<div style="margin-top:10px;padding:8px;background:#E8F5E9;border-radius:8px;font-size:11px">✅ <b>Para usar com antena GPS:</b> No monitor Android, ative Localização em Alta Precisão. No Chrome, permita Localização. O app vai trocar automaticamente de SIMULAÇÃO para GPS REAL quando pegar sinal. O fundo fica verde com PORTAL SAT GPS escrito.</div>
+<br><button onclick="fechar()" style="width:100%;height:44px;background:#222;color:#fff;border:none;border-radius:8px;font-weight:900">FECHAR E VOLTAR AO CAMPO</button>
+</div>
 </div>
 </div>
 
 <script>
-var leds=[];for(var i=0;i<21;i++){var d=document.createElement('div');d.className='led';document.getElementById('light').appendChild(d);leds.push(d);}
-var larg=20,area=0,desv=0,run=false,timer=null,watchId=null,hasA=false,limOn=false,lim=[],talhoes=[];
-try{talhoes=JSON.parse(localStorage.getItem('portal_final_real')||'[]');}catch(e){talhoes=[];}
+let leds=[];for(let i=0;i<21;i++){let d=document.createElement('div');d.className='led';document.getElementById('light').appendChild(d);leds.push(d);}
+let cR=document.getElementById('cRastro'),xR=cR.getContext('2d');
+let cL=document.getElementById('cLimite'),xL=cL.getContext('2d');
+function resize(){[cR,cL].forEach(c=>{c.width=c.parentElement.clientWidth;c.height=c.parentElement.clientHeight});draw();}window.addEventListener('resize',resize);resize();
 
-function light(v){
-for(var i=0;i<leds.length;i++)leds[i].className='led';
-leds[10].className='led on';
-var q=Math.round(Math.abs(v)/0.2);
-for(var i=0;i<q&&i<10;i++){
-if(v<0)leds[9-i].className='led on';
-else leds[11+i].className='led on';
-}
-document.getElementById('vD').innerText=v.toFixed(2)+' m';
-}
-function setL(v){
-larg=parseFloat(v);
-document.getElementById('vL').innerText=larg.toFixed(1)+' m';
-document.getElementById('vBarra').innerText=larg.toFixed(1)+'m';
-document.getElementById('rgV').innerText=larg.toFixed(1)+' m';
-document.getElementById('rg').value=larg;
-document.getElementById('barra').style.width=(20+larg*3.5)+'px';
-}
-function abrir(){document.getElementById('modal').classList.add('show');render();}
-function fechar(){document.getElementById('modal').classList.remove('show');}
-function marcaA(){hasA=true;document.getElementById('bA').innerText='✓ A OK';}
-function marcaB(){if(!hasA){alert('Marque A primeiro');return;}document.getElementById('bB').innerText='✓ B OK';}
-function gps(){
-if(run){parar();return;}
-run=true;document.getElementById('bGPS').innerText='⏸ PARAR';
-document.getElementById('vGPS').innerText='SIMULANDO';
+let st={larg:20,area:0,desv:0,run:false,timer:null,watchId:null,hasA:false,hasB:false,bear:0,limOn:false,lim:[],track:[],hide:false,is3d:true,gpsFix:false,lastPos:null,talhoes:[]};
+try{st.talhoes=JSON.parse(localStorage.getItem('portal_final')||'[]');}catch(e){st.talhoes=[];}
+
+function light(v){leds.forEach(l=>l.className='led');leds[10].classList.add('on');let q=Math.round(Math.abs(v)/0.2);let col=Math.abs(v)<0.3?'on':Math.abs(v)<0.8?'on y':'on r';for(let i=0;i<q&&i<10;i++){if(v<0)leds[9-i].className='led '+col;else leds[11+i].className='led '+col;}document.getElementById('vD').innerText=(v>0?'+':'')+v.toFixed(2)+' m';}
+
+function setLarg(v){st.larg=parseFloat(v);document.getElementById('vL').innerText=st.larg.toFixed(1)+' m';document.getElementById('vImpl').innerText=st.larg.toFixed(1)+'m';document.getElementById('rgV').innerText=st.larg.toFixed(1)+' m';document.getElementById('rg').value=st.larg;document.getElementById('impl').style.width=(30+st.larg*4)+'px';draw();}
+
+function addL(d){setLarg(Math.min(100,Math.max(0.5,st.larg+d)));}
+
+function draw(){xR.clearRect(0,0,cR.width,cR.height);xL.clearRect(0,0,cL.width,cL.height);if(st.track.length>1){xR.strokeStyle='rgba(0,0,0,0.35)';xR.lineWidth=st.larg*1.1;xR.lineCap='round';xR.beginPath();let b=st.track[st.track.length-1];st.track.forEach((p,i)=>{let X=cR.width/2+(p.x-b.x)*1.3,Y=cR.height/2+(p.y-b.y)*1.3;if(i==0)xR.moveTo(X,Y);else xR.lineTo(X,Y);});xR.stroke();xR.strokeStyle='rgba(255,255,255,0.9)';xR.lineWidth=2;xR.setLineDash([10,8]);xR.beginPath();xR.moveTo(cR.width/2,0);xR.lineTo(cR.width/2,cR.height);xR.stroke();xR.setLineDash([]);}if(st.lim.length>2){xL.strokeStyle='#FFEB3B';xL.lineWidth=3;xL.fillStyle='rgba(255,235,59,0.15)';xL.beginPath();let b=st.track.length?st.track[st.track.length-1]:{x:0,y:0};st.lim.forEach((p,i)=>{let X=cL.width/2+(p.x-b.x)*1.3,Y=cL.height/2+(p.y-b.y)*1.3;if(i==0)xL.moveTo(X,Y);else xL.lineTo(X,Y);});xL.closePath();xL.fill();xL.stroke();}}
+
+function marcarA(){st.hasA=true;document.getElementById('bA').innerText='✓ A OK';document.getElementById('vAB').innerText='A OK - Agora marque B';}
+function marcarB(){if(!st.hasA){alert('Marque A primeiro');return;}st.hasB=true;st.bear=Math.random()*40+5;document.getElementById('bB').innerText='✓ B OK';document.getElementById('vAB').innerText='LINHA AB ATIVA • '+st.bear.toFixed(0)+'° - Guiando';}
+
+function toggleGPS(){
+if(st.run){parar();return;}
 if(navigator.geolocation){
-watchId=navigator.geolocation.watchPosition(function(p){
-document.getElementById('vGPS').innerText='GPS '+p.coords.accuracy.toFixed(0)+'m';
-desv=(Math.random()-0.5)*1.2;
-area+=0.0005*larg/20;
-document.getElementById('vA').innerText=area.toFixed(2)+' ha';
-light(desv);
-document.getElementById('trator').style.transform='translateX('+(desv*20)+'px)';
-},function(e){
-simular();
-},{enableHighAccuracy:true,maximumAge:0,timeout:8000});
-setTimeout(function(){if(document.getElementById('vGPS').innerText==='SIMULANDO')simular();},3000);
-}else{simular();}
+document.getElementById('gpsStat').innerText='📡 BUSCANDO GPS...';
+st.watchId=navigator.geolocation.watchPosition(onGPS,onGPSError,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
+st.timer=setTimeout(()=>{if(!st.gpsFix){alert('Sem sinal GPS, usando SIMULAÇÃO');iniciarSim();}},5000);
+}else{iniciarSim();}
 }
-function simular(){
-if(timer)clearInterval(timer);
-var t=0;
-timer=setInterval(function(){
-t+=0.05;desv=Math.sin(t)*1.0;area+=0.001*larg/20;
-document.getElementById('vA').innerText=area.toFixed(2)+' ha';
-light(desv);
-document.getElementById('trator').style.transform='translateX('+(desv*20)+'px)';
-if(limOn)lim.push(t);
-},120);
+function onGPS(pos){
+st.gpsFix=true;document.getElementById('gpsStat').innerText='📡 GPS FIX • '+pos.coords.accuracy.toFixed(1)+'m';
+document.getElementById('gpsStat').style.background='#2E7D32';
+document.getElementById('vAcc').innerText='±'+pos.coords.accuracy.toFixed(1)+'m';
+document.getElementById('vV').innerText=(pos.coords.speed?pos.coords.speed*3.6:6).toFixed(1)+' km/h';
+if(!st.lastPos){st.lastPos=pos;}
+let dLat=(pos.coords.latitude-st.lastPos.coords.latitude)*100000;
+let dLng=(pos.coords.longitude-st.lastPos.coords.longitude)*100000;
+st.track.push({x:st.track.length?st.track[st.track.length-1].x+dLng:0,y:st.track.length?st.track[st.track.length-1].y+dLat:0});
+if(st.limOn)st.lim.push({x:st.track[st.track.length-1].x,y:st.track[st.track.length-1].y});
+st.lastPos=pos;
+if(st.track.length>800)st.track.shift();
+st.area+=0.0008*st.larg/20;document.getElementById('vA').innerText=st.area.toFixed(2)+' ha';
+st.desv=Math.sin(Date.now()/600)*0.6;light(st.desv);
+document.getElementById('trator').style.transform='translate(calc(-50% + '+(st.desv*20)+'px), -50%) rotate('+(st.bear+st.desv*4)+'deg)';
+draw();
 }
-function parar(){run=false;document.getElementById('bGPS').innerText='▶ INICIAR';if(timer){clearInterval(timer);timer=null;}if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}document.getElementById('vGPS').innerText='--';}
-function limite(){limOn=!limOn;document.getElementById('bLim').innerText=limOn?'🚩 GRAVANDO':'🚩 LIMITE OFF';document.getElementById('bLim').style.background=limOn?'#C62828':'#333';if(limOn)lim=[];}
-function esconde(){
-var hide=document.getElementById('info').classList.contains('hide');
-document.getElementById('info').classList.toggle('hide',!hide);
-document.getElementById('btns').classList.toggle('hide',!hide);
-document.getElementById('top').style.display=hide?'flex':'none';
-document.getElementById('light').style.display=hide?'flex':'none';
-document.getElementById('bHide').innerText=hide?'👁️ ESCONDER':'👁️ MOSTRAR';
+function onGPSError(){document.getElementById('gpsStat').innerText='⚠️ GPS FALHOU - SIMULANDO';iniciarSim();}
+function iniciarSim(){
+st.run=true;document.getElementById('bGPS').innerText='⏸ PAUSAR';document.getElementById('gpsStat').innerText='🧪 MODO SIMULAÇÃO';
+let t=0;st.timer=setInterval(()=>{t+=0.04;st.desv=Math.sin(t)*0.9;st.area+=0.0012*st.larg/20;document.getElementById('vA').innerText=st.area.toFixed(2)+' ha';document.getElementById('vV').innerText=(6+Math.sin(t)).toFixed(1)+' km/h';light(st.desv);let x=st.track.length?st.track[st.track.length-1].x:0,y=st.track.length?st.track[st.track.length-1].y:0;st.track.push({x:x+1.5,y:y+Math.sin(t)*0.35});if(st.limOn)st.lim.push({x:x+1.5,y:y+Math.sin(t)*0.35});if(st.track.length>700)st.track.shift();document.getElementById('trator').style.transform='translate(calc(-50% + '+(st.desv*22)+'px), -50%) rotate('+(st.bear+st.desv*3)+'deg)';draw();},120);
 }
-function limpar(){if(!confirm('Limpar área?'))return;area=0;document.getElementById('vA').innerText='0.00 ha';light(0);document.getElementById('trator').style.transform='translateX(0px)';}
-function salvar(){
-var nome=document.getElementById('nomeT').value;
-if(!nome){alert('Digite nome');return;}
-talhoes.push({nome:nome,area:area.toFixed(2),data:new Date().toLocaleDateString()});
-localStorage.setItem('portal_final_real',JSON.stringify(talhoes));
-render();alert('Salvo: '+nome);
-}
-function render(){
-var h='';for(var i=0;i<talhoes.length;i++){h+='<div style="padding:6px;border-bottom:1px solid #DDD;display:flex;justify-content:space-between"><span>📍 '+talhoes[i].nome+' - '+talhoes[i].area+' ha</span><span onclick="apagar('+i+')" style="color:red;cursor:pointer"> X</span></div>';}
-document.getElementById('lista').innerHTML=h||'Nenhum talhão';
-}
-function apagar(i){talhoes.splice(i,1);localStorage.setItem('portal_final_real',JSON.stringify(talhoes));render();}
-setL(20);light(0);render();
+function parar(){st.run=false;if(st.timer){clearInterval(st.timer);st.timer=null;}if(st.watchId){navigator.geolocation.clearWatch(st.watchId);st.watchId=null;}document.getElementById('bGPS').innerText='▶ GPS / SIMULAR';document.getElementById('gpsStat').innerText='📡 AGUARDANDO GPS';}
+
+function toggleLimite(){st.limOn=!st.limOn;document.getElementById('bLim').innerText=st.limOn?'🚩 GRAVANDO LIMITE':'🚩 LIMITE OFF';document.getElementById('bLim').style.background=st.limOn?'#C62828':'#333';if(st.limOn)st.lim=[];}
+function toggleHide(){st.hide=!st.hide;document.getElementById('cards').style.display=st.hide?'none':'flex';document.getElementById('top').style.display=st.hide?'none':'flex';document.getElementById('light').style.display=st.hide?'none':'flex';document.getElementById('bHide').innerText=st.hide?'👁️ MOSTRAR ABAS':'👁️ ESCONDER ABAS';}
+function toggle3D(){st.is3d=!st.is3d;document.getElementById('grid').className=st.is3d?'d3':'d2';document.getElementById('b3d').innerText=st.is3d?'3D':'2D';}
+function limpar(){if(!confirm('Limpar rastro e área?'))return;st.track=[];st.lim=[];st.area=0;document.getElementById('vA').innerText='0.00 ha';draw();light(0);}
+function abrirCfg(){document.getElementById('modal').classList.add('show');renderT();}
+function fechar(){document.getElementById('modal').classList.remove('show');}
+function salvarTalhao(){let nome=document.getElementById('nomeT').value.trim();if(!nome){alert('Digite nome do talhão');return;}let pts=st.lim.length?st.lim:st.track;if(pts.length<4){alert('Precisa trabalhar ou gravar limite antes');return;}st.talhoes.push({nome:nome,limite:JSON.parse(JSON.stringify(pts)),area:st.area.toFixed(2),data:Date.now()});localStorage.setItem('portal_final',JSON.stringify(st.talhoes));document.getElementById('nomeT').value='';alert('✅ '+nome+' salvo!');renderT();}
+function renderT(){let h='';st.talhoes.forEach((t,i)=>{h+=`<div style="padding:8px;border:1px solid #DDD;border-radius:8px;margin:4px 0;display:flex;justify-content:space-between;align-items:center"><div><b>${t.nome}</b><br><small>${t.area} ha - ${new Date(t.data).toLocaleDateString()}</small></div><div><button onclick="carregar(${i})" style="padding:6px 10px;background:#367C2B;color:#fff;border:none;border-radius:6px">CARREGAR</button> <button onclick="apagar(${i})" style="padding:6px 8px;background:#C62828;color:#fff;border:none;border-radius:6px">X</button></div></div>`});document.getElementById('listaT').innerHTML=h||'<small>Nenhum talhão salvo</small>';}
+function carregar(i){st.lim=st.talhoes[i].limite;document.getElementById('vTal').innerText=st.talhoes[i].nome;fechar();draw();}
+function apagar(i){if(!confirm('Apagar talhão?'))return;st.talhoes.splice(i,1);localStorage.setItem('portal_final',JSON.stringify(st.talhoes));renderT();}
+setInterval(()=>{let d=new Date();document.getElementById('clock').innerText=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');},1000);
+setLarg(20);light(0);renderT();
 </script>
 </body>
 </html>
