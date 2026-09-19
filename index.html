@@ -1,197 +1,1054 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Portal Sat GPS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Portal Sat GPS Agrícola 🛰️</title>
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 <style>
-body{margin:0;background:#000;font-family:Arial;color:#fff;height:100vh;display:flex;flex-direction:column}
-#top{background:#1B5E20;color:#fff;padding:10px;text-align:center;font-weight:900;font-size:18px;border-bottom:3px solid yellow}
-#luz{background:#111;height:28px;display:flex;justify-content:center;gap:3px;padding:5px}
-.led{width:14px;background:#222}
-.led.on{background:#0f0}
-#campo{flex:1;background:#2E7D32;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-#campo:after{content:"PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️";position:absolute;top:50%;left:-30%;font-size:26px;font-weight:900;color:rgba(255,255,255,0.15);transform:rotate(-15deg);white-space:nowrap}
-#trator{font-size:50px;z-index:2}
-#info{background:#fff;color:#000;display:flex;justify-content:space-around;padding:10px;font-weight:900;font-size:13px;text-align:center}
-#info b{display:block;color:#1B5E20;font-size:16px}
-#btns{background:#212121;padding:6px;display:flex;gap:5px;flex-wrap:wrap}
-#btns button{flex:1;min-width:70px;height:48px;border:none;border-radius:8px;font-weight:900;font-size:12px}
-.g{background:#2E7D32;color:#fff}.y{background:yellow;color:#000}.r{background:#900;color:#fff}.c{background:#444;color:#fff}
-#cfg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;color:#000;z-index:100;padding:15px}
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#eef5f0;
+ color:#17352a;
+}
+
+header{
+ background:#07552f;
+ color:white;
+ padding:14px;
+ text-align:center;
+}
+
+header h1{
+ margin:0;
+ font-size:22px;
+}
+
+header p{
+ margin:5px 0 0;
+ font-size:13px;
+}
+
+#map{
+ width:100%;
+ height:55vh;
+ min-height:380px;
+}
+
+.panel{
+ background:white;
+ padding:12px;
+ box-shadow:0 -3px 12px #0003;
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:8px;
+}
+
+.card{
+ background:#edf5f0;
+ padding:10px;
+ border-radius:10px;
+}
+
+.card span{
+ display:block;
+ font-size:12px;
+ color:#557067;
+}
+
+.card strong{
+ font-size:17px;
+}
+
+.buttons{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:8px;
+ margin-top:10px;
+}
+
+button{
+ border:0;
+ border-radius:10px;
+ padding:13px 8px;
+ font-weight:bold;
+ font-size:14px;
+ background:#087044;
+ color:white;
+}
+
+button.secondary{
+ background:#42675a;
+}
+
+button.danger{
+ background:#a83d35;
+}
+
+button.active{
+ background:#d28b00;
+}
+
+#status{
+ margin-top:10px;
+ padding:10px;
+ border-radius:8px;
+ background:#f0f3f1;
+ font-size:13px;
+}
 </style>
 </head>
+
 <body>
 
-<div id="top">PORTAL SAT GPS 🛰️</div>
-<div id="luz"></div>
-<div id="campo"><div id="trator">🚜</div></div>
+<header>
+<h1>Portal Sat GPS Agrícola 🛰️</h1>
+<p>GPS • Talhões • Trilhas • Linha AB • Área</p>
+</header>
 
-<div id="info">
-<div>LARGURA<b id="vL">20.0 m</b></div>
-<div>DESVIO<b id="vD" style="color:red">0.00 m</b></div>
-<div>AREA<b id="vA">0.00 ha</b></div>
-<div>GPS<b id="vG">--</b></div>
+<div id="map"></div>
+
+<div class="panel">
+
+<div class="grid">
+
+<div class="card">
+<span>Latitude</span>
+<strong id="lat">---</strong>
 </div>
 
-<div id="btns">
-<button class="c" onclick="marcaA()" id="bA">MARCAR A</button>
-<button class="c" onclick="marcaB()" id="bB">MARCAR B</button>
-<button class="y" onclick="document.getElementById('cfg').style.display='block'">LARGURA</button>
-<button class="g" onclick="iniciar()" id="bI">▶ INICIAR</button>
+<div class="card">
+<span>Longitude</span>
+<strong id="lon">---</strong>
 </div>
 
-<div id="btns" style="background:#111">
-<button class="c" onclick="esconder()" id="bH">👁️ LIMPA</button>
-<button class="r" onclick="limpar()">🗑️ LIMPAR</button>
+<div class="card">
+<span>Precisão</span>
+<strong id="accuracy">---</strong>
 </div>
 
-<div id="cfg">
-<h2>PORTAL SAT GPS 🛰️ - LARGURA</h2><br>
-<input type="range" id="rg" min="0.5" max="100" step="0.1" value="20" oninput="setL(this.value)" style="width:100%">
-<h1 id="rgV" style="text-align:center;color:green">20.0 m</h1><br>
-<button onclick="setL(6)">6m</button> <button onclick="setL(12)">12.2m</button> <button onclick="setL(20)">20m</button> <button onclick="setL(30)">30m</button> <button onclick="setL(100)">100m</button>
-<br><br>
-<button class="g" style="width:100%;height:50px" onclick="document.getElementById('cfg').style.display='none'">FECHAR - VOLTAR AO CAMPO</button>
-<br><br>
-<div style="background:#E8F5E9;padding:10px;font-size:12px">Como usar com antena: 1- Ative GPS Alta Precisão no Android 2- Permita localização no Chrome 3- Clique INICIAR 4- Ande 15m, clique A, ande 15m, clique B. Pronto, guia de verdade.</div>
+<div class="card">
+<span>Velocidade</span>
+<strong id="speed">---</strong>
 </div>
+
+<div class="card">
+<span>Direção</span>
+<strong id="heading">---</strong>
+</div>
+
+<div class="card">
+<span>Distância</span>
+<strong id="distance">0 m</strong>
+</div>
+
+<div class="card">
+<span>Área</span>
+<strong id="area">0 m²</strong>
+</div>
+
+<div class="card">
+<span>Área em hectares</span>
+<strong id="hectares">0 ha</strong>
+</div>
+
+</div>
+
+<div class="buttons">
+
+<button id="gpsBtn">
+📡 Iniciar GPS
+</button>
+
+<button id="trackBtn">
+🚜 Gravar trilha
+</button>
+
+<button id="pointBtn" class="secondary">
+📍 Marcar ponto
+</button>
+
+<button id="areaBtn" class="secondary">
+📐 Medir área
+</button>
+
+<button id="abBtn" class="secondary">
+🧭 Linha AB
+</button>
+
+<button id="saveBtn" class="secondary">
+💾 Salvar campo
+</button>
+
+<button id="exportBtn" class="secondary">
+📤 Exportar GPX
+</button>
+
+<button id="clearBtn" class="danger">
+🗑 Limpar
+</button>
+
+</div>
+
+<div id="status">
+Aguardando GPS...
+</div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-var leds=[];
-for(var i=0;i<15;i++){var d=document.createElement('div');d.className='led';document.getElementById('luz').appendChild(d);leds.push(d);}
-var larg=20,area=0,desv=0,run=false,timer=null,watchId=null,hasA=false,hasB=false,lastPos=null,pointA=null,pointB=null;
 
-function toRad(d){return d*Math.PI/180;}
-function dist(a,b){
-var R=6371000;
-var dLat=toRad(b.lat-a.lat);
-var dLon=toRad(b.lon-a.lon);
-var lat1=toRad(a.lat);
-var lat2=toRad(b.lat);
-var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)*Math.sin(dLon/2);
-return R*2*Math.asin(Math.sqrt(h));
-}
-function bearing(a,b){
-var y=Math.sin(toRad(b.lon-a.lon))*Math.cos(toRad(b.lat));
-var x=Math.cos(toRad(a.lat))*Math.sin(toRad(b.lat))-Math.sin(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.cos(toRad(b.lon-a.lon));
-return (Math.atan2(y,x)*180/Math.PI+360)%360;
-}
-function crossTrack(A,B,P){
-var d13=dist(A,P);
-var brg13=toRad(bearing(A,P)-bearing(A,B));
-return Math.asin(Math.sin(d13/6371000)*Math.sin(brg13))*6371000;
-}
+/* =========================================================
+   PORTAL SAT GPS AGRÍCOLA
+   ========================================================= */
 
-function luz(v){
-for(var i=0;i<leds.length;i++)leds[i].className='led';
-leds[7].className='led on';
-var q=Math.round(Math.abs(v)/0.25);
-for(var i=0;i<q&&i<7;i++){
-if(v<0&&leds[6-i])leds[6-i].className='led on';
-if(v>0&&leds[8+i])leds[8+i].className='led on';
-}
-document.getElementById('vD').innerText=v.toFixed(2)+' m';
-}
+const map = L.map("map").setView([-25.5,-54.6],15);
 
-function setL(v){
-larg=parseFloat(v);
-document.getElementById('vL').innerText=larg.toFixed(1)+' m';
-document.getElementById('rgV').innerText=larg.toFixed(1)+' m';
-document.getElementById('rg').value=larg;
-}
+L.tileLayer(
+ "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+ {
+   maxZoom:20,
+   attribution:"© OpenStreetMap"
+ }
+).addTo(map);
 
-function marcaA(){
-if(!lastPos){alert('Ligue o GPS primeiro - clique INICIAR');return;}
-pointA={lat:lastPos.lat,lon:lastPos.lon};
-hasA=true;
-document.getElementById('bA').innerHTML='✓ A OK';
-}
 
-function marcaB(){
-if(!hasA){alert('Marque A primeiro');return;}
-if(!lastPos){alert('Sem GPS');return;}
-pointB={lat:lastPos.lat,lon:lastPos.lon};
-hasB=true;
-document.getElementById('bB').innerHTML='✓ B OK';
-}
+/* VARIÁVEIS */
 
-function iniciar(){
-if(run){
-run=false;
-if(timer)clearInterval(timer);
-if(watchId)navigator.geolocation.clearWatch(watchId);
-document.getElementById('bI').innerHTML='▶ INICIAR';
-document.getElementById('vG').innerHTML='--';
-return;
-}
-run=true;
-document.getElementById('bI').innerHTML='⏸ PARAR';
-document.getElementById('vG').innerHTML='BUSCANDO...';
+let gpsWatch = null;
+let gpsMarker = null;
+let accuracyCircle = null;
 
-if(navigator.geolocation){
-watchId=navigator.geolocation.watchPosition(function(p){
-var pos={lat:p.coords.latitude,lon:p.coords.longitude};
-document.getElementById('vG').innerHTML= p.coords.accuracy.toFixed(0)+'m';
-if(!lastPos){lastPos=pos;return;}
-var d=dist(lastPos,pos);
-if(d<0.6)return;
-area+=d*larg/10000;
-document.getElementById('vA').innerHTML=area.toFixed(2)+' ha';
-if(hasA&&hasB){
-desv=crossTrack(pointA,pointB,pos);
-}else{
-desv=(Math.random()-0.5)*0.6;
-}
-luz(desv);
-document.getElementById('trator').style.marginLeft=(desv*18)+'px';
-lastPos=pos;
-},function(e){
-document.getElementById('vG').innerHTML='SIMULANDO';
-simular();
-},{enableHighAccuracy:true,maximumAge:0,timeout:10000});
-}else{
-simular();
-}
+let tracking = false;
+let trackPoints = [];
+let trackLine = null;
+
+let lastPosition = null;
+let totalDistance = 0;
+
+let fieldPoints = [];
+let fieldMarkers = [];
+let fieldPolygon = null;
+
+let areaMode = false;
+
+let pointCounter = 0;
+
+let pointA = null;
+let pointB = null;
+let lineAB = null;
+
+
+/* ELEMENTOS */
+
+const latEl = document.getElementById("lat");
+const lonEl = document.getElementById("lon");
+const accEl = document.getElementById("accuracy");
+const speedEl = document.getElementById("speed");
+const headingEl = document.getElementById("heading");
+const distanceEl = document.getElementById("distance");
+
+const areaEl = document.getElementById("area");
+const hectaresEl = document.getElementById("hectares");
+
+const statusEl = document.getElementById("status");
+
+
+/* DISTÂNCIA ENTRE COORDENADAS */
+
+function distanceMeters(a,b){
+
+ const R = 6371000;
+
+ const lat1 = a.lat * Math.PI/180;
+ const lat2 = b.lat * Math.PI/180;
+
+ const dLat = (b.lat-a.lat)*Math.PI/180;
+ const dLon = (b.lon-a.lon)*Math.PI/180;
+
+ const x =
+ Math.sin(dLat/2)**2 +
+ Math.cos(lat1) *
+ Math.cos(lat2) *
+ Math.sin(dLon/2)**2;
+
+ return R * 2 * Math.atan2(
+ Math.sqrt(x),
+ Math.sqrt(1-x)
+ );
 }
 
-function simular(){
-if(timer)clearInterval(timer);
-var t=0;
-timer=setInterval(function(){
-t+=0.05;
-desv=Math.sin(t)*0.9;
-area+=0.001*larg/20;
-document.getElementById('vA').innerHTML=area.toFixed(2)+' ha';
-luz(desv);
-document.getElementById('trator').style.marginLeft=(desv*18)+'px';
-},120);
+
+/* ÁREA */
+
+function calculateArea(points){
+
+ if(points.length < 3)
+   return 0;
+
+ const R = 6378137;
+
+ let lat0 = 0;
+
+ points.forEach(p=>{
+   lat0 += p.lat;
+ });
+
+ lat0 =
+ (lat0 / points.length) *
+ Math.PI/180;
+
+ let xy = points.map(p=>({
+
+   x:
+   p.lon *
+   Math.PI/180 *
+   R *
+   Math.cos(lat0),
+
+   y:
+   p.lat *
+   Math.PI/180 *
+   R
+
+ }));
+
+ let area = 0;
+
+ for(let i=0;i<xy.length;i++){
+
+   let j=(i+1)%xy.length;
+
+   area +=
+   xy[i].x*xy[j].y -
+   xy[j].x*xy[i].y;
+ }
+
+ return Math.abs(area/2);
 }
 
-function limpar(){
-area=0;
-document.getElementById('vA').innerHTML='0.00 ha';
-luz(0);
-document.getElementById('trator').style.marginLeft='0px';
+
+/* ATUALIZAR ÁREA */
+
+function updateArea(){
+
+ const area = calculateArea(fieldPoints);
+
+ areaEl.textContent =
+ area.toFixed(1)+" m²";
+
+ hectaresEl.textContent =
+ (area/10000).toFixed(3)+" ha";
 }
 
-function esconder(){
-var info=document.getElementById('info');
-if(info.style.display==='none'){
-info.style.display='flex';
-document.getElementById('top').style.display='block';
-document.getElementById('luz').style.display='flex';
-document.getElementById('bH').innerHTML='👁️ LIMPA';
-}else{
-info.style.display='none';
-document.getElementById('top').style.display='none';
-document.getElementById('luz').style.display='none';
-document.getElementById('bH').innerHTML='👁️ MOSTRAR';
-}
+
+/* GPS */
+
+function startGPS(){
+
+ if(!navigator.geolocation){
+
+   statusEl.textContent =
+   "Seu navegador não suporta GPS.";
+
+   return;
+ }
+
+ if(gpsWatch !== null){
+
+   navigator.geolocation.clearWatch(gpsWatch);
+ }
+
+ gpsWatch =
+ navigator.geolocation.watchPosition(
+
+   positionReceived,
+
+   gpsError,
+
+   {
+     enableHighAccuracy:true,
+     maximumAge:1000,
+     timeout:15000
+   }
+ );
+
+ document.getElementById("gpsBtn").textContent =
+ "📡 GPS ativo";
+
+ statusEl.textContent =
+ "GPS ativo. Aguardando posição...";
 }
 
-setL(20);
-luz(0);
+
+/* POSIÇÃO RECEBIDA */
+
+function positionReceived(position){
+
+ const c = position.coords;
+
+ const current = {
+
+   lat:c.latitude,
+   lon:c.longitude
+
+ };
+
+
+ latEl.textContent =
+ c.latitude.toFixed(7);
+
+ lonEl.textContent =
+ c.longitude.toFixed(7);
+
+ accEl.textContent =
+ c.accuracy.toFixed(1)+" m";
+
+
+ if(c.speed !== null){
+
+   speedEl.textContent =
+   (c.speed*3.6).toFixed(1)+" km/h";
+
+ }else{
+
+   speedEl.textContent =
+   "---";
+ }
+
+
+ if(c.heading !== null){
+
+   headingEl.textContent =
+   c.heading.toFixed(0)+"°";
+
+ }else{
+
+   headingEl.textContent =
+   "---";
+ }
+
+
+ /* MARCADOR GPS */
+
+ if(!gpsMarker){
+
+   gpsMarker =
+   L.marker([
+     current.lat,
+     current.lon
+   ])
+   .addTo(map)
+   .bindPopup(
+     "Portal Sat GPS 🛰️"
+   );
+
+   gpsMarker.openPopup();
+
+   map.setView(
+     [current.lat,current.lon],
+     18
+   );
+
+ }else{
+
+   gpsMarker.setLatLng([
+     current.lat,
+     current.lon
+   ]);
+
+ }
+
+
+ /* PRECISÃO */
+
+ if(!accuracyCircle){
+
+   accuracyCircle =
+   L.circle(
+     [current.lat,current.lon],
+     {
+       radius:c.accuracy,
+       color:"#087044",
+       fillOpacity:.08
+     }
+   ).addTo(map);
+
+ }else{
+
+   accuracyCircle
+   .setLatLng([
+     current.lat,
+     current.lon
+   ])
+   .setRadius(c.accuracy);
+
+ }
+
+
+ /* TRILHA */
+
+ if(tracking){
+
+   if(lastPosition){
+
+     totalDistance +=
+     distanceMeters(
+       lastPosition,
+       current
+     );
+
+   }
+
+   lastPosition = current;
+
+   trackPoints.push(current);
+
+   if(!trackLine){
+
+     trackLine =
+     L.polyline(
+       [],
+       {
+         color:"#ff7a00",
+         weight:5
+       }
+     ).addTo(map);
+
+   }
+
+   trackLine.setLatLngs(
+     trackPoints.map(p=>[
+       p.lat,
+       p.lon
+     ])
+   );
+
+   if(totalDistance < 1000){
+
+     distanceEl.textContent =
+     totalDistance.toFixed(1)+" m";
+
+   }else{
+
+     distanceEl.textContent =
+     (totalDistance/1000).toFixed(3)+" km";
+
+   }
+
+ }
+
+
+ statusEl.textContent =
+ "GPS atualizado • "+
+ new Date().toLocaleTimeString();
+
+}
+
+
+/* ERRO GPS */
+
+function gpsError(error){
+
+ statusEl.textContent =
+ "Erro GPS: "+
+ error.message+
+ " • Verifique a permissão de localização.";
+
+}
+
+
+/* GRAVAR TRILHA */
+
+document.getElementById("trackBtn")
+.onclick=function(){
+
+ tracking=!tracking;
+
+ if(tracking){
+
+   trackPoints=[];
+   totalDistance=0;
+   lastPosition=null;
+
+   if(trackLine){
+
+     map.removeLayer(trackLine);
+     trackLine=null;
+
+   }
+
+   this.textContent =
+   "⏹ Parar trilha";
+
+   this.classList.add("active");
+
+   statusEl.textContent =
+   "Gravando trilha...";
+
+ }else{
+
+   this.textContent =
+   "🚜 Gravar trilha";
+
+   this.classList.remove("active");
+
+   statusEl.textContent =
+   "Trilha finalizada.";
+
+ }
+
+};
+
+
+/* MARCAR PONTO */
+
+document.getElementById("pointBtn")
+.onclick=function(){
+
+ if(!gpsMarker){
+
+   statusEl.textContent =
+   "Primeiro inicie o GPS.";
+
+   return;
+
+ }
+
+ const position =
+ gpsMarker.getLatLng();
+
+ pointCounter++;
+
+ const marker =
+ L.marker(position)
+ .addTo(map);
+
+ marker.bindPopup(
+   "<b>Ponto "+
+   pointCounter+
+   "</b><br>"+
+   "Latitude: "+
+   position.lat.toFixed(7)+
+   "<br>"+
+   "Longitude: "+
+   position.lng.toFixed(7)
+ );
+
+ fieldMarkers.push(marker);
+
+ statusEl.textContent =
+ "Ponto "+pointCounter+
+ " marcado.";
+
+};
+
+
+/* MODO ÁREA */
+
+document.getElementById("areaBtn")
+.onclick=function(){
+
+ areaMode=!areaMode;
+
+ if(areaMode){
+
+   this.textContent =
+   "⏹ Finalizar área";
+
+   this.classList.add("active");
+
+   statusEl.textContent =
+   "Clique no mapa para marcar os vértices do talhão.";
+
+ }else{
+
+   this.textContent =
+   "📐 Medir área";
+
+   this.classList.remove("active");
+
+   statusEl.textContent =
+   "Área finalizada.";
+
+ }
+
+};
+
+
+/* CLIQUES NO MAPA */
+
+map.on("click",function(e){
+
+ if(!areaMode)
+   return;
+
+ const point = {
+
+   lat:e.latlng.lat,
+   lon:e.latlng.lng
+
+ };
+
+ fieldPoints.push(point);
+
+ const marker =
+ L.circleMarker(
+   e.latlng,
+   {
+     radius:6,
+     color:"#087044",
+     fillOpacity:1
+   }
+ ).addTo(map);
+
+ fieldMarkers.push(marker);
+
+
+ if(fieldPolygon){
+
+   map.removeLayer(
+     fieldPolygon
+   );
+
+ }
+
+
+ fieldPolygon =
+ L.polygon(
+   fieldPoints.map(p=>[
+     p.lat,
+     p.lon
+   ]),
+   {
+     color:"#087044",
+     fillOpacity:.15
+   }
+ ).addTo(map);
+
+ updateArea();
+
+});
+
+
+/* LINHA AB */
+
+document.getElementById("abBtn")
+.onclick=function(){
+
+ if(!gpsMarker){
+
+   statusEl.textContent =
+   "Inicie o GPS primeiro.";
+
+   return;
+
+ }
+
+ const p =
+ gpsMarker.getLatLng();
+
+ const point = {
+   lat:p.lat,
+   lon:p.lng
+ };
+
+
+ if(!pointA){
+
+   pointA=point;
+
+   L.marker(
+     [point.lat,point.lon]
+   )
+   .addTo(map)
+   .bindPopup("PONTO A")
+   .openPopup();
+
+   statusEl.textContent =
+   "Ponto A marcado. Vá até o próximo ponto e pressione novamente.";
+
+   return;
+ }
+
+
+ if(!pointB){
+
+   pointB=point;
+
+   L.marker(
+     [point.lat,point.lon]
+   )
+   .addTo(map)
+   .bindPopup("PONTO B")
+   .openPopup();
+
+
+   if(lineAB){
+
+     map.removeLayer(lineAB);
+
+   }
+
+
+   lineAB =
+   L.polyline(
+     [
+       [pointA.lat,pointA.lon],
+       [pointB.lat,pointB.lon]
+     ],
+     {
+       color:"#005eff",
+       weight:5,
+       dashArray:"10 8"
+     }
+   ).addTo(map);
+
+
+   const dist =
+   distanceMeters(
+     pointA,
+     pointB
+   );
+
+
+   statusEl.textContent =
+   "Linha AB criada • "+
+   dist.toFixed(1)+
+   " metros.";
+
+   return;
+ }
+
+
+ pointA=null;
+ pointB=null;
+
+ if(lineAB){
+
+   map.removeLayer(lineAB);
+   lineAB=null;
+
+ }
+
+ statusEl.textContent =
+ "Linha AB reiniciada. Marque o ponto A.";
+
+};
+
+
+/* SALVAR CAMPO */
+
+document.getElementById("saveBtn")
+.onclick=function(){
+
+ const data={
+
+   nome:
+   "Talhão Portal Sat",
+
+   data:
+   new Date().toISOString(),
+
+   pontos:
+   fieldPoints,
+
+   trilha:
+   trackPoints,
+
+   linhaAB:{
+     A:pointA,
+     B:pointB
+   },
+
+   area_m2:
+   calculateArea(fieldPoints)
+
+ };
+
+
+ localStorage.setItem(
+   "portalSatCampo",
+   JSON.stringify(data)
+ );
+
+
+ statusEl.textContent =
+ "Campo salvo no aparelho.";
+
+};
+
+
+/* EXPORTAR GPX */
+
+document.getElementById("exportBtn")
+.onclick=function(){
+
+ if(trackPoints.length < 2){
+
+   statusEl.textContent =
+   "Grave uma trilha primeiro.";
+
+   return;
+
+ }
+
+
+ let track="";
+
+
+ trackPoints.forEach(p=>{
+
+   track +=
+   '<trkpt lat="'+
+   p.lat+
+   '" lon="'+
+   p.lon+
+   '"></trkpt>';
+
+ });
+
+
+ const gpx =
+ `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1"
+creator="Portal Sat GPS Agrícola">
+<trk>
+<name>Portal Sat GPS Agrícola</name>
+<trkseg>
+${track}
+</trkseg>
+</trk>
+</gpx>`;
+
+
+ const blob =
+ new Blob(
+   [gpx],
+   {
+     type:"application/gpx+xml"
+   }
+ );
+
+
+ const url =
+ URL.createObjectURL(blob);
+
+
+ const a =
+ document.createElement("a");
+
+ a.href=url;
+
+ a.download=
+ "portal-sat-trilha.gpx";
+
+ a.click();
+
+ URL.revokeObjectURL(url);
+
+
+ statusEl.textContent =
+ "Arquivo GPX exportado.";
+
+};
+
+
+/* LIMPAR */
+
+document.getElementById("clearBtn")
+.onclick=function(){
+
+ if(gpsMarker)
+   map.removeLayer(gpsMarker);
+
+ if(accuracyCircle)
+   map.removeLayer(accuracyCircle);
+
+ if(trackLine)
+   map.removeLayer(trackLine);
+
+ if(fieldPolygon)
+   map.removeLayer(fieldPolygon);
+
+ fieldMarkers.forEach(
+   marker=>{
+     map.removeLayer(marker);
+   }
+ );
+
+
+ gpsMarker=null;
+ accuracyCircle=null;
+ trackLine=null;
+ fieldPolygon=null;
+
+ fieldMarkers=[];
+ fieldPoints=[];
+ trackPoints=[];
+
+ pointA=null;
+ pointB=null;
+
+ totalDistance=0;
+ lastPosition=null;
+
+ if(lineAB){
+
+   map.removeLayer(lineAB);
+   lineAB=null;
+
+ }
+
+ distanceEl.textContent="0 m";
+ areaEl.textContent="0 m²";
+ hectaresEl.textContent="0 ha";
+
+ statusEl.textContent =
+ "Mapa limpo.";
+
+};
+
+
+/* INICIAR GPS */
+
+document.getElementById("gpsBtn")
+.onclick=startGPS;
+
+
+/* TENTAR RECUPERAR CAMPO SALVO */
+
+window.addEventListener(
+ "load",
+ function(){
+
+   const saved =
+   localStorage.getItem(
+     "portalSatCampo"
+   );
+
+   if(saved){
+
+     statusEl.textContent =
+     "Existe um campo salvo neste aparelho.";
+
+   }
+
+ }
+);
+
 </script>
+
 </body>
 </html>
