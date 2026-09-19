@@ -1,101 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Portal Sat GPS</title>
 <style>
-body{margin:0;background:#111;color:#fff;font-family:Arial;text-align:center}
-#top{background:#367C2B;padding:14px;font-size:20px;font-weight:900;border-bottom:5px solid #FFDE00}
-#light{height:28px;background:#000;display:flex;justify-content:center;gap:3px;padding:5px}
-.led{width:12px;background:#333;border-radius:3px}
-.led.on{background:#2ECC40;box-shadow:0 0 6px #0f0}
-#map{height:52vh;background:#D8D2B8;position:relative;overflow:hidden;margin:6px;border-radius:10px;border:3px solid #367C2B}
-#grid{position:absolute;inset:-50%;background-image:linear-gradient(#bbb 1px,transparent 1px),linear-gradient(90deg,#bbb 1px,transparent 1px);background-size:40px 40px}
-#trator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:56px;z-index:5;transition:0.1s}
-#info{background:#fff;color:#111;margin:6px;padding:10px;border-radius:10px;font-weight:900;display:flex;justify-content:space-around}
-#info b{color:#367C2B}
-button{padding:12px;margin:4px;border:none;border-radius:10px;font-weight:900;font-size:13px;cursor:pointer}
-button.g{background:#367C2B;color:#fff;width:46%}
-button.y{background:#FFDE00;color:#111;width:46%}
-input{width:90%;margin:8px}
+*{margin:0;box-sizing:border-box;font-family:Arial}
+body{background:#000;height:100vh;display:flex;flex-direction:column}
+#top{background:#2E7D32;color:#fff;padding:12px;text-align:center;font-weight:900;font-size:18px;border-bottom:4px solid #FFDE00}
+#light{height:26px;background:#111;display:flex;justify-content:center;gap:2px;padding:4px}
+.led{width:11px;background:#222;border-radius:2px}
+.led.on{background:#00E676;box-shadow:0 0 6px #00E676}
+#campo{flex:1;position:relative;background:#2E7D32;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#campo::after{content:"PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️ PORTAL SAT GPS 🛰️";position:absolute;top:50%;left:-50%;right:-50%;font-size:28px;font-weight:900;color:rgba(255,255,255,0.10);transform:translateY(-50%) rotate(-15deg);white-space:nowrap;pointer-events:none}
+#grid{position:absolute;inset:-60%;background:linear-gradient(rgba(255,255,255,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.15) 1px,transparent 1px);background-size:40px 40px}
+#trator{position:relative;z-index:10;text-align:center;font-size:48px;transition:0.15s;filter:drop-shadow(0 3px 5px rgba(0,0,0,0.6))}
+#barra{height:10px;background:#0D47A1;border:2px solid #002171;border-radius:4px;margin:0 auto;transition:0.2s}
+#info{background:#fff;color:#111;margin:6px;padding:10px;border-radius:10px;display:flex;justify-content:space-around;font-weight:900;font-size:13px}
+#info span{color:#2E7D32}
+#btns{padding:6px;display:flex;gap:5px;flex-wrap:wrap;background:#1A1A1A}
+button{flex:1;min-width:75px;height:44px;border:none;border-radius:8px;font-weight:900;font-size:11px;cursor:pointer}
+.g{background:#2E7D32;color:#fff}.y{background:#FFDE00;color:#111}.r{background:#6A1B1A;color:#fff}.d{background:#333;color:#fff}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;padding:12px;z-index:50}
+#modal.show{display:flex}
+#box{background:#fff;color:#111;width:100%;max-width:380px;border-radius:12px;padding:14px;max-height:90vh;overflow-y:auto}
+.hide{display:none!important}
 </style>
 </head>
 <body>
 <div id="top">PORTAL SAT GPS 🛰️</div>
 <div id="light"></div>
-<div id="map">
+<div id="campo">
 <div id="grid"></div>
-<div id="trator">🚜</div>
+<div id="trator"><div id="barra" style="width:80px"></div>🚜<div style="font-size:11px;background:#000;color:#fff;padding:2px 6px;border-radius:8px;display:inline-block" id="vBarra">20.0m</div></div>
 </div>
 <div id="info">
-<div>LARGURA<br><b id="vL">20.0 m</b></div>
-<div>DESVIO<br><b id="vD">0.00 m</b></div>
-<div>ÁREA<br><b id="vA">0.00 ha</b></div>
+<div>LARGURA<br><span id="vL">20.0 m</span></div>
+<div>DESVIO<br><span id="vD" style="color:#C62828">0.00 m</span></div>
+<div>ÁREA<br><span id="vA">0.00 ha</span></div>
+<div>GPS<br><span id="vGPS">--</span></div>
 </div>
-<div style="padding:8px">
-<input type="range" id="rg" min="0.5" max="100" step="0.1" value="20" oninput="setL(this.value)">
-<div>Largura: <b id="rgV">20.0 m</b> (0.5 até 100m)</div>
-<button class="g" onclick="go()" id="bGo">▶ SIMULAR - CLICA AQUI</button>
-<button class="y" onclick="limpar()">🗑️ LIMPAR</button>
-<br>
-<button class="g" onclick="salvar()" style="background:#1565C0;width:90%">💾 SALVAR TALHÃO</button>
-<div id="lista" style="margin-top:10px;text-align:left;background:#222;padding:8px;border-radius:8px"></div>
+<div id="btns">
+<button class="d" onclick="marcaA()" id="bA">MARCAR A</button>
+<button class="d" onclick="marcaB()" id="bB">MARCAR B</button>
+<button class="y" onclick="abrir()">LARGURA</button>
+<button class="g" onclick="gps()" id="bGPS">▶ INICIAR</button>
+</div>
+<div id="btns" style="background:#111">
+<button class="d" onclick="limite()" id="bLim">🚩 LIMITE OFF</button>
+<button class="d" onclick="abrir()">🗺️ TALHÕES</button>
+<button class="d" onclick="esconde()" id="bHide">👁️ ESCONDER</button>
+<button class="r" onclick="limpar()">🗑️</button>
+</div>
+
+<div id="modal" onclick="fechar()">
+<div id="box" onclick="event.stopPropagation()">
+<b>⚙️ PORTAL SAT GPS 🛰️ - Configuração</b><br><br>
+Largura (0.5 até 100m) - ajuste fino 0.1m<br>
+<input type="range" id="rg" min="0.5" max="100" step="0.1" value="20" oninput="setL(this.value)" style="width:100%">
+<div style="display:flex;justify-content:space-between"><span>0.5m</span><b id="rgV" style="color:#2E7D32">20.0 m</b><span>100m</span></div>
+<div style="margin:8px 0">
+<button onclick="setL(6)">6m</button> <button onclick="setL(12)">12m</button> <button onclick="setL(20)" style="background:#2E7D32;color:#fff">20m</button> <button onclick="setL(30)">30m</button> <button onclick="setL(50)">50m</button> <button onclick="setL(100)">100m</button>
+</div>
+<hr>
+<input id="nomeT" placeholder="Nome do talhão ex: Talhão 1" style="width:100%;padding:10px;border:2px solid #CCC;border-radius:8px;margin:8px 0">
+<button class="g" style="width:100%;height:44px" onclick="salvar()">💾 SALVAR TALHÃO</button>
+<div id="lista" style="margin-top:10px;max-height:160px;overflow-y:auto"></div>
+<br><button class="d" style="width:100%;height:40px" onclick="fechar()">FECHAR</button>
+</div>
 </div>
 
 <script>
-let leds=[];for(let i=0;i<21;i++){let d=document.createElement('div');d.className='led';document.getElementById('light').appendChild(d);leds.push(d);}
-let larg=20,area=0,desv=0,run=false,timer=null,talhoes=[];
-try{talhoes=JSON.parse(localStorage.getItem('portal_sat_v3')||'[]');}catch(e){talhoes=[];}
+var leds=[];for(var i=0;i<21;i++){var d=document.createElement('div');d.className='led';document.getElementById('light').appendChild(d);leds.push(d);}
+var larg=20,area=0,desv=0,run=false,timer=null,watchId=null,hasA=false,limOn=false,lim=[],talhoes=[];
+try{talhoes=JSON.parse(localStorage.getItem('portal_final_real')||'[]');}catch(e){talhoes=[];}
 
 function light(v){
-leds.forEach(l=>l.className='led');
-leds[10].classList.add('on');
-let q=Math.round(Math.abs(v)/0.2);
-for(let i=0;i<q&&i<10;i++){
-if(v<0)leds[9-i].classList.add('on');
-else leds[11+i].classList.add('on');
+for(var i=0;i<leds.length;i++)leds[i].className='led';
+leds[10].className='led on';
+var q=Math.round(Math.abs(v)/0.2);
+for(var i=0;i<q&&i<10;i++){
+if(v<0)leds[9-i].className='led on';
+else leds[11+i].className='led on';
 }
 document.getElementById('vD').innerText=v.toFixed(2)+' m';
 }
 function setL(v){
 larg=parseFloat(v);
 document.getElementById('vL').innerText=larg.toFixed(1)+' m';
+document.getElementById('vBarra').innerText=larg.toFixed(1)+'m';
 document.getElementById('rgV').innerText=larg.toFixed(1)+' m';
+document.getElementById('rg').value=larg;
+document.getElementById('barra').style.width=(20+larg*3.5)+'px';
 }
-function go(){
-run=!run;
-document.getElementById('bGo').innerText=run?'⏸ PAUSAR':'▶ SIMULAR - CLICA AQUI';
-if(run){
-let t=0;
-timer=setInterval(()=>{
-t+=0.05;
-desv=Math.sin(t)*1.2;
-area+=0.002*larg/20;
+function abrir(){document.getElementById('modal').classList.add('show');render();}
+function fechar(){document.getElementById('modal').classList.remove('show');}
+function marcaA(){hasA=true;document.getElementById('bA').innerText='✓ A OK';}
+function marcaB(){if(!hasA){alert('Marque A primeiro');return;}document.getElementById('bB').innerText='✓ B OK';}
+function gps(){
+if(run){parar();return;}
+run=true;document.getElementById('bGPS').innerText='⏸ PARAR';
+document.getElementById('vGPS').innerText='SIMULANDO';
+if(navigator.geolocation){
+watchId=navigator.geolocation.watchPosition(function(p){
+document.getElementById('vGPS').innerText='GPS '+p.coords.accuracy.toFixed(0)+'m';
+desv=(Math.random()-0.5)*1.2;
+area+=0.0005*larg/20;
 document.getElementById('vA').innerText=area.toFixed(2)+' ha';
 light(desv);
-document.getElementById('trator').style.transform='translate(calc(-50% + '+(desv*25)+'px), -50%)';
+document.getElementById('trator').style.transform='translateX('+(desv*20)+'px)';
+},function(e){
+simular();
+},{enableHighAccuracy:true,maximumAge:0,timeout:8000});
+setTimeout(function(){if(document.getElementById('vGPS').innerText==='SIMULANDO')simular();},3000);
+}else{simular();}
+}
+function simular(){
+if(timer)clearInterval(timer);
+var t=0;
+timer=setInterval(function(){
+t+=0.05;desv=Math.sin(t)*1.0;area+=0.001*larg/20;
+document.getElementById('vA').innerText=area.toFixed(2)+' ha';
+light(desv);
+document.getElementById('trator').style.transform='translateX('+(desv*20)+'px)';
+if(limOn)lim.push(t);
 },120);
-}else{
-clearInterval(timer);
-timer=null;
 }
+function parar(){run=false;document.getElementById('bGPS').innerText='▶ INICIAR';if(timer){clearInterval(timer);timer=null;}if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}document.getElementById('vGPS').innerText='--';}
+function limite(){limOn=!limOn;document.getElementById('bLim').innerText=limOn?'🚩 GRAVANDO':'🚩 LIMITE OFF';document.getElementById('bLim').style.background=limOn?'#C62828':'#333';if(limOn)lim=[];}
+function esconde(){
+var hide=document.getElementById('info').classList.contains('hide');
+document.getElementById('info').classList.toggle('hide',!hide);
+document.getElementById('btns').classList.toggle('hide',!hide);
+document.getElementById('top').style.display=hide?'flex':'none';
+document.getElementById('light').style.display=hide?'flex':'none';
+document.getElementById('bHide').innerText=hide?'👁️ ESCONDER':'👁️ MOSTRAR';
 }
-function limpar(){area=0;document.getElementById('vA').innerText='0.00 ha';light(0);document.getElementById('trator').style.transform='translate(-50%,-50%)';}
+function limpar(){if(!confirm('Limpar área?'))return;area=0;document.getElementById('vA').innerText='0.00 ha';light(0);document.getElementById('trator').style.transform='translateX(0px)';}
 function salvar(){
-let nome=prompt('Nome do talhão:','Talhão '+(talhoes.length+1));
-if(!nome)return;
-talhoes.push({nome:nome,area:area.toFixed(2),data:new Date().toLocaleString()});
-localStorage.setItem('portal_sat_v3',JSON.stringify(talhoes));
-lista();
-alert('Talhão '+nome+' salvo!');
+var nome=document.getElementById('nomeT').value;
+if(!nome){alert('Digite nome');return;}
+talhoes.push({nome:nome,area:area.toFixed(2),data:new Date().toLocaleDateString()});
+localStorage.setItem('portal_final_real',JSON.stringify(talhoes));
+render();alert('Salvo: '+nome);
 }
-function lista(){
-let h='';talhoes.forEach((t,i)=>{h+=`<div style="border-bottom:1px solid #444;padding:6px;display:flex;justify-content:space-between"><span>📍 ${t.nome} - ${t.area} ha</span><span onclick="apagar(${i})" style="color:#f55;cursor:pointer">X</span></div>`;});
-document.getElementById('lista').innerHTML=h||'Nenhum talhão salvo ainda - clique em SIMULAR e depois SALVAR';
+function render(){
+var h='';for(var i=0;i<talhoes.length;i++){h+='<div style="padding:6px;border-bottom:1px solid #DDD;display:flex;justify-content:space-between"><span>📍 '+talhoes[i].nome+' - '+talhoes[i].area+' ha</span><span onclick="apagar('+i+')" style="color:red;cursor:pointer"> X</span></div>';}
+document.getElementById('lista').innerHTML=h||'Nenhum talhão';
 }
-function apagar(i){talhoes.splice(i,1);localStorage.setItem('portal_sat_v3',JSON.stringify(talhoes));lista();}
-setL(20);light(0);lista();
+function apagar(i){talhoes.splice(i,1);localStorage.setItem('portal_final_real',JSON.stringify(talhoes));render();}
+setL(20);light(0);render();
 </script>
 </body>
 </html>
