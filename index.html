@@ -12,7 +12,7 @@
             width: 100vw; overflow: hidden; position: fixed;
         }
 
-        /* ❌ FAIXA VERDE DO TOPO — REMOVIDA DEFINITIVAMENTE */
+        /* ❌ FAIXA VERDE — REMOVIDA DEFINITIVAMENTE */
         .barra-verde { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; pointer-events: none !important; }
 
         /* 🔦 BARRA DE LEDS */
@@ -30,18 +30,29 @@
         .led.centro { width: 11px; background: #333; }
         .led.centro.ativo { background: #fff; box-shadow: 0 0 6px #fff; }
 
-        /* 📱 CABEÇALHO */
+        /* 📱 CABEÇALHO — SEM FAIXA CINZA, SÓ CONTEÚDO */
         .cabecalho {
             position: absolute; top: 26px; left: 0; right: 0;
-            background: #1a1a1a; padding: 6px 12px;
+            padding: 6px 12px;
             display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid #333; z-index: 40; height: 48px;
+            z-index: 40; height: 48px;
+            background: transparent; /* ❌ REMOVIDA A FAIXA CINZA */
         }
-        .titulo { font-size: 15px; font-weight: bold; color: #6cf; display: flex; align-items: center; gap: 6px; }
+        .cabecalho-esquerda {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .titulo { font-size: 15px; font-weight: bold; color: #6cf; }
         .status-topo { display: flex; align-items: center; gap: 10px; }
         .btn-gps { background: #f90; border: none; padding: 3px 10px; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 12px; }
         .btn-gps.rtk { background: #080; }
         .relogio { font-family: monospace; font-size: 14px; }
+        .cabecalho-direita {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .btn-fechar-topo {
+            background: transparent; border: none; color: #fff;
+            font-size: 14px; cursor: pointer; padding: 4px 8px;
+        }
         .btn-config { width: 32px; height: 32px; border-radius: 6px; border: none; background: #333; color: white; font-size: 18px; cursor: pointer; }
 
         /* 🔄 BOTÕES 2D / 3D — IGUAL DA IMAGEM */
@@ -53,10 +64,9 @@
             padding: 10px 28px; border: none; border-radius: 6px;
             font-size: 20px; font-weight: bold; cursor: pointer;
             transition: all 0.3s ease;
+            background: #0066ff; color: white;
             box-shadow: 0 0 8px rgba(0,100,255,0.4);
         }
-        .btn-2d { background: #0066ff; color: white; }
-        .btn-3d { background: #0066ff; color: white; }
 
         /* 🎯 ÁREA DE MAPA — PERSPECTIVA PARA MOVIMENTO 2D/3D */
         .area-mapa {
@@ -133,12 +143,6 @@
         .btn-a { background: linear-gradient(180deg, #00c000, #009000); }
         .btn-b { background: linear-gradient(180deg, #0088ff, #0066cc); }
         .btn-b:disabled { background: #222; color: #666; border-color: #444; opacity: 1; }
-        .btn-fechar-dados {
-            position: absolute; top: 0; left: 0; right: 0;
-            background: #333; border: none; color: white;
-            padding: 6px; font-size: 14px; font-weight: bold;
-            border-radius: 6px 6px 0 0; cursor: pointer;
-        }
 
         /* ➡️ BOTÕES LADO DIREITO */
         .botoes-lado-direito {
@@ -191,14 +195,21 @@
     <!-- 🔦 BARRA DE LEDS -->
     <div class="barra-led" id="barraLED"></div>
 
-    <!-- 📱 CABEÇALHO -->
+    <!-- 📱 CABEÇALHO — SEM FAIXA CINZA, SÓ TEXTOS E ÍCONES -->
     <div class="cabecalho">
-        <div class="titulo">🛰️ PORTAL SAT GPS</div>
-        <div class="status-topo">
-            <button class="btn-gps" id="btnGPS">GPS</button>
-            <span class="relogio" id="relogio">15:37</span>
+        <div class="cabecalho-esquerda">
+            <span style="font-size:18px;">🛰️</span>
+            <span class="titulo">PORTAL SAT GPS</span>
+            <div class="status-topo">
+                <button class="btn-gps" id="btnGPS">GPS</button>
+                <span class="relogio" id="relogio">15:52</span>
+            </div>
         </div>
-        <button class="btn-config" id="btnConfig">⚙</button>
+        <div class="cabecalho-direita">
+            <!-- ✅ BOTÃO FECHAR MOVIDO PARA AQUI, AO LADO DO CONFIGURAÇÕES -->
+            <button class="btn-fechar-topo" id="btnFecharTopo">📊 Fechar</button>
+            <button class="btn-config" id="btnConfig">⚙</button>
+        </div>
     </div>
 
     <!-- 🔄 BOTÕES 2D / 3D -->
@@ -225,12 +236,9 @@
     <!-- 📐 DESVIO GRANDE -->
     <div class="desvio-grande" id="desvioGrande">+0.00 m</div>
 
-    <!-- ⬅️ BOTÕES A E B -->
+    <!-- ⬅️ BOTÕES A E B — SEM ÍCONE FECHAR DENTRO -->
     <div class="botoes-navegacao-lado">
-        <button class="btn-lado btn-a" id="btnA">
-            <span style="display:block;font-size:12px;opacity:0.8;">📊 Fechar</span>
-            PONTO A
-        </button>
+        <button class="btn-lado btn-a" id="btnA">PONTO A</button>
         <button class="btn-lado btn-b" id="btnB" disabled>PONTO B</button>
     </div>
 
@@ -292,7 +300,7 @@
 
     <script>
         // ==============================================
-        // 🚜 PORTAL SAT GPS — PLANO SE MOVE EM 2D/3D
+        // 🚜 PORTAL SAT GPS — ALTERAÇÕES SOLICITADAS
         // ==============================================
 
         // === VARIÁVEIS ===
@@ -307,19 +315,19 @@
         let unidadesMetricas = true;
         let tipoLinha = 'AB Reta';
         let talhoes = [];
-        let coberturaAtiva = true; // ✅ Ligado por padrão
+        let painelVisivel = true;
+        let coberturaAtiva = true;
         let zoom = 1;
         let visao2D = true;
         const TOTAL_LEDS = 27;
         const CENTRO_LED = 13;
         const leds = [];
         
-        // Cobertura e movimento do mapa
         let ultimoPonto = null;
         let escalaMetrosPorPixel = 0.05;
-        let deslocamentoX = 0; // Pixels — movimento do mapa
+        let deslocamentoX = 0;
         let deslocamentoY = 0;
-        let fatorMovimento = 20; // Quanto o mapa se move por metro real
+        let fatorMovimento = 20;
 
         // === ELEMENTOS ===
         const el = {
@@ -327,6 +335,7 @@
             btnGPS: document.getElementById('btnGPS'),
             relogio: document.getElementById('relogio'),
             btnConfig: document.getElementById('btnConfig'),
+            btnFecharTopo: document.getElementById('btnFecharTopo'),
             modal: document.getElementById('modal'),
             btn2D: document.getElementById('btn2D'),
             btn3D: document.getElementById('btn3D'),
@@ -347,11 +356,11 @@
         
         function ajustarCanvas() {
             const rect = el.areaMapa.getBoundingClientRect();
-            el.coberturaCanvas.width = rect.width * 2; // Maior resolução
+            el.coberturaCanvas.width = rect.width * 2;
             el.coberturaCanvas.height = rect.height * 2;
             el.coberturaCanvas.style.width = rect.width + 'px';
             el.coberturaCanvas.style.height = rect.height + 'px';
-            ctx.scale(2, 2); // Compensar resolução
+            ctx.scale(2, 2);
             escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
         }
         window.addEventListener('resize', ajustarCanvas);
@@ -427,13 +436,9 @@
             if (visao2D) {
                 el.areaMapa.classList.remove('modo-3d');
                 el.areaMapa.classList.add('modo-2d');
-                el.btn2D.style.background = '#0066ff';
-                el.btn3D.style.background = '#0066ff';
             } else {
                 el.areaMapa.classList.remove('modo-2d');
                 el.areaMapa.classList.add('modo-3d');
-                el.btn2D.style.background = '#0066ff';
-                el.btn3D.style.background = '#0066ff';
             }
             atualizarMovimentoMapa();
         }
@@ -449,10 +454,10 @@
         });
 
         // ==============================================
-        // 🗺️ ATUALIZAR MOVIMENTO DO MAPA — SETA FIXA, MAPA SE MOVE
+        // 🗺️ ATUALIZAR MOVIMENTO DO MAPA
         // ==============================================
         function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
-            const R = 6371000; // Raio da Terra em metros
+            const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -463,7 +468,6 @@
         }
 
         function atualizarMovimentoMapa() {
-            // Rotação do mapa alinhada com o rumo — seta sempre aponta para cima
             const rotacao = -rumo;
             const inclinacao = visao2D ? 0 : 60;
             
@@ -558,6 +562,14 @@
         });
 
         // ==============================================
+        // 📍 BOTÃO FECHAR — MOVIDO PARA O TOPO
+        // ==============================================
+        el.btnFecharTopo.addEventListener('click', () => {
+            painelVisivel = !painelVisivel;
+            el.btnFecharTopo.textContent = painelVisivel ? '📊 Fechar' : '📊 Dados';
+        });
+
+        // ==============================================
         // 📍 BOTÕES A E B
         // ==============================================
         el.btnA.addEventListener('click', () => {
@@ -583,18 +595,15 @@
         // 🔄 ATUALIZAR TELA
         // ==============================================
         function atualizarTela() {
-            // Desvio
             const desvioStr = (desvio >= 0 ? '+' : '') + desvio.toFixed(2) + ' m';
             el.desvioGrande.textContent = desvioStr;
             el.desvioGrande.style.color = Math.abs(desvio) > 0.5 ? '#f00' : Math.abs(desvio) > 0.25 ? '#ff0' : '#0f0';
 
-            // Rotação da seta — mapa gira ao contrário
-            el.seta.style.transform = `rotate(0deg)`; // Seta sempre aponta para cima
+            el.seta.style.transform = `rotate(0deg)`;
 
-            // Movimento do mapa com base na posição real
             if (lat && lon && latAnterior !== null && lonAnterior !== null) {
                 const distancia = calcularDistanciaMetros(latAnterior, lonAnterior, lat, lon);
-                if (distancia > 0.01) { // Mais de 1cm
+                if (distancia > 0.01) {
                     const rad = rumo * Math.PI / 180;
                     deslocamentoX += Math.sin(rad) * distancia * fatorMovimento * zoom;
                     deslocamentoY -= Math.cos(rad) * distancia * fatorMovimento * zoom;
@@ -603,7 +612,6 @@
                 }
             }
 
-            // Desenha cobertura no centro (onde a seta está fixa)
             if (coberturaAtiva && temA) {
                 const cx = el.coberturaCanvas.width / 2 / 2;
                 const cy = el.coberturaCanvas.height / 2 / 2;
