@@ -30,7 +30,7 @@
         .led.centro { width: 11px; background: #333; }
         .led.centro.ativo { background: #fff; box-shadow: 0 0 6px #fff; }
 
-        /* 📱 CABEÇALHO */
+        /* 📱 CABEÇALHO — LIMPO */
         .cabecalho {
             position: absolute; top: 26px; left: 0; right: 0;
             padding: 6px 12px;
@@ -46,36 +46,6 @@
         .btn-gps { background: #f90; border: none; padding: 3px 10px; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 12px; }
         .btn-gps.rtk { background: #080; }
         .relogio { font-family: monospace; font-size: 14px; }
-        .cabecalho-direita {
-            display: flex; align-items: center; gap: 12px;
-        }
-        .btn-fechar-topo {
-            background: transparent; border: none; color: #fff;
-            font-size: 14px; cursor: pointer; padding: 4px 8px;
-        }
-        .btn-config { width: 32px; height: 32px; border-radius: 6px; border: none; background: #333; color: white; font-size: 18px; cursor: pointer; }
-
-        /* 📊 PAINEL DE DADOS — FUNCIONAL */
-        .painel-dados {
-            position: absolute; top: 115px; left: 8px;
-            background: rgba(0,0,0,0.85); border: 1px solid #333;
-            border-radius: 6px; padding: 10px; min-width: 180px;
-            z-index: 30; transition: all 0.3s ease;
-            font-size: 13px;
-        }
-        .painel-dados.escondido {
-            opacity: 0; transform: translateX(-200px); pointer-events: none;
-        }
-        .linha-dado {
-            display: flex; justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid #222;
-        }
-        .etiqueta { color: #888; font-size: 12px; }
-        .valor { font-family: monospace; font-weight: bold; color: #0f0; font-size: 13px; }
-        .valor.azul { color: #0cf; }
-        .valor.vermelho { color: #f44; }
-        .valor.amarelo { color: #fc0; }
 
         /* 🎯 ÁREA DE MAPA */
         .area-mapa {
@@ -136,10 +106,60 @@
             transform-origin: center;
         }
 
-        /* ⬅️ BOTÕES A E B — MENORES E MAIS PARA BAIXO */
-        .botoes-navegacao-lado {
+        /* ⬅️ ÁREA DOS BOTÕES A/B + PAINEL DE DADOS AO LADO */
+        .lado-esquerdo-conteiner {
             position: absolute; left: 15px; top: 65%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 12px; z-index: 30;
+            display: flex; align-items: flex-start; gap: 12px;
+            z-index: 30;
+        }
+
+        /* 📊 PAINEL DE DADOS — AO LADO DOS BOTÕES, NÃO ATRÁS */
+        .painel-dados {
+            background: rgba(0,0,0,0.85); border: 1px solid #333;
+            border-radius: 6px; padding: 10px; min-width: 180px;
+            font-size: 13px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .painel-dados.escondido {
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+        }
+        .linha-dado {
+            display: flex; justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #222;
+        }
+        .etiqueta { color: #888; font-size: 12px; }
+        .valor { font-family: monospace; font-weight: bold; color: #0f0; font-size: 13px; }
+        .valor.azul { color: #0cf; }
+        .valor.vermelho { color: #f44; }
+        .valor.amarelo { color: #fc0; }
+
+        /* 🎛️ ÍCONES DE DADOS E CONFIGURAÇÃO — ACIMA DO BOTÃO A */
+        .icones-superior-esquerdo {
+            position: absolute; left: 15px; top: 120px;
+            display: flex; gap: 10px;
+            z-index: 35;
+        }
+        .btn-icone-topo {
+            width: 32px; height: 32px; border-radius: 6px; border: none;
+            background: #333; color: white;
+            font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-fechar-dados {
+            background: #333;
+        }
+        .btn-config {
+            background: #333;
+        }
+
+        /* 🎯 BOTÕES A E B */
+        .botoes-navegacao-lado {
+            display: flex; flex-direction: column; gap: 12px;
         }
         .btn-lado {
             width: 90px; height: 90px; border-radius: 8px; border: 4px solid white;
@@ -216,25 +236,35 @@
             <span class="titulo">PORTAL SAT GPS</span>
             <div class="status-topo">
                 <button class="btn-gps" id="btnGPS">GPS</button>
-                <span class="relogio" id="relogio">15:52</span>
+                <span class="relogio" id="relogio">16:15</span>
             </div>
-        </div>
-        <div class="cabecalho-direita">
-            <button class="btn-fechar-topo" id="btnFecharTopo">📊 Dados</button>
-            <button class="btn-config" id="btnConfig">⚙</button>
         </div>
     </div>
 
-    <!-- 📊 PAINEL DE DADOS -->
-    <div class="painel-dados" id="painelDados">
-        <div class="linha-dado"><span class="etiqueta">Talhão</span><span class="valor" id="nomeTalhao">---</span></div>
-        <div class="linha-dado"><span class="etiqueta">Implemento</span><span class="valor azul" id="larguraFaixa">--- m</span></div>
-        <div class="linha-dado"><span class="etiqueta">Latitude</span><span class="valor" id="lat">---</span></div>
-        <div class="linha-dado"><span class="etiqueta">Longitude</span><span class="valor" id="lon">---</span></div>
-        <div class="linha-dado"><span class="etiqueta">Rumo</span><span class="valor" id="rumo">0.0°</span></div>
-        <div class="linha-dado"><span class="etiqueta">Velocidade</span><span class="valor azul" id="vel">0.0 km/h</span></div>
-        <div class="linha-dado"><span class="etiqueta">Desvio</span><span class="valor vermelho" id="desvio">+0.00 m</span></div>
-        <div class="linha-dado"><span class="etiqueta">Precisão</span><span class="valor azul" id="precisao">--- m</span></div>
+    <!-- 🎛️ ÍCONES DE DADOS E CONFIGURAÇÃO — ACIMA DO BOTÃO A -->
+    <div class="icones-superior-esquerdo">
+        <button class="btn-icone-topo btn-fechar-dados" id="btnDadosToggle" title="Mostrar/Esconder Dados">📊</button>
+        <button class="btn-icone-topo btn-config" id="btnConfig" title="Configurações">⚙</button>
+    </div>
+
+    <!-- ⬅️ LADO ESQUERDO: BOTÕES A/B + PAINEL DE DADOS AO LADO -->
+    <div class="lado-esquerdo-conteiner">
+        <div class="botoes-navegacao-lado">
+            <button class="btn-lado btn-a" id="btnA">PONTO A</button>
+            <button class="btn-lado btn-b" id="btnB" disabled>PONTO B</button>
+        </div>
+
+        <!-- 📊 PAINEL DE DADOS — AO LADO, NÃO ATRÁS -->
+        <div class="painel-dados" id="painelDados">
+            <div class="linha-dado"><span class="etiqueta">Talhão</span><span class="valor" id="nomeTalhao">---</span></div>
+            <div class="linha-dado"><span class="etiqueta">Implemento</span><span class="valor azul" id="larguraFaixa">--- m</span></div>
+            <div class="linha-dado"><span class="etiqueta">Latitude</span><span class="valor" id="lat">---</span></div>
+            <div class="linha-dado"><span class="etiqueta">Longitude</span><span class="valor" id="lon">---</span></div>
+            <div class="linha-dado"><span class="etiqueta">Rumo</span><span class="valor" id="rumo">0.0°</span></div>
+            <div class="linha-dado"><span class="etiqueta">Velocidade</span><span class="valor azul" id="vel">0.0 km/h</span></div>
+            <div class="linha-dado"><span class="etiqueta">Desvio</span><span class="valor vermelho" id="desvio">+0.00 m</span></div>
+            <div class="linha-dado"><span class="etiqueta">Precisão</span><span class="valor azul" id="precisao">--- m</span></div>
+        </div>
     </div>
 
     <!-- 🎯 ÁREA DE MAPA -->
@@ -250,18 +280,11 @@
     <!-- 📐 DESVIO GRANDE -->
     <div class="desvio-grande" id="desvioGrande">+0.00 m</div>
 
-    <!-- ⬅️ BOTÕES A E B — MENORES E MAIS PARA BAIXO -->
-    <div class="botoes-navegacao-lado">
-        <button class="btn-lado btn-a" id="btnA">PONTO A</button>
-        <button class="btn-lado btn-b" id="btnB" disabled>PONTO B</button>
-    </div>
-
     <!-- ➡️ BOTÕES LADO DIREITO + BOTÃO 2D/3D ÚNICO -->
     <div class="botoes-lado-direito">
         <button class="btn-direito btn-cobertura" id="btnCobertura" title="Ligar/Desligar Cobertura">🟩</button>
         <button class="btn-direito btn-zoom" id="btnZoomMais" title="Aproximar">+</button>
         <button class="btn-direito btn-zoom" id="btnZoomMenos" title="Distanciar">−</button>
-        <!-- ✅ BOTÃO 2D/3D ÚNICO ABAIXO DO BOTÃO DE MENOS -->
         <button class="btn-direito btn-visao-unico" id="btnVisaoUnica" title="Alternar 2D / 3D">2D</button>
     </div>
 
@@ -351,7 +374,7 @@
             btnGPS: document.getElementById('btnGPS'),
             relogio: document.getElementById('relogio'),
             btnConfig: document.getElementById('btnConfig'),
-            btnFecharTopo: document.getElementById('btnFecharTopo'),
+            btnDadosToggle: document.getElementById('btnDadosToggle'),
             painelDados: document.getElementById('painelDados'),
             nomeTalhao: document.getElementById('nomeTalhao'),
             larguraFaixaEl: document.getElementById('larguraFaixa'),
@@ -454,7 +477,7 @@
         }
 
         // ==============================================
-        // ✅ 2D / 3D — BOTÃO ÚNICO NO LADO DIREITO
+        // ✅ 2D / 3D — BOTÃO ÚNICO
         // ==============================================
         function aplicarModoVisao() {
             if (visao2D) {
@@ -585,10 +608,9 @@
         // ==============================================
         // 📊 BOTÃO DADOS — FUNCIONAL
         // ==============================================
-        el.btnFecharTopo.addEventListener('click', () => {
+        el.btnDadosToggle.addEventListener('click', () => {
             painelVisivel = !painelVisivel;
             el.painelDados.classList.toggle('escondido', !painelVisivel);
-            el.btnFecharTopo.textContent = painelVisivel ? '📊 Dados' : '📊 Fechar';
         });
 
         // ==============================================
@@ -739,7 +761,7 @@
                 lat: lat || 0, lon: lon || 0,
                 data: new Date().toLocaleDateString('pt-BR')
             };
-            talhoes.unshift(talhao);
+            talhoes.unshift(talhoes.unshift(talhao));
             salvarTalhoes();
             nomeTalhaoAtual = nome;
             larguraFaixa = larg;
