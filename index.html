@@ -2,964 +2,142 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport"
-      content="width=device-width,
-      initial-scale=1.0,
-      maximum-scale=1.0,
-      user-scalable=no">
-
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Portal Sat GPS Agrícola</title>
 
 <style>
-
-*{
-    box-sizing:border-box;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-body{
-    margin:0;
-    background:#111;
-    color:white;
-    font-family:Arial,sans-serif;
-    overflow:hidden;
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #101417;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-/* TOPO */
-
-header{
-    height:60px;
-    background:#191919;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 15px;
-    border-bottom:1px solid #333;
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.logo{
-    font-size:19px;
-    font-weight:bold;
+.topbar {
+  height: 62px;
+  background: #20272b;
+  display: flex;
+  align-items: center;
+  padding: 7px 10px;
+  gap: 9px;
+  border-bottom: 1px solid #394247;
 }
 
-.logo span{
-    color:#39d978;
+.logo {
+  font-size: 19px;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
-.status{
-    font-size:12px;
-    color:#70e99b;
+.logo span {
+  color: #67d45c;
 }
 
-/* MAPA */
-
-main{
-    height:calc(100vh - 60px);
-    display:grid;
-    grid-template-columns:1fr 320px;
+.status {
+  margin-left: auto;
+  padding: 9px 13px;
+  border-radius: 6px;
+  background: #4b2020;
+  font-weight: bold;
+  font-size: 13px;
 }
 
-#map{
-    position:relative;
-    background:#173b25;
-    overflow:hidden;
+.status.ok {
+  background: #155b29;
 }
 
-canvas{
-    width:100%;
-    height:100%;
-    display:block;
+button, select, input {
+  font: inherit;
 }
 
-/* INFORMAÇÕES */
-
-.hud{
-    position:absolute;
-    top:10px;
-    left:10px;
-    right:10px;
-
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
+button {
+  border: 0;
+  border-radius: 6px;
+  background: #303a40;
+  color: white;
+  padding: 10px 13px;
+  font-weight: bold;
 }
 
-.card{
-    background:rgba(0,0,0,.78);
-    border:1px solid #444;
-    border-radius:8px;
-    padding:8px 10px;
-    min-width:90px;
+button:active {
+  transform: scale(.97);
 }
 
-.card small{
-    display:block;
-    color:#aaa;
-    font-size:10px;
+button.green {
+  background: #20752e;
 }
 
-.card b{
-    font-size:16px;
+button.orange {
+  background: #956218;
 }
 
-/* CRUZ CENTRAL */
-
-.cross{
-    position:absolute;
-    left:50%;
-    top:50%;
-
-    width:36px;
-    height:36px;
-
-    transform:translate(-50%,-50%);
-    pointer-events:none;
+button.red {
+  background: #8b2929;
 }
 
-.cross:before,
-.cross:after{
-    content:"";
-    position:absolute;
-    background:white;
-    opacity:.8;
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
 }
 
-.cross:before{
-    width:36px;
-    height:2px;
-    top:17px;
+.sidebar {
+  width: 250px;
+  background: #20272b;
+  padding: 9px;
+  overflow-y: auto;
 }
 
-.cross:after{
-    height:36px;
-    width:2px;
-    left:17px;
+.panel {
+  background: #171d20;
+  border: 1px solid #384147;
+  border-radius: 7px;
+  margin-bottom: 9px;
+  padding: 9px;
 }
 
-/* SETA */
-
-#arrow{
-    position:absolute;
-
-    left:50%;
-    top:50%;
-
-    transform:translate(-50%,-50%);
-
-    font-size:42px;
-
-    color:white;
-
-    text-shadow:
-        0 2px 5px black;
-
-    pointer-events:none;
+.panel h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #aeb8bd;
+  text-transform: uppercase;
 }
 
-/* PAINEL */
-
-.panel{
-    background:#202020;
-    padding:12px;
-    overflow:auto;
-    border-left:1px solid #333;
+.bigValue {
+  font-size: 25px;
+  font-weight: bold;
 }
 
-.group{
-    background:#292929;
-    border-radius:9px;
-    padding:10px;
-    margin-bottom:10px;
+.unit {
+  color: #9aa5aa;
+  font-size: 12px;
 }
 
-h3{
-    margin:4px 0 10px;
-    font-size:15px;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
 
-label{
-    font-size:11px;
-    color:#aaa;
-    display:block;
-    margin-bottom:4px;
+.data {
+  background: #242d31;
+  border-radius: 5px;
+  padding: 8px;
 }
 
-input{
-    width:100%;
-    background:#111;
-    color:white;
-
-    border:1px solid #555;
-
-    border-radius:6px;
-
-    padding:9px;
-
-    margin-bottom:8px;
-}
-
-button{
-    width:100%;
-
-    border:0;
-
-    border-radius:7px;
-
-    padding:10px 9px;
-
-    background:#39c96b;
-
-    color:#07160d;
-
-    font-weight:bold;
-
-    cursor:pointer;
-
-    margin:3px 0;
-}
-
-button.alt{
-    background:#444;
-    color:white;
-}
-
-.row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:6px;
-}
-
-.big{
-    font-size:22px;
-    text-align:center;
-    padding:8px;
-}
-
-.warn{
-    color:#ffd15c;
-    font-size:11px;
-    line-height:1.4;
-}
-
-</style>
-</head>
-
-<body>
-
-<header>
-
-<div class="logo">
-🛰️ <span>Portal Sat</span> GPS Agrícola
-</div>
-
-<div class="status" id="gpsStatus">
-GPS aguardando...
-</div>
-
-</header>
-
-
-<main>
-
-<section id="map">
-
-<canvas id="canvas"></canvas>
-
-
-<div class="hud">
-
-<div class="card">
-
-<small>VELOCIDADE</small>
-
-<b id="speed">
-0.0 km/h
-</b>
-
-</div>
-
-
-<div class="card">
-
-<small>RUMO</small>
-
-<b id="heading">
---°
-</b>
-
-</div>
-
-
-<div class="card">
-
-<small>ÁREA</small>
-
-<b id="area">
-0.00 ha
-</b>
-
-</div>
-
-
-<div class="card">
-
-<small>AFASTAMENTO</small>
-
-<b id="offset">
-0.0 m
-</b>
-
-</div>
-
-</div>
-
-
-<div id="arrow">
-▲
-</div>
-
-<div class="cross"></div>
-
-</section>
-
-
-<aside class="panel">
-
-
-<!-- IMPLEMENTO -->
-
-<div class="group">
-
-<h3>
-🚜 Implemento
-</h3>
-
-<label>
-Largura de trabalho (metros)
-</label>
-
-<input
-id="width"
-type="number"
-value="6"
-min="0.5"
-step="0.1"
->
-
-<button onclick="setWidth()">
-Aplicar largura
-</button>
-
-</div>
-
-
-<!-- LINHA AB -->
-
-<div class="group">
-
-<h3>
-📐 Orientação A–B
-</h3>
-
-<div class="row">
-
-<button onclick="setA()">
-Definir A
-</button>
-
-<button onclick="setB()">
-Definir B
-</button>
-
-</div>
-
-<div
-class="big"
-id="ab">
-
-A: — &nbsp; B: —
-
-</div>
-
-<button
-class="alt"
-onclick="clearAB()">
-
-Limpar A–B
-
-</button>
-
-</div>
-
-
-<!-- TRABALHO -->
-
-<div class="group">
-
-<h3>
-🌾 Trabalho
-</h3>
-
-<button onclick="startWork()">
-▶ Iniciar trabalho
-</button>
-
-<button
-class="alt"
-onclick="stopWork()">
-
-■ Parar
-
-</button>
-
-<button
-class="alt"
-onclick="markPoint()">
-
-📍 Marcar ponto
-
-</button>
-
-</div>
-
-
-<!-- DADOS -->
-
-<div class="group">
-
-<h3>
-📊 Dados
-</h3>
-
-<p>
-Passada:
-<b id="pass">0</b>
-</p>
-
-<p>
-Distância:
-<b id="dist">0 m</b>
-</p>
-
-<p>
-Pontos:
-<b id="points">0</b>
-</p>
-
-</div>
-
-
-<!-- AVISO -->
-
-<div class="group warn">
-
-⚠️ O Portal Sat GPS Agrícola utiliza o GPS
-do dispositivo. A precisão depende do aparelho,
-sinal dos satélites e condições do ambiente.
-
-Este protótipo não substitui sistemas
-profissionais de orientação ou piloto automático.
-
-</div>
-
-
-</aside>
-
-</main>
-
-
-<script>
-
-/* =========================================
-   PORTAL SAT GPS AGRÍCOLA
-   ========================================= */
-
-
-/* CANVAS */
-
-const canvas =
-document.getElementById("canvas");
-
-const ctx =
-canvas.getContext("2d");
-
-
-/* VARIÁVEIS */
-
-let W;
-let H;
-
-let widthM = 6;
-
-let tracking = false;
-
-let last = null;
-
-let totalDist = 0;
-
-let points = [];
-
-let A = null;
-
-let B = null;
-
-let heading = 0;
-
-let speed = 0;
-
-let workArea = 0;
-
-let pass = 0;
-
-
-/* =========================================
-   AJUSTAR TELA
-   ========================================= */
-
-function resize(){
-
-    W =
-    canvas.width =
-    canvas.clientWidth *
-    devicePixelRatio;
-
-    H =
-    canvas.height =
-    canvas.clientHeight *
-    devicePixelRatio;
-
-    ctx.setTransform(
-        devicePixelRatio,
-        0,
-        0,
-        devicePixelRatio,
-        0,
-        0
-    );
-
-    draw();
-}
-
-
-window.addEventListener(
-    "resize",
-    resize
-);
-
-resize();
-
-
-/* =========================================
-   LARGURA DO IMPLEMENTO
-   ========================================= */
-
-function setWidth(){
-
-    widthM =
-    Math.max(
-        0.5,
-        parseFloat(
-            document.getElementById("width").value
-        ) || 6
-    );
-
-    draw();
-}
-
-
-/* =========================================
-   DISTÂNCIA GPS
-   ========================================= */
-
-function geoDistance(a,b){
-
-    const R = 6371000;
-
-    const p = Math.PI / 180;
-
-    const dlat =
-    (b.lat-a.lat) * p;
-
-    const dlon =
-    (b.lon-a.lon) * p;
-
-    const x =
-        Math.sin(dlat/2)**2 +
-        Math.cos(a.lat*p) *
-        Math.cos(b.lat*p) *
-        Math.sin(dlon/2)**2;
-
-    return 2 *
-        R *
-        Math.asin(
-            Math.sqrt(x)
-        );
-}
-
-
-/* =========================================
-   DIREÇÃO
-   ========================================= */
-
-function bearing(a,b){
-
-    const p =
-    Math.PI / 180;
-
-    const y =
-    Math.sin(
-        (b.lon-a.lon)*p
-    ) *
-    Math.cos(
-        b.lat*p
-    );
-
-    const x =
-        Math.cos(a.lat*p) *
-        Math.sin(b.lat*p)
-        -
-        Math.sin(a.lat*p) *
-        Math.cos(b.lat*p) *
-        Math.cos(
-            (b.lon-a.lon)*p
-        );
-
-    return (
-        Math.atan2(y,x)
-        *180/Math.PI
-        +360
-    )%360;
-}
-
-
-/* =========================================
-   DEFINIR A
-   ========================================= */
-
-function setA(){
-
-    if(!last){
-
-        alert(
-            "Aguardando sinal GPS."
-        );
-
-        return;
-    }
-
-    A = {
-        ...last
-    };
-
-    updateAB();
-}
-
-
-/* =========================================
-   DEFINIR B
-   ========================================= */
-
-function setB(){
-
-    if(!last){
-
-        alert(
-            "Aguardando sinal GPS."
-        );
-
-        return;
-    }
-
-    B = {
-        ...last
-    };
-
-    updateAB();
-}
-
-
-/* =========================================
-   LIMPAR AB
-   ========================================= */
-
-function clearAB(){
-
-    A = null;
-
-    B = null;
-
-    updateAB();
-
-    draw();
-}
-
-
-/* =========================================
-   ATUALIZAR AB
-   ========================================= */
-
-function updateAB(){
-
-    document.getElementById(
-        "ab"
-    ).textContent =
-        `A: ${A ? "✓" : "—"}
-         B: ${B ? "✓" : "—"}`;
-
-    draw();
-}
-
-
-/* =========================================
-   INICIAR
-   ========================================= */
-
-function startWork(){
-
-    tracking = true;
-}
-
-
-/* =========================================
-   PARAR
-   ========================================= */
-
-function stopWork(){
-
-    tracking = false;
-}
-
-
-/* =========================================
-   MARCAR PONTO
-   ========================================= */
-
-function markPoint(){
-
-    if(last){
-
-        points.push({
-            ...last
-        });
-
-        document.getElementById(
-            "points"
-        ).textContent =
-        points.length;
-
-        draw();
-    }
-}
-
-
-/* =========================================
-   ERRO GPS
-   ========================================= */
-
-function gpsError(e){
-
-    document.getElementById(
-        "gpsStatus"
-    ).textContent =
-    "GPS indisponível";
-
-    alert(
-        "Não foi possível obter o GPS: "
-        + e.message
-    );
-}
-
-
-/* =========================================
-   RECEBER POSIÇÃO
-   ========================================= */
-
-function onPos(pos){
-
-    const c =
-    pos.coords;
-
-    const cur = {
-
-        lat:
-        c.latitude,
-
-        lon:
-        c.longitude
-    };
-
-
-    if(last){
-
-        const d =
-        geoDistance(
-            last,
-            cur
-        );
-
-        totalDist += d;
-
-
-        if(d > 0.3){
-
-            if(
-                c.speed !== null &&
-                c.speed !== undefined
-            ){
-
-                speed =
-                Math.max(
-                    0,
-                    c.speed
-                ) * 3.6;
-
-            }else{
-
-                speed =
-                d * 3.6;
-
-            }
-
-
-            if(
-                c.heading !== null &&
-                c.heading >= 0
-            ){
-
-                heading =
-                c.heading;
-
-            }
-
-        }
-
-    }
-
-
-    if(
-        c.heading !== null &&
-        c.heading >= 0
-    ){
-
-        heading =
-        c.heading;
-
-    }
-
-
-    last = cur;
-
-
-    document.getElementById(
-        "gpsStatus"
-    ).textContent =
-    "● GPS conectado";
-
-
-    document.getElementById(
-        "speed"
-    ).textContent =
-    speed.toFixed(1)
-    + " km/h";
-
-
-    document.getElementById(
-        "heading"
-    ).textContent =
-    Math.round(heading)
-    + "°";
-
-
-    document.getElementById(
-        "dist"
-    ).textContent =
-    totalDist.toFixed(0)
-    + " m";
-
-
-    if(tracking){
-
-        workArea =
-        totalDist *
-        widthM /
-        10000;
-
-    }
-
-
-    document.getElementById(
-        "area"
-    ).textContent =
-    workArea.toFixed(2)
-    + " ha";
-
-
-    draw();
-}
-
-
-/* =========================================
-   INICIAR GPS
-   ========================================= */
-
-if(
-    navigator.geolocation
-){
-
-    navigator.geolocation.watchPosition(
-
-        onPos,
-
-        gpsError,
-
-        {
-
-            enableHighAccuracy:true,
-
-            maximumAge:1000,
-
-            timeout:10000
-
-        }
-
-    );
-
-}else{
-
-    alert(
-        "Este dispositivo não oferece GPS."
-    );
-
-}
-
-
-/* =========================================
-   CONVERTER GPS PARA MAPA
-   ========================================= */
-
-function localXY(p,ref){
-
-    const lat =
-    ref.lat;
-
-    const lon =
-    ref.lon;
-
-
-    const x =
-    (p.lon-lon) *
-    111320 *
-    Math.cos(
-        lat*Math.PI/180
-    );
-
-
-    const y =
-    (p.lat-lat) *
-    110540;
-
-
-    return {
-        x:x,
-        y:y
-    };
+.data small {
