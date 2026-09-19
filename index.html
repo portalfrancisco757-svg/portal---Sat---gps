@@ -12,8 +12,8 @@
             width: 100vw; overflow: hidden; position: fixed;
         }
 
-        /* ❌ BARRA VERDE OCULTA */
-        .barra-verde { display: none !important; }
+        /* ❌ REMOVIDA FAIXA VERDE DO TOPO — TOTALMENTE OCULTA */
+        .barra-verde { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; overflow: hidden !important; }
 
         /* 🔦 BARRA DE LEDS */
         .barra-led {
@@ -83,7 +83,7 @@
         .valor.vermelho { color: #f44; }
         .valor.amarelo { color: #fc0; }
 
-        /* 🎯 ÁREA DE MAPA */
+        /* 🎯 ÁREA DE MAPA — PERSPECTIVA CORRIGIDA PARA 2D/3D */
         .area-mapa {
             position: absolute; top: 74px; left: 0; right: 0; bottom: 0;
             background: #0a0a0a;
@@ -91,11 +91,12 @@
                 linear-gradient(rgba(60,180,255,0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(60,180,255,0.05) 1px, transparent 1px);
             background-size: 40px 40px;
-            perspective: 1000px;
             overflow: hidden;
+            perspective: 1000px;
+            transform-style: preserve-3d;
         }
 
-        /* 🟩 COBERTURA — ÁREA QUE VAI SENDO PINTADA */
+        /* 🟩 COBERTURA — CANVAS */
         .cobertura-canvas {
             position: absolute; inset: 0;
             pointer-events: none; z-index: 5;
@@ -109,28 +110,33 @@
             z-index: 20;
         }
 
-        /* 🔄 BOTÕES 2D / 3D */
+        /* 🔄 BOTÕES 2D / 3D — ESTILO IGUAL DA IMAGEM */
         .btn-visao {
             position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 4px; z-index: 30;
         }
         .btn-2d, .btn-3d {
-            padding: 6px 16px; border: none; border-radius: 5px;
-            font-size: 13px; font-weight: bold; cursor: pointer;
-            background: #333; color: #888; transition: all 0.3s;
+            padding: 8px 24px; border: none; border-radius: 4px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: all 0.25s ease;
         }
-        .btn-2d.ativo, .btn-3d.ativo {
-            background: #06c; color: white; box-shadow: 0 0 8px rgba(0,100,255,0.3);
-        }
+        .btn-2d { background: #0066ff; color: white; }
+        .btn-2d.ativo { background: #0066ff; color: white; box-shadow: 0 0 10px rgba(0,100,255,0.5); }
+        .btn-3d { background: #333; color: #888; }
+        .btn-3d.ativo { background: #0066ff; color: white; box-shadow: 0 0 10px rgba(0,100,255,0.5); }
 
-        /* 🎯 SETA E LINHA — CENTRO */
+        /* 🎯 CONTAINER SETA — TRANSFORMAÇÃO 2D/3D FUNCIONAL */
         .container-seta {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            display: flex; flex-direction: column; align-items: center;
+            position: absolute; top: 50%; left: 50%;
             transform-style: preserve-3d;
+            transition: transform 0.4s ease;
+            z-index: 10;
         }
+        .modo-2d { transform: translate(-50%, -50%) rotateX(0deg) scale(1) !important; }
+        .modo-3d { transform: translate(-50%, -50%) rotateX(45deg) scale(0.85) !important; }
+
         .linha-centro {
-            position: absolute; left: 50%; top: -200px; bottom: -200px; width: 2px;
+            position: absolute; left: 50%; top: -300px; bottom: -300px; width: 2px;
             background: linear-gradient(180deg, transparent, #0cf, transparent);
             transform: translateX(-50%); box-shadow: 0 0 12px rgba(0,200,255,0.3);
             opacity: 0; transition: opacity 0.3s;
@@ -138,46 +144,46 @@
         .linha-centro.ativa { opacity: 1; }
         .seta-navegacao {
             width: 0; height: 0;
-            border-left: 22px solid transparent;
-            border-right: 22px solid transparent;
-            border-bottom: 32px solid #fc0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 35px solid #fc0;
             filter: drop-shadow(0 0 12px rgba(255,200,0,0.5));
             transition: transform 0.2s ease-out;
             transform-origin: center bottom;
             z-index: 15;
         }
 
-        /* ⬅️ BOTÕES A E B — LADO ESQUERDO */
+        /* ⬅️ BOTÕES A E B */
         .botoes-navegacao-lado {
             position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
             display: flex; flex-direction: column; gap: 12px; z-index: 30;
         }
         .btn-lado {
-            width: 72px; height: 72px; border-radius: 10px; border: none;
-            font-size: 14px; font-weight: bold; color: white;
+            width: 90px; height: 90px; border-radius: 8px; border: 3px solid;
+            font-size: 16px; font-weight: bold; color: white;
             cursor: pointer; touch-action: manipulation;
             transition: all 0.15s;
         }
         .btn-lado:active { transform: scale(0.95); }
-        .btn-a { background: linear-gradient(180deg, #0c0, #080); border: 2px solid #0f0; }
-        .btn-b { background: linear-gradient(180deg, #0088ff, #0066cc); border: 2px solid #00ccff; }
-        .btn-b:disabled { background: #222; color: #666; border: 2px solid #333; opacity: 1; }
+        .btn-a { background: linear-gradient(180deg, #00aa00, #008800); border-color: #ffffff; }
+        .btn-b { background: linear-gradient(180deg, #0088ff, #0066cc); border-color: #ffffff; }
+        .btn-b:disabled { background: #222; color: #666; border-color: #333; opacity: 1; }
 
         /* ➡️ BOTÕES LADO DIREITO */
         .botoes-lado-direito {
             position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 12px; z-index: 30;
+            display: flex; flex-direction: column; gap: 15px; z-index: 30;
         }
         .btn-direito {
-            width: 56px; height: 56px; border-radius: 50%; border: none;
-            font-size: 20px; cursor: pointer; background: #2a2a2a;
-            color: white; border: 2px solid #444;
+            width: 60px; height: 60px; border-radius: 50%; border: 2px solid;
+            font-size: 22px; cursor: pointer; background: #2a2a2a;
+            color: white; border-color: #444;
             transition: all 0.15s;
         }
         .btn-direito:active { transform: scale(0.9); background: #3a3a3a; }
-        .btn-cobertura { background: #400; border-color: #600; font-size: 18px; }
-        .btn-cobertura.ativo { background: #060; border-color: #0a0; box-shadow: 0 0 8px rgba(0,255,0,0.3); }
-        .btn-zoom { background: #333; border-color: #555; font-weight: bold; font-size: 18px; }
+        .btn-cobertura { background: #004400; border-color: #00ff00; font-size: 20px; }
+        .btn-cobertura.ativo { background: #006600; border-color: #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.6); }
+        .btn-zoom { background: #333; border-color: #555; font-weight: bold; font-size: 22px; }
 
         /* 📋 MODAL DE CONFIGURAÇÕES */
         .fundo-modal {
@@ -219,7 +225,7 @@
 </head>
 <body>
 
-    <!-- ❌ BARRA VERDE OCULTA -->
+    <!-- ❌ FAIXA VERDE — REMOVIDA E TOTALMENTE OCULTA -->
     <div class="barra-verde"></div>
 
     <!-- 🔦 BARRA DE LEDS -->
@@ -256,13 +262,13 @@
         <button class="btn-3d" id="btn3D">3D</button>
     </div>
 
-    <!-- 🎯 ÁREA DE MAPA + COBERTURA DINÂMICA -->
+    <!-- 🎯 ÁREA DE MAPA + COBERTURA -->
     <div class="area-mapa" id="areaMapa">
-        <!-- 🟩 CANVAS DE COBERTURA — PINTA CONFORME ANDA -->
+        <!-- 🟩 CANVAS DE COBERTURA -->
         <canvas class="cobertura-canvas" id="coberturaCanvas"></canvas>
         
-        <!-- CENTRO: LINHA E SETA -->
-        <div class="container-seta" id="containerSeta">
+        <!-- CENTRO: LINHA E SETA — 2D/3D FUNCIONAL -->
+        <div class="container-seta modo-2d" id="containerSeta">
             <div class="linha-centro" id="linhaCentro"></div>
             <div class="seta-navegacao" id="seta"></div>
         </div>
@@ -324,11 +330,6 @@
                         <option selected>Métrico (m, km/h)</option>
                         <option>Imperial (pés, mph)</option>
                     </select>
-                    <label>Modo de Visão Padrão</label>
-                    <select id="modoVisao" class="campo">
-                        <option selected>2D</option>
-                        <option>3D</option>
-                    </select>
                 </div>
                 <div class="grupo-botoes">
                     <button class="btn-modal btn-cancelar" id="btnFecharConfig">Fechar</button>
@@ -340,7 +341,7 @@
 
     <script>
         // ==============================================
-        // 🚜 PORTAL SAT GPS — VERSÃO MODIFICADA
+        // 🚜 PORTAL SAT GPS — CORRIGIDO 2D/3D + SEM FAIXA VERDE NO TOPO
         // ==============================================
 
         // === VARIÁVEIS ===
@@ -357,16 +358,14 @@
         let painelVisivel = true;
         let coberturaAtiva = false;
         let zoom = 1;
-        let visao2D = true;
-        let angulo3D = 0;
-        let inclinacao3D = 20;
+        let visao2D = true; // ✅ 2D/3D funcional
         const TOTAL_LEDS = 27;
         const CENTRO_LED = 13;
         const leds = [];
         
-        // Variáveis para cobertura
+        // Cobertura
         let ultimoPonto = null;
-        let escalaMetrosPorPixel = 0.05; // 1px = 0.05m (ajustável)
+        let escalaMetrosPorPixel = 0.05;
 
         // === ELEMENTOS ===
         const el = {
@@ -400,15 +399,12 @@
             btnZoomMenos: document.getElementById('btnZoomMenos'),
         };
 
-        // === CONTEXTO DO CANVAS DE COBERTURA ===
         const ctx = el.coberturaCanvas.getContext('2d');
         
-        // Ajusta tamanho do canvas
         function ajustarCanvas() {
             const rect = el.areaMapa.getBoundingClientRect();
             el.coberturaCanvas.width = rect.width;
             el.coberturaCanvas.height = rect.height;
-            // Mantém a escala de metros/pixel atualizada
             escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
         }
         window.addEventListener('resize', ajustarCanvas);
@@ -438,31 +434,20 @@
             
             const w = el.coberturaCanvas.width;
             const h = el.coberturaCanvas.height;
-            const centroX = w / 2;
-            const centroY = h / 2;
             
-            // Largura da faixa em pixels baseada no implemento e zoom
             const larguraPx = (larguraFaixa / escalaMetrosPorPixel) * zoom;
-            
-            // Converte ângulo para radianos
             const rad = angulo * Math.PI / 180;
             const perpRad = rad + Math.PI / 2;
-            
-            // Meia largura
             const meiaLargura = larguraPx / 2;
-            
-            // Pontos da faixa perpendicular à direção de deslocamento
             const dx = Math.cos(perpRad) * meiaLargura;
             const dy = Math.sin(perpRad) * meiaLargura;
             
-            // Pinta faixa verde translúcida
             ctx.save();
             ctx.fillStyle = 'rgba(0, 255, 0, 0.25)';
             ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
             ctx.lineWidth = 2;
             
             if (ultimoPonto) {
-                // Desenha um retângulo/faixa entre o ponto anterior e o atual
                 ctx.beginPath();
                 ctx.moveTo(ultimoPonto.x - dx, ultimoPonto.y - dy);
                 ctx.lineTo(ultimoPonto.x + dx, ultimoPonto.y + dy);
@@ -472,7 +457,6 @@
                 ctx.fill();
                 ctx.stroke();
             } else {
-                // Primeiro ponto — desenha um círculo inicial
                 ctx.beginPath();
                 ctx.arc(x, y, meiaLargura, 0, Math.PI * 2);
                 ctx.fill();
@@ -483,11 +467,39 @@
             ultimoPonto = { x, y };
         }
 
-        // Limpa a cobertura
         function limparCobertura() {
             ctx.clearRect(0, 0, el.coberturaCanvas.width, el.coberturaCanvas.height);
             ultimoPonto = null;
         }
+
+        // ==============================================
+        // ✅ 2D / 3D — FUNCIONAL CORRIGIDO
+        // ==============================================
+        function aplicarModoVisao() {
+            if (visao2D) {
+                // Modo 2D — Plano
+                el.containerSeta.classList.remove('modo-3d');
+                el.containerSeta.classList.add('modo-2d');
+                el.btn2D.classList.add('ativo');
+                el.btn3D.classList.remove('ativo');
+            } else {
+                // Modo 3D — Perspectiva inclinada
+                el.containerSeta.classList.remove('modo-2d');
+                el.containerSeta.classList.add('modo-3d');
+                el.btn3D.classList.add('ativo');
+                el.btn2D.classList.remove('ativo');
+            }
+        }
+
+        el.btn2D.addEventListener('click', () => {
+            visao2D = true;
+            aplicarModoVisao();
+        });
+
+        el.btn3D.addEventListener('click', () => {
+            visao2D = false;
+            aplicarModoVisao();
+        });
 
         // ==============================================
         // 🔦 ATUALIZAR LEDS
@@ -549,46 +561,15 @@
         }
 
         // ==============================================
-        // 🔄 ALTERNAR 2D / 3D — FUNCIONAL
-        // ==============================================
-        function aplicarModoVisao() {
-            if (visao2D) {
-                // Modo 2D — plano
-                el.containerSeta.style.transform = `translate(-50%, -50%) rotateX(0deg) rotateZ(0deg) scale(${zoom})`;
-                el.areaMapa.style.perspective = 'none';
-            } else {
-                // Modo 3D — perspectiva inclinada
-                el.containerSeta.style.transform = `translate(-50%, -50%) rotateX(${inclinacao3D}deg) rotateZ(${angulo3D}deg) scale(${zoom})`;
-                el.areaMapa.style.perspective = '800px';
-            }
-        }
-
-        el.btn2D.addEventListener('click', () => {
-            visao2D = true;
-            el.btn2D.classList.add('ativo');
-            el.btn3D.classList.remove('ativo');
-            aplicarModoVisao();
-        });
-
-        el.btn3D.addEventListener('click', () => {
-            visao2D = false;
-            el.btn3D.classList.add('ativo');
-            el.btn2D.classList.remove('ativo');
-            aplicarModoVisao();
-        });
-
-        // ==============================================
         // 🔍 ZOOM
         // ==============================================
         el.btnZoomMais.addEventListener('click', () => {
             zoom = Math.min(3.0, zoom + 0.15);
             escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
-            aplicarModoVisao();
         });
         el.btnZoomMenos.addEventListener('click', () => {
             zoom = Math.max(0.3, zoom - 0.15);
             escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
-            aplicarModoVisao();
         });
 
         // ==============================================
@@ -597,9 +578,7 @@
         el.btnCobertura.addEventListener('click', () => {
             coberturaAtiva = !coberturaAtiva;
             el.btnCobertura.classList.toggle('ativo', coberturaAtiva);
-            if (!coberturaAtiva) {
-                limparCobertura();
-            }
+            if (!coberturaAtiva) limparCobertura();
         });
 
         // ==============================================
@@ -622,7 +601,6 @@
             el.btnB.disabled = false;
             el.btnB.classList.add('ativo');
             el.linhaCentro.classList.add('ativa');
-            // Reseta cobertura ao marcar ponto A
             limparCobertura();
         });
         el.btnB.addEventListener('click', () => {
@@ -652,13 +630,10 @@
             el.desvio.style.color = cor;
             el.desvioGrande.style.color = cor;
 
-            // Atualiza rotação da seta
-            if (visao2D) {
-                el.seta.style.transform = `rotate(${rumo}deg)`;
-            }
-            aplicarModoVisao();
+            // Rotação da seta
+            el.seta.style.transform = `rotate(${rumo}deg)`;
 
-            // Desenha cobertura no centro da tela (posição atual)
+            // Cobertura
             if (coberturaAtiva && temA) {
                 const cx = el.coberturaCanvas.width / 2;
                 const cy = el.coberturaCanvas.height / 2;
@@ -768,14 +743,8 @@
         document.getElementById('btnAplicarConfig').addEventListener('click', () => {
             tipoLinha = document.getElementById('tipoLinhaGuia').value;
             unidadesMetricas = document.getElementById('unidades').value.startsWith('Métrico');
-            const modoVisao = document.getElementById('modoVisao').value;
-            visao2D = modoVisao === '2D';
-            el.btn2D.classList.toggle('ativo', visao2D);
-            el.btn3D.classList.toggle('ativo', !visao2D);
             localStorage.setItem('tipoLinha', tipoLinha);
             localStorage.setItem('unidadesMetricas', unidadesMetricas);
-            localStorage.setItem('modoVisao', visao2D ? '2D' : '3D');
-            aplicarModoVisao();
             alert('✅ Configurações aplicadas!');
             fecharModal();
             atualizarTela();
@@ -785,7 +754,7 @@
         function fecharModal() { el.modal.classList.remove('mostrar'); }
 
         // ==============================================
-        // 📡 GPS — SUPORTE ANTENA EXTERNA / ALTA PRECISÃO
+        // 📡 GPS — ANTENA EXTERNA
         // ==============================================
         if (!navigator.geolocation) {
             alert('❌ GPS não suportado! Use Chrome ou Safari.');
@@ -796,22 +765,16 @@
                     lon = posicao.coords.longitude;
                     precisao = posicao.coords.accuracy;
                     
-                    // Suporte a heading de antena externa
                     if (posicao.coords.heading !== null && posicao.coords.heading !== 0) {
                         rumo = posicao.coords.heading;
                     }
                     
-                    // Velocidade
                     if (posicao.coords.speed !== null) {
                         velocidade = Math.round((posicao.coords.speed * (unidadesMetricas ? 3.6 : 2.237)) * 10) / 10;
                     }
                     
-                    // Status GPS / RTK / ANTENA EXTERNA
                     el.btnGPS.classList.remove('rtk');
-                    if (precisao <= 0.05) {
-                        el.btnGPS.textContent = 'RTK-FIX';
-                        el.btnGPS.classList.add('rtk');
-                    } else if (precisao <= 0.3) {
+                    if (precisao <= 0.3) {
                         el.btnGPS.textContent = 'RTK-FIX';
                         el.btnGPS.classList.add('rtk');
                     } else if (precisao <= 1) {
@@ -820,7 +783,6 @@
                         el.btnGPS.textContent = 'GPS';
                     }
                     
-                    // Calcula desvio
                     if (temA && temB && pontoA && pontoB) {
                         desvio = calcularDesvio(pontoA.lat, pontoA.lon, pontoB.lat, pontoB.lon, lat, lon);
                     }
@@ -832,11 +794,7 @@
                     lat = lon = null;
                     atualizarTela();
                 },
-                { 
-                    enableHighAccuracy: true, 
-                    maximumAge: 500, // Mais atualizado para antena externa
-                    timeout: 3000
-                }
+                { enableHighAccuracy: true, maximumAge: 500, timeout: 3000 }
             );
         }
 
@@ -854,15 +812,8 @@
         // 🚀 INICIALIZAÇÃO
         // ==============================================
         carregarTalhoesSalvos();
-        // Restaura modo de visão salvo
-        const modoSalvo = localStorage.getItem('modoVisao');
-        if (modoSalvo) {
-            visao2D = modoSalvo === '2D';
-            el.btn2D.classList.toggle('ativo', visao2D);
-            el.btn3D.classList.toggle('ativo', !visao2D);
-        }
         ajustarCanvas();
-        aplicarModoVisao();
+        aplicarModoVisao(); // ✅ 2D ativo por padrão
         atualizarTela();
     </script>
 </body>
