@@ -3,89 +3,82 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Sat GPS PRO</title>
+<title>Portal Sat GPS PRO MAX</title>
 <link rel="manifest" href="manifest.webmanifest">
 <style>
-:root{
-  --bg:#FFFFFF; --card:#F2F4F7; --texto:#111; --verde:#1A7F37; --borda:#E5E7EB;
-}
-body.noite{
-  --bg:#0F1214; --card:#1C2126; --texto:#FFF; --borda:#2A2E33;
-}
-*{box-sizing:border-box; font-family:Inter,system-ui,sans-serif}
-body{margin:0; background:var(--bg); color:var(--texto); transition:0.3s}
+:root{--bg:#FFFFFF;--card:#F2F4F7;--texto:#111;--verde:#1A7F37;--borda:#E5E7EB}
+body.noite{--bg:#0F1214;--card:#1C2126;--texto:#FFF;--borda:#2A2E33}
+*{box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
+body{margin:0;background:var(--bg);color:var(--texto);transition:0.3s}
+.topo{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--borda)}
+.logo{font-weight:900;color:var(--verde);font-size:18px;cursor:pointer}
+.gps{font-size:11px;background:#1A7F37;color:#fff;padding:6px 10px;border-radius:20px}
+#lightbar{display:flex;gap:5px;justify-content:center;background:#000;padding:8px}
+.led{width:12px;height:12px;border-radius:50%;background:#333;transition:0.1s}
+.led.on-green{background:#00FF55;box-shadow:0 0 10px #00FF55}
+.led.on-red{background:#FF2222;box-shadow:0 0 10px #FF2222}
 
-/* TOPO */
-.topo{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:12px 16px; background:var(--card); border-bottom:1px solid var(--borda);
-}
-.logo{font-weight:900; color:var(--verde); font-size:20px}
-.gps{font-size:12px; background:#1A7F37; color:#fff; padding:6px 10px; border-radius:20px}
+/* MAPA COM MODOS */
+#mapa{height:52vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:0.4s}
+#mapa.fundo-2d{background:linear-gradient(#A8D5A8, #5A9E3A)}
+#mapa.fundo-3d{background:linear-gradient(180deg, #87CEEB 0%, #A8D5A8 30%, #4A7D2A 100%); perspective: 600px;}
+#mapa.fundo-satelite{background: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600') center/cover}
+#mapa.fundo-terra{background:repeating-linear-gradient(90deg, #8B5A2B 0 20px, #A67C52 20px 40px)}
 
-/* LIGHTBAR PRO */
-#lightbar{
-  display:flex; gap:5px; justify-content:center;
-  background:#000; padding:10px; margin:0;
-}
-.led{width:14px; height:14px; border-radius:50%; background:#333; transition:0.1s}
-.led.on-green{background:#00FF55; box-shadow:0 0 12px #00FF55}
-.led.on-red{background:#FF2222; box-shadow:0 0 12px #FF2222}
+#trator-area{position:relative; z-index:2; text-align:center; transition:0.3s}
+#trator{font-size:52px; display:block; transform:rotate(0deg)}
+#implemento{font-size:14px; background:rgba(0,0,0,0.6); color:#fff; padding:2px 6px; border-radius:6px; margin-top:4px; display:inline-block}
+.linha-guia{position:absolute;width:4px;height:100%;background:#00FF55;opacity:0.9;z-index:1}
+#rastro{position:absolute;width:var(--largura);background:rgba(0,255,0,0.15);height:100%;z-index:0}
 
-/* MAPA */
-#mapa{
-  height:48vh; background: linear-gradient(#9ACD9A, #5A8F3A);
-  display:flex; align-items:center; justify-content:center; position:relative;
-}
-#trator{font-size:48px; transform:rotate(0deg)}
-.linha-guia{position:absolute; width:4px; height:100%; background:#00FF55; opacity:0.8}
+#desvioBox{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--verde);border-radius:14px;padding:8px 18px;text-align:center;z-index:3}
+#desvio{font-size:30px;font-weight:900;color:var(--verde)}
 
-#desvioBox{
-  position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
-  background:var(--card); border:2px solid var(--verde); border-radius:14px;
-  padding:8px 18px; text-align:center;
-}
-#desvio{font-size:34px; font-weight:900; color:var(--verde)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:14px;padding:12px}
+.card b{font-size:24px;display:block}
+.card span{font-size:12px;opacity:0.7}
 
-/* CARDS */
-.grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px}
-.card{background:var(--card); border:1px solid var(--borda); border-radius:14px; padding:12px}
-.card b{font-size:26px; display:block}
-.card span{font-size:12px; opacity:0.7}
+.botoes{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:10px;padding:0 12px 12px}
+.btn{background:var(--verde);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:700}
+.btn.sec{background:transparent;color:var(--verde);border:2px solid var(--verde)}
 
-/* BOTOES */
-.botoes{display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:10px; padding:0 12px 12px}
-.btn{background:var(--verde); color:#fff; border:none; border-radius:12px; padding:14px; font-weight:700; font-size:15px}
-.btn.sec{background:transparent; color:var(--verde); border:2px solid var(--verde)}
-.nav{display:flex; justify-content:space-around; padding:12px; background:var(--card); border-top:1px solid var(--borda)}
+/* MODAL CONFIG */
+#modalConfig{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:none;z-index:99;align-items:end}
+#modalConfig.open{display:flex}
+.modalBox{background:var(--bg);width:100%;border-radius:20px 20px 0 0;padding:20px;max-height:85vh;overflow:auto}
+.opcao{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{padding:8px 14px;border:1px solid var(--borda);border-radius:20px;background:var(--card);cursor:pointer}
+.chip.ativo{background:var(--verde);color:#fff;border-color:var(--verde)}
 </style>
 </head>
 <body>
 
 <div class="topo">
-  <div class="logo">⚙️🛰️ Portal Sat GPS</div>
-  <div style="display:flex; gap:8px; align-items:center">
-    <div class="gps" id="gpsStatus">GPS • 12 sats • ±0.8m</div>
-    <button onclick="toggleTema()" style="border:none; background:var(--card); font-size:20px">☀️/🌙</button>
+  <div class="logo" onclick="abrirConfig()">⚙️🛰️ Portal Sat GPS</div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <div class="gps" id="gpsStatus">GPS • ±19.0m</div>
+    <div onclick="toggleTema()" style="font-size:22px;cursor:pointer">☀️/🌙</div>
   </div>
 </div>
 
 <div id="lightbar"></div>
 
-<div id="mapa">
+<div id="mapa" class="fundo-2d">
+  <div id="rastro" style="--largura:60px"></div>
   <div class="linha-guia"></div>
-  <div id="trator">🚜</div>
-  <div id="desvioBox">
-    <small>DESVIO</small>
-    <div id="desvio">< 12cm ></div>
+  <div id="trator-area">
+    <div id="trator">🚜</div>
+    <div id="implemento">Pulverizador 24m</div>
   </div>
+  <div id="desvioBox"><small>DESVIO</small><div id="desvio">< 15cm ></div></div>
 </div>
 
 <div class="grid">
-  <div class="card"><span>Velocidade</span><b id="vel">8.5 km/h</b></div>
+  <div class="card"><span>Velocidade</span><b id="vel">3.9 km/h</b></div>
   <div class="card"><span>Área trabalhada</span><b id="area">3.25 ha</b></div>
   <div class="card"><span>Distância</span><b id="dist">1.2 km</b></div>
-  <div class="card"><span>Largura</span><b>6m</b></div>
+  <div class="card"><span>Largura</span><b id="larg">24m</b></div>
 </div>
 
 <div class="botoes">
@@ -94,45 +87,84 @@ body{margin:0; background:var(--bg); color:var(--texto); transition:0.3s}
   <button class="btn" onclick="iniciar()">▶ Iniciar</button>
 </div>
 
-<div class="nav">
-  <div>🏠 Início</div><div style="color:var(--verde)">🧭 Guiar</div><div>🗺️ Talhões</div><div>⚙️ Config</div>
+<!-- CONFIGURAÇÕES -->
+<div id="modalConfig" onclick="fecharConfig()">
+<div class="modalBox" onclick="event.stopPropagation()">
+  <h3 style="margin:0 0 10px">⚙️ Configurações PRO</h3>
+  
+  <b>🖼️ Fundo do Mapa</b>
+  <div class="opcao">
+    <div class="chip ativo" onclick="setFundo('fundo-2d',this)">2D Verde</div>
+    <div class="chip" onclick="setFundo('fundo-3d',this)">3D Perspectiva</div>
+    <div class="chip" onclick="setFundo('fundo-satelite',this)">Satélite Real</div>
+    <div class="chip" onclick="setFundo('fundo-terra',this)">Solo</div>
+  </div>
+
+  <b>🚜 Implemento</b>
+  <div class="opcao">
+    <div class="chip ativo" onclick="setImpl('🚜','Pulverizador 24m','24m','60px',this)">Pulverizador 24m</div>
+    <div class="chip" onclick="setImpl('🚜','Plantadeira 9m','9m','40px',this)">Plantadeira 9m</div>
+    <div class="chip" onclick="setImpl('🚜','Grade 6m','6m','30px',this)">Grade 6m</div>
+    <div class="chip" onclick="setImpl('🚜💨','Colheitadeira 7m','7m','35px',this)">Colheitadeira</div>
+    <div class="chip" onclick="setImpl('🚜','Subsolador 3m','3m','20px',this)">Subsolador 3m</div>
+  </div>
+
+  <b>🌗 Tema</b>
+  <div class="opcao">
+    <div class="chip" onclick="toggleTema()">Alternar Dia/Noite</div>
+  </div>
+
+  <button class="btn" style="width:100%;margin-top:12px" onclick="fecharConfig()">Fechar</button>
+</div>
 </div>
 
 <script>
-// TEMA DIA/NOITE
-function toggleTema(){
-  document.body.classList.toggle('noite');
-  localStorage.setItem('tema', document.body.classList.contains('noite')?'noite':'dia');
+const lb=document.getElementById('lightbar');
+for(let i=0;i<21;i++){let d=document.createElement('div');d.className='led';d.id='led'+i;lb.appendChild(d);}
+function atualizarBarra(cm){
+ for(let i=0;i<21;i++)document.getElementById('led'+i).className='led';
+ document.getElementById('led10').classList.add('on-green');
+ document.getElementById('led9').classList.add('on-green');
+ document.getElementById('led11').classList.add('on-green');
+ document.getElementById('desvio').innerHTML=`${cm<0?'&lt;':cm>0?'&gt;':''} ${Math.abs(cm)}cm ${cm>0?'&gt;':cm<0?'&lt;':''}`;
+ let q=Math.round(Math.abs(cm)/6);
+ if(cm<0){for(let i=0;i<q;i++){let el=document.getElementById('led'+(9-i));if(el)el.classList.add('on-red');}}
+ if(cm>0){for(let i=0;i<q;i++){let el=document.getElementById('led'+(11+i));if(el)el.classList.add('on-red');}}
 }
-if(localStorage.getItem('tema')==='noite') document.body.classList.add('noite');
+setInterval(()=>atualizarBarra(Math.round(Math.random()*30-15)),800);
 
-// LIGHTBAR - 21 LEDs
-const lb = document.getElementById('lightbar');
-for(let i=0;i<21;i++){ let d=document.createElement('div'); d.className='led'; d.id='led'+i; lb.appendChild(d); }
-function atualizarBarra(desvioCm){
-  for(let i=0;i<21;i++) document.getElementById('led'+i).className='led';
-  document.getElementById('led10').classList.add('on-green');
-  document.getElementById('led9').classList.add('on-green');
-  document.getElementById('led11').classList.add('on-green');
-  document.getElementById('desvio').innerHTML = (desvioCm<0?'&lt;':desvioCm>0?'&gt;':'')+` ${Math.abs(desvioCm)}cm `+(desvioCm>0?'&gt;':desvioCm<0?'&lt;':'');
-  let q = Math.round(Math.abs(desvioCm)/8);
-  if(desvioCm<0){ for(let i=0;i<q;i++){ let el=document.getElementById('led'+(9-i)); if(el) el.classList.add('on-red'); } }
-  if(desvioCm>0){ for(let i=0;i<q;i++){ let el=document.getElementById('led'+(11+i)); if(el) el.classList.add('on-red'); } }
+function toggleTema(){document.body.classList.toggle('noite');localStorage.setItem('tema',document.body.classList.contains('noite')?'noite':'dia')}
+if(localStorage.getItem('tema')==='noite')document.body.classList.add('noite');
+
+function abrirConfig(){document.getElementById('modalConfig').classList.add('open')}
+function fecharConfig(){document.getElementById('modalConfig').classList.remove('open')}
+function setFundo(classe,el){
+ document.getElementById('mapa').className=classe;
+ document.querySelectorAll('.opcao .chip').forEach(c=>{if(c.parentNode.firstElementChild.textContent.includes('2D')||c.textContent.includes('3D')||c.textContent.includes('Satélite')||c.textContent.includes('Solo')){}}); 
+ el.parentNode.querySelectorAll('.chip').forEach(ch=>ch.classList.remove('ativo')); el.classList.add('ativo');
+ localStorage.setItem('fundo',classe);
 }
-setInterval(()=>{ atualizarBarra(Math.round((Math.random()*40-20))); }, 800);
-
-// GPS REAL
+function setImpl(icone,nome,larg,px,el){
+ document.getElementById('trator').innerText=icone;
+ document.getElementById('implemento').innerText=nome;
+ document.getElementById('larg').innerText=larg;
+ document.getElementById('rastro').style.setProperty('--largura',px);
+ el.parentNode.querySelectorAll('.chip').forEach(ch=>ch.classList.remove('ativo')); el.classList.add('ativo');
+ localStorage.setItem('impl',JSON.stringify({icone,nome,larg,px}));
+}
 if(navigator.geolocation){
-  navigator.geolocation.watchPosition(pos=>{
-    document.getElementById('gpsStatus').innerText = `GPS • ±${pos.coords.accuracy.toFixed(1)}m`;
-    document.getElementById('vel').innerText = ((pos.coords.speed||0)*3.6).toFixed(1)+' km/h';
-  }, null, {enableHighAccuracy:true});
+ navigator.geolocation.watchPosition(p=>{
+  document.getElementById('gpsStatus').innerText=`GPS • ±${p.coords.accuracy.toFixed(1)}m`;
+  document.getElementById('vel').innerText=((p.coords.speed||0)*3.6).toFixed(1)+' km/h';
+ },null,{enableHighAccuracy:true});
 }
-function marcarA(){ document.getElementById('btnA').innerText='✓ A'; document.getElementById('btnA').style.background='#1A7F37'; document.getElementById('btnA').style.color='#fff'; }
-function marcarB(){ document.getElementById('btnB').innerText='✓ B'; document.getElementById('btnB').style.background='#1A7F37'; document.getElementById('btnB').style.color='#fff'; }
-function iniciar(){ alert('Trabalho iniciado! Linha A-B ativa'); }
+function marcarA(){document.getElementById('btnA').innerText='✓ A';}
+function marcarB(){document.getElementById('btnB').innerText='✓ B';}
+function iniciar(){alert('Guia iniciado! Largura: '+document.getElementById('larg').innerText);}
 
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+// carregar salvo
+let f=localStorage.getItem('fundo'); if(f) document.getElementById('mapa').className=f;
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
 </script>
 </body>
 </html>
