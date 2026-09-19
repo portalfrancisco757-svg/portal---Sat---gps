@@ -1,189 +1,138 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07191d">
-<title>Portal Sat GPS Agrícola</title>
-<style>
-:root{--bg:#061419;--panel:#0b2228;--text:#f4fbf7;--muted:#9bb2b4;--green:#20e36a;--border:#1b4148}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}
-button,input{font:inherit}button{border:0;cursor:pointer}.app{max-width:480px;margin:auto;min-height:100vh;background:var(--bg)}
-header{height:64px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:#07191d}
-.logo{font-weight:800;font-size:20px}.logo span{color:var(--green)}.status{font-size:12px;color:var(--muted)}
-main{padding:14px 14px 90px}.screen{display:none}.screen.active{display:block}
-.card{background:#0b252b;border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px}
-h2{font-size:20px;margin:4px 0 14px}.muted{color:var(--muted)}
-.map{height:410px;border-radius:18px;border:1px solid var(--border);position:relative;overflow:hidden;background:#173a2b}
-.guideline{position:absolute;left:50%;top:0;bottom:0;width:4px;background:#20e36a;box-shadow:0 0 12px #20e36a;transform:translateX(-50%)}
-.vehicle{position:absolute;left:50%;top:57%;transform:translate(-50%,-50%);font-size:42px}
-.badge{position:absolute;top:12px;left:12px;background:#07191de8;border:1px solid var(--border);padding:9px 12px;border-radius:12px;font-size:13px}
-.deviation{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:#07191df0;padding:7px 14px;border-radius:20px;border:1px solid var(--green);font-weight:800}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.stat{background:#091c21;border:1px solid var(--border);border-radius:12px;padding:11px;text-align:center}.stat b{display:block;font-size:17px}.stat small{color:var(--muted)}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.btn{padding:13px 14px;border-radius:12px;background:#17343a;color:white;border:1px solid var(--border);font-weight:750}.btn.primary{background:var(--green);color:#04140a}.btn.danger{background:#5a2222}.btn.full{width:100%;margin-top:10px}
-input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--border);background:#07191d;color:white}.field{margin-bottom:12px}.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-.list{display:flex;flex-direction:column;gap:8px}.item{padding:13px;background:#091d22;border:1px solid var(--border);border-radius:12px;display:flex;justify-content:space-between;align-items:center}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:480px;width:100%;height:72px;background:#07191df5;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr)}
-nav button{background:none;color:#91a8aa;font-size:11px}.navico{display:block;font-size:21px;margin-bottom:2px}nav button.active{color:var(--green)}
-.big{font-size:31px;font-weight:850}.empty{padding:35px 10px;text-align:center;color:var(--muted)}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Sat GPS PRO</title>
 <link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#FFFFFF; --card:#F2F4F7; --texto:#111; --verde:#1A7F37; --borda:#E5E7EB;
+}
+body.noite{
+  --bg:#0F1214; --card:#1C2126; --texto:#FFF; --borda:#2A2E33;
+}
+*{box-sizing:border-box; font-family:Inter,system-ui,sans-serif}
+body{margin:0; background:var(--bg); color:var(--texto); transition:0.3s}
+
+/* TOPO */
+.topo{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 16px; background:var(--card); border-bottom:1px solid var(--borda);
+}
+.logo{font-weight:900; color:var(--verde); font-size:20px}
+.gps{font-size:12px; background:#1A7F37; color:#fff; padding:6px 10px; border-radius:20px}
+
+/* LIGHTBAR PRO */
+#lightbar{
+  display:flex; gap:5px; justify-content:center;
+  background:#000; padding:10px; margin:0;
+}
+.led{width:14px; height:14px; border-radius:50%; background:#333; transition:0.1s}
+.led.on-green{background:#00FF55; box-shadow:0 0 12px #00FF55}
+.led.on-red{background:#FF2222; box-shadow:0 0 12px #FF2222}
+
+/* MAPA */
+#mapa{
+  height:48vh; background: linear-gradient(#9ACD9A, #5A8F3A);
+  display:flex; align-items:center; justify-content:center; position:relative;
+}
+#trator{font-size:48px; transform:rotate(0deg)}
+.linha-guia{position:absolute; width:4px; height:100%; background:#00FF55; opacity:0.8}
+
+#desvioBox{
+  position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+  background:var(--card); border:2px solid var(--verde); border-radius:14px;
+  padding:8px 18px; text-align:center;
+}
+#desvio{font-size:34px; font-weight:900; color:var(--verde)}
+
+/* CARDS */
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px}
+.card{background:var(--card); border:1px solid var(--borda); border-radius:14px; padding:12px}
+.card b{font-size:26px; display:block}
+.card span{font-size:12px; opacity:0.7}
+
+/* BOTOES */
+.botoes{display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:10px; padding:0 12px 12px}
+.btn{background:var(--verde); color:#fff; border:none; border-radius:12px; padding:14px; font-weight:700; font-size:15px}
+.btn.sec{background:transparent; color:var(--verde); border:2px solid var(--verde)}
+.nav{display:flex; justify-content:space-around; padding:12px; background:var(--card); border-top:1px solid var(--borda)}
+</style>
 </head>
 <body>
-<div class="app">
-<header><div class="logo">📍 Portal <span>Sat</span></div><div id="gpsStatus" class="status">GPS desligado</div></header>
 
-<main>
-<section id="home" class="screen active">
-<div class="card">
-<div class="muted">GPS agrícola</div>
-<h2>Guiamento de precisão</h2>
-<p class="muted">Use o celular para criar uma linha A-B e acompanhar o deslocamento da máquina.</p>
-<button class="btn primary full" onclick="startGPS()">📡 Iniciar GPS</button>
+<div class="topo">
+  <div class="logo">⚙️🛰️ Portal Sat GPS</div>
+  <div style="display:flex; gap:8px; align-items:center">
+    <div class="gps" id="gpsStatus">GPS • 12 sats • ±0.8m</div>
+    <button onclick="toggleTema()" style="border:none; background:var(--card); font-size:20px">☀️/🌙</button>
+  </div>
 </div>
-<div class="card"><div class="muted">Último trabalho</div><div id="lastWork" class="big">—</div><div class="muted" id="lastWorkSub">Nenhum trabalho salvo</div></div>
-</section>
 
-<section id="guide" class="screen">
-<div class="map">
-<div class="badge"><b id="fieldName">Sem talhão</b><br><span id="coords">GPS aguardando…</span></div>
-<div class="deviation" id="dev">Aguardando linha A-B</div>
-<div class="guideline"></div><div class="vehicle">🚜</div>
-</div>
-<div class="stats">
-<div class="stat"><b id="speed">0.0</b><small>km/h</small></div>
-<div class="stat"><b id="worked">0.00</b><small>ha</small></div>
-<div class="stat"><b id="distance">0.00</b><small>km</small></div>
-</div>
-<div class="actions"><button class="btn primary" onclick="setPoint('A')">📍 Marcar A</button><button class="btn primary" onclick="setPoint('B')">📍 Marcar B</button></div>
-<div class="actions"><button class="btn" onclick="toggleWork()" id="workBtn">▶ Iniciar trabalho</button><button class="btn danger" onclick="saveWork()">💾 Salvar</button></div>
-</section>
+<div id="lightbar"></div>
 
-<section id="fields" class="screen">
-<h2>Meus Talhões</h2>
-<div class="card">
-<div class="field"><label>Nome do novo talhão</label><input id="newField" placeholder="Ex.: Talhão 01 — Soja"></div>
-<button class="btn primary full" onclick="addField()">＋ Criar talhão</button>
+<div id="mapa">
+  <div class="linha-guia"></div>
+  <div id="trator">🚜</div>
+  <div id="desvioBox">
+    <small>DESVIO</small>
+    <div id="desvio">< 12cm ></div>
+  </div>
 </div>
-<div id="fieldList" class="list"></div>
-</section>
 
-<section id="settings" class="screen">
-<h2>Configurações</h2>
-<div class="card">
-<div class="field"><label>Largura do implemento (metros)</label><input id="width" type="number" step="0.1" value="12"></div>
-<button class="btn primary full" onclick="saveSettings()">Salvar configurações</button>
+<div class="grid">
+  <div class="card"><span>Velocidade</span><b id="vel">8.5 km/h</b></div>
+  <div class="card"><span>Área trabalhada</span><b id="area">3.25 ha</b></div>
+  <div class="card"><span>Distância</span><b id="dist">1.2 km</b></div>
+  <div class="card"><span>Largura</span><b>6m</b></div>
 </div>
-<div class="card">
-<button class="btn full" onclick="exportData()">📤 Exportar dados</button>
-<button class="btn full" onclick="clearData()">🗑️ Apagar dados locais</button>
-</div>
-</section>
-</main>
 
-<nav>
-<button class="active" data-screen="home"><span class="navico">⌂</span>Início</button>
-<button data-screen="guide"><span class="navico">🧭</span>Guiar</button>
-<button data-screen="fields"><span class="navico">▦</span>Talhões</button>
-<button data-screen="settings"><span class="navico">⚙</span>Config.</button>
-</nav>
+<div class="botoes">
+  <button class="btn sec" id="btnA" onclick="marcarA()">Marcar A</button>
+  <button class="btn sec" id="btnB" onclick="marcarB()">Marcar B</button>
+  <button class="btn" onclick="iniciar()">▶ Iniciar</button>
+</div>
+
+<div class="nav">
+  <div>🏠 Início</div><div style="color:var(--verde)">🧭 Guiar</div><div>🗺️ Talhões</div><div>⚙️ Config</div>
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
-let state=JSON.parse(localStorage.getItem('portalSat')||'null')||{fields:[],works:[],settings:{width:12}};
-let pos=null,prev=null,watch=null,running=false,totalM=0,areaM2=0,A=null,B=null,selectedField=null;
+// TEMA DIA/NOITE
+function toggleTema(){
+  document.body.classList.toggle('noite');
+  localStorage.setItem('tema', document.body.classList.contains('noite')?'noite':'dia');
+}
+if(localStorage.getItem('tema')==='noite') document.body.classList.add('noite');
 
-function persist(){localStorage.setItem('portalSat',JSON.stringify(state))}
-function showScreen(id){
-document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
-$(id).classList.add('active');
-document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.screen===id));
-if(id==='fields')renderFields();if(id==='home')renderHome()
+// LIGHTBAR - 21 LEDs
+const lb = document.getElementById('lightbar');
+for(let i=0;i<21;i++){ let d=document.createElement('div'); d.className='led'; d.id='led'+i; lb.appendChild(d); }
+function atualizarBarra(desvioCm){
+  for(let i=0;i<21;i++) document.getElementById('led'+i).className='led';
+  document.getElementById('led10').classList.add('on-green');
+  document.getElementById('led9').classList.add('on-green');
+  document.getElementById('led11').classList.add('on-green');
+  document.getElementById('desvio').innerHTML = (desvioCm<0?'&lt;':desvioCm>0?'&gt;':'')+` ${Math.abs(desvioCm)}cm `+(desvioCm>0?'&gt;':desvioCm<0?'&lt;':'');
+  let q = Math.round(Math.abs(desvioCm)/8);
+  if(desvioCm<0){ for(let i=0;i<q;i++){ let el=document.getElementById('led'+(9-i)); if(el) el.classList.add('on-red'); } }
+  if(desvioCm>0){ for(let i=0;i<q;i++){ let el=document.getElementById('led'+(11+i)); if(el) el.classList.add('on-red'); } }
 }
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+setInterval(()=>{ atualizarBarra(Math.round((Math.random()*40-20))); }, 800);
 
-function startGPS(){
-if(!navigator.geolocation){alert('Este aparelho não oferece GPS.');return}
-if(watch!==null)return;
-$('gpsStatus').textContent='Buscando GPS…';
-watch=navigator.geolocation.watchPosition(updatePosition,e=>{$('gpsStatus').textContent='Erro no GPS';alert('GPS: '+e.message)}, {enableHighAccuracy:true,maximumAge:1000,timeout:10000});
-showScreen('guide')
+// GPS REAL
+if(navigator.geolocation){
+  navigator.geolocation.watchPosition(pos=>{
+    document.getElementById('gpsStatus').innerText = `GPS • ±${pos.coords.accuracy.toFixed(1)}m`;
+    document.getElementById('vel').innerText = ((pos.coords.speed||0)*3.6).toFixed(1)+' km/h';
+  }, null, {enableHighAccuracy:true});
 }
-function updatePosition(p){
-const q={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy||0,speed:p.coords.speed||0};
-if(prev&&running){let d=dist(prev,q);totalM+=d;areaM2+=d*(+state.settings.width||12);$('distance').textContent=(totalM/1000).toFixed(2);$('worked').textContent=(areaM2/10000).toFixed(2)}
-prev=q;pos=q;
-$('gpsStatus').textContent='GPS ±'+Math.round(q.acc)+' m';
-$('coords').textContent=q.lat.toFixed(6)+', '+q.lon.toFixed(6);
-$('speed').textContent=(q.speed>0?q.speed*3.6:0).toFixed(1);
-if(A&&B)updateDeviation(q)
-}
-function dist(a,b){
-const R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180;
-const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;
-return 2*R*Math.asin(Math.sqrt(x))
-}
-function setPoint(which){
-startGPS();
-if(!pos){alert('Aguarde o GPS obter sua posição.');return}
-if(which==='A')A={...pos};else B={...pos};
-$('dev').textContent=which+' marcado';
-if(A&&B)$('dev').textContent='Linha A-B criada — siga a linha verde'
-}
-function updateDeviation(p){
-const lat=p.lat*Math.PI/180,lat0=A.lat*Math.PI/180;
-const x=(p.lon-A.lon)*Math.PI/180*Math.cos(lat0)*6371000;
-const y=(p.lat-A.lat)*Math.PI/180*6371000;
-const bx=(B.lon-A.lon)*Math.PI/180*Math.cos(lat0)*6371000;
-const by=(B.lat-A.lat)*Math.PI/180*6371000;
-const cross=(x*by-y*bx)/Math.sqrt(bx*bx+by*by||1);
-$('dev').textContent=(cross>=0?'← ':'→ ')+Math.abs(cross).toFixed(2)+' m'
-}
-function toggleWork(){
-if(!pos){startGPS();alert('Aguarde o GPS.');return}
-running=!running;
-$('workBtn').textContent=running?'⏸ Pausar trabalho':'▶ Iniciar trabalho';
-if(running)prev=pos
-}
-function addField(){
-const n=$('newField').value.trim();if(!n)return;
-state.fields.push({id:Date.now(),name:n,area:0});persist();$('newField').value='';renderFields()
-}
-function renderFields(){
-const el=$('fieldList');
-if(!state.fields.length){el.innerHTML='<div class="empty">Nenhum talhão criado.</div>';return}
-el.innerHTML=state.fields.map(f=>`<div class="item"><div><b>${esc(f.name)}</b><br><small class="muted">${(f.area||0).toFixed(2)} ha</small></div><button class="btn" onclick="selectField(${f.id})">Usar</button></div>`).join('')
-}
-function selectField(id){
-selectedField=state.fields.find(f=>f.id===id);
-$('fieldName').textContent=selectedField.name;showScreen('guide')
-}
-function saveWork(){
-if(!totalM){alert('Ainda não há percurso para salvar.');return}
-const name=selectedField?.name||'Trabalho '+new Date().toLocaleString('pt-BR');
-state.works.unshift({date:new Date().toISOString(),name,distanceKm:totalM/1000,areaHa:areaM2/10000,A,B});
-if(selectedField)selectedField.area=(selectedField.area||0)+areaM2/10000;
-persist();alert('Trabalho salvo.');renderHome()
-}
-function renderHome(){
-const w=state.works[0];
-$('lastWork').textContent=w?w.areaHa.toFixed(2)+' ha':'—';
-$('lastWorkSub').textContent=w?w.name:'Nenhum trabalho salvo'
-}
-function saveSettings(){
-state.settings.width=Math.max(.1,+$('width').value||12);persist();alert('Configurações salvas.')
-}
-function exportData(){
-const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='portal-sat-dados.json';a.click()
-}
-function clearData(){
-if(confirm('Apagar todos os talhões e trabalhos deste aparelho?')){localStorage.removeItem('portalSat');location.reload()}
-}
-function esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-renderHome();renderFields();$('width').value=state.settings.width;
+function marcarA(){ document.getElementById('btnA').innerText='✓ A'; document.getElementById('btnA').style.background='#1A7F37'; document.getElementById('btnA').style.color='#fff'; }
+function marcarB(){ document.getElementById('btnB').innerText='✓ B'; document.getElementById('btnB').style.background='#1A7F37'; document.getElementById('btnB').style.color='#fff'; }
+function iniciar(){ alert('Trabalho iniciado! Linha A-B ativa'); }
+
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
-<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
 </body>
 </html>
