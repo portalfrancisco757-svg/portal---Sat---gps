@@ -2,183 +2,112 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Portal Sat GPS - GS4</title>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#367C2B">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Portal Sat GPS</title>
 <style>
-:root{--jd-green:#367C2B;--jd-yellow:#FFDE00;--jd-dark:#2B6122;--bg:#EDEEE2;--card:#FFFFFF}
-*{box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif;margin:0;padding:0}
-body{background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden;touch-action:none}
-/* HEADER JD */
-#header{height:52px;background:var(--jd-green);display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:white;z-index:20;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-#header-left{display:flex;align-items:center;gap:10px;font-weight:900;font-size:17px;letter-spacing:0.5px}
-#header-left img{width:36px;height:36px;background:white;border-radius:6px;padding:3px}
-#header-right{display:flex;gap:8px}
-.hdr-btn{background:var(--jd-dark);border:1px solid rgba(255,255,255,.2);color:white;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700}
-.hdr-btn.yellow{background:var(--jd-yellow);color:#222;border-color:var(--jd-yellow)}
-/* LIGHTBAR GS4 */
-#lightbar-wrap{background:#111;padding:6px 0;display:flex;justify-content:center;gap:3px;box-shadow:inset 0 2px 10px #000}
-.led{width:14px;height:22px;border-radius:3px;background:#333;transition:.15s;border:1px solid #222}
-.led.center{width:22px;background:#555}
-.led.active-green{background:var(--jd-green);box-shadow:0 0 10px #4CAF50}
-.led.active-yellow{background:var(--jd-yellow);box-shadow:0 0 10px #FFEB3B}
-.led.active-red{background:#E53935;box-shadow:0 0 10px #FF5252}
-/* MAIN */
-#main{flex:1;display:flex;position:relative}
-#canvas-wrap{flex:1;position:relative;background:radial-gradient(#D8DCC3,#C5C9A8)}
-#mapCanvas{width:100%;height:100%;display:block}
-#watermark{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);width:320px;opacity:0.11;pointer-events:none;z-index:2}
-#watermark img{width:100%}
-/* OVERLAYS */
-#top-info{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;z-index:5;pointer-events:none}
-.info-card{background:rgba(255,255,255,.92);border-radius:8px;padding:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,.2);min-width:165px;border-left:4px solid var(--jd-green)}
-.info-card b{float:right;color:var(--jd-green)}
-.info-card.red{border-left-color:#E53935}
-#center-cross{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:4}
-#tractor-icon{font-size:34px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));transform:rotate(var(--heading,0deg))}
-/* SIDEBAR JD */
-#sidebar{width:78px;background:#222;color:#AAA;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:14px;border-left:2px solid #333}
-.sbtn{width:62px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;padding:8px 0;border-radius:8px;background:#2A2A2A;border:1px solid #333}
-.sbtn.active{background:var(--jd-green);color:white}
-.sbtn.ic{font-size:22px;display:block;margin-bottom:2px}
-#bottom-bar{height:64px;background:var(--card);border-top:2px solid #CCC;display:flex;align-items:center;justify-content:space-between;padding:0 8px;gap:6px}
-.bbtn{flex:1;height:46px;border-radius:8px;border:2px solid #CCC;background:white;font-weight:800;font-size:13px;cursor:pointer}
-.bbtn.green{background:var(--jd-green);color:white;border-color:var(--jd-dark)}
-.bbtn.yellow{background:var(--jd-yellow);border-color:#E6C900}
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:50;align-items:center;justify-content:center}
-#modal.open{display:flex}
-#modal-box{background:white;width:94%;max-width:420px;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.4)}
-#modal-head{background:var(--jd-green);color:white;padding:14px;font-weight:900}
-#modal-body{padding:16px}
-.chip{padding:8px 14px;border:1.5px solid #CCC;border-radius:20px;display:inline-block;margin:4px;font-weight:700;font-size:13px;background:#F5F5F5}
-.chip.on{background:var(--jd-green);color:white;border-color:var(--jd-green)}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial, sans-serif}
+body{background:#0F0F0F;height:100vh;display:flex;align-items:center;justify-content:center;padding:10px}
+#device{width:100%;max-width:980px;aspect-ratio:16/10;background:#111;border-radius:18px;padding:10px;box-shadow:0 10px 40px rgba(0,0,0,.6);display:flex;border:4px solid #222}
+#screen{flex:1;background:#EDE9D6;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;position:relative}
+#top{height:46px;background:#367C2B;display:flex;align-items:center;justify-content:space-between;padding:0 14px;color:white;border-bottom:4px solid #FFDE00}
+#top b{font-size:20px;letter-spacing:0.5px}
+#top small{font-size:12px;opacity:0.9;display:flex;gap:10px;align-items:center}
+#lightbar{height:42px;background:#0A0A0A;margin:6px 8px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 10px;border:2px solid #000;box-shadow:inset 0 2px 8px #000}
+.led{width:14px;height:14px;border-radius:3px;background:#222;border:1px solid #000}
+.led.g{background:#2ECC40;box-shadow:0 0 8px #2ECC40}
+.led.y{background:#FFDE00;box-shadow:0 0 8px #FFDE00}
+.led.o{background:#FF8C00;box-shadow:0 0 8px #FF8C00}
+.led.r{background:#444}
+#center{display:flex;flex:1;position:relative}
+#map-area{flex:1;position:relative;background:linear-gradient(#D8D2B8,#CFC8A8);overflow:hidden}
+#grid{position:absolute;inset:-50%;background-image:linear-gradient(#C9C3A3 1px,transparent 1px),linear-gradient(90deg,#C9C3A3 1px,transparent 1px);background-size:52px 52px;transform:perspective(500px) rotateX(55deg)}
+#tractor-wrap{position:absolute;top:58%;left:50%;transform:translate(-50%,-50%);z-index:5;text-align:center}
+#impl{width:220px;height:14px;background:#1E5AA7;border-radius:4px;border:2px solid #0A3A7A;box-shadow:0 2px 6px rgba(0,0,0,.4);position:relative;margin:0 auto}
+#impl::before{content:'...';position:absolute;top:-12px;left:0;right:0;text-align:center;letter-spacing:6px;color:#1E5AA7;font-weight:900}
+#trator{font-size:32px;margin-top:6px;display:block}
+#left-card{position:absolute;left:12px;top:12px;width:148px;background:white;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.3);border:2px solid #367C2B;z-index:10;padding:10px 12px}
+#left-card div{border-bottom:1px solid #EEE;padding:8px 0}
+#left-card div:last-child{border:none}
+#left-card span{font-size:12px;color:#367C2B;font-weight:800;display:block}
+#left-card b{font-size:20px;color:#111}
+#right-card{position:absolute;right:12px;top:12px;width:148px;background:white;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.3);border:2px solid #9B2C2C;z-index:10;padding:10px 12px;text-align:center}
+#right-card span{font-size:12px;color:#9B2C2C;font-weight:800;display:block}
+#right-card b{font-size:26px;color:#111;display:block;margin:6px 0}
+#right-card small{font-size:12px;color:#555}
+#side-panel{width:88px;background:#1E1E1E;display:flex;flex-direction:column;gap:10px;padding:10px 8px;border-left:3px solid #000}
+.side-btn{background:#2E2E2E;color:white;border:2px solid #444;border-radius:10px;padding:14px 4px;text-align:center;font-weight:900;font-size:12px;cursor:pointer}
+.side-btn:active{background:#367C2B}
+#bottom{height:58px;background:rgba(255,255,255,0.0);display:flex;gap:8px;padding:8px;z-index:10}
+.bbtn{flex:1;border-radius:10px;border:2px solid #999;background:white;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.bbtn.yellow{background:#FFDE00;border-color:#C9AC00}
+.bbtn.green{background:#2FAA2F;color:white;border-color:#1E7A1E}
+.bbtn:active{transform:scale(0.96)}
+#canvas-track{position:absolute;inset:0;z-index:2;pointer-events:none}
+@media(max-width:700px){#device{aspect-ratio:9/16;max-width:420px}#top b{font-size:16px}#left-card,#right-card{width:122px}#left-card b{font-size:16px}#right-card b{font-size:18px}#impl{width:160px}}
 </style>
 </head>
 <body>
-
-<div id="header">
-  <div id="header-left"><img src="logo.png" onerror="this.src='icon-512.png'" style="object-fit:contain"><span>PORTAL SAT | GS4</span></div>
-  <div id="header-right">
-    <div class="hdr-btn" id="gpsAcc">GPS ± -- m</div>
-    <div class="hdr-btn yellow" id="gpsStat">📶 GPS FONE</div>
-  </div>
+<div id="device">
+<div id="screen">
+<div id="top"><b>Portal Sat GPS</b><small><span>GPS FIX • RTK • ±<span id="accTop">1.2</span> cm</span><span>🛰️</span><span>📶</span><span style="border:1px solid white;padding:2px 4px;border-radius:4px" id="bat">87%</span></small></div>
+<div id="lightbar"></div>
+<div id="center">
+<div id="map-area">
+<div id="grid"></div>
+<canvas id="canvas-track"></canvas>
+<div id="left-card">
+<div><span>LARGURA</span><b id="txtLarg">12.2 m</b></div>
+<div><span>VELOCIDADE</span><b id="txtVel">0.0 km/h</b></div>
+<div><span>ÁREA</span><b id="txtArea">0.00 ha</b></div>
+</div>
+<div id="right-card">
+<span>DESVIO</span>
+<b id="txtDesv">-0.03 m</b>
+<small>Desvio p/ Linha</small>
+<div style="margin:10px 0">÷</div>
+<small>LINHA A-B</small>
+</div>
+<div id="tractor-wrap">
+<div id="impl"></div>
+<div id="trator">🚜</div>
+</div>
+</div>
+<div id="side-panel">
+<div class="side-btn" onclick="openCfg()">⚙️ CONFIG</div>
+<div class="side-btn" onclick="limpar()">🧹 LIMPAR</div>
+<div class="side-btn" onclick="centrar()">◎ CENTRO</div>
+<div class="side-btn" style="margin-top:auto;background:#FFDE00;color:#111" onclick="simular()">▶ SIMULAR</div>
+</div>
+</div>
+<div id="bottom">
+<button class="bbtn" id="bA" onclick="marcaA()">📍 MARCAR A</button>
+<button class="bbtn" id="bB" onclick="marcaB()">📍 MARCAR B</button>
+<button class="bbtn yellow" onclick="openCfg()">🚜 IMPLEMENTO</button>
+<button class="bbtn green" id="bGo" onclick="go()">▶ INICIAR</button>
+</div>
+</div>
 </div>
 
-<div id="lightbar-wrap"></div>
-
-<div id="main">
-  <div id="canvas-wrap">
-    <canvas id="mapCanvas"></canvas>
-    <div id="watermark"><img src="logo.png"></div>
-    <div id="top-info">
-      <div class="info-card">
-        <div>Largura <b id="txtLarg">20.00 m</b></div>
-        <div>Vel. <b id="txtVel">0.0 km/h</b></div>
-        <div>Área <b id="txtArea">0.00 ha</b></div>
-        <div>Modo <b>AB Reto</b></div>
-      </div>
-      <div class="info-card red">
-        <div>Desvio <b id="txtDesvio" style="color:#E53935">0.00 m</b></div>
-        <div>Precisão <b id="txtPrec">Baixa</b></div>
-        <div>Trajeto <b id="txtDist">0.00 km</b></div>
-      </div>
-    </div>
-    <div id="center-cross"><div id="tractor-icon">🚜</div></div>
-  </div>
-  <div id="sidebar">
-    <div class="sbtn" onclick="openCfg()"><span class="ic">⚙️</span>AJUSTES</div>
-    <div class="sbtn" id="btn3D" onclick="toggle3D()"><span class="ic">🗺️</span>2D/3D</div>
-    <div class="sbtn" onclick="clearAll()"><span class="ic">🗑️</span>LIMPAR</div>
-    <div class="sbtn" style="margin-top:auto;background:var(--jd-yellow);color:#222"><span class="ic">☁️</span>OFFLINE</div>
-  </div>
-</div>
-
-<div id="bottom-bar">
-  <button class="bbtn" id="btnA" onclick="setA()">MARCAR A</button>
-  <button class="bbtn" id="btnB" onclick="setB()">MARCAR B</button>
-  <button class="bbtn yellow" onclick="openCfg()">⚙️ IMPLEMENTO</button>
-  <button class="bbtn green" id="btnGo" onclick="toggleGo()">▶ INICIAR</button>
-</div>
-
-<div id="modal" onclick="this.classList.remove('open')">
-<div id="modal-box" onclick="event.stopPropagation()">
-<div id="modal-head">GS4 - Configuração</div>
-<div id="modal-body">
-<b>Largura de trabalho</b><br>
-<div id="largOpts">
-<span class="chip" onclick="setLarg(3,this)">3 m</span>
-<span class="chip" onclick="setLarg(6,this)">6 m</span>
-<span class="chip" onclick="setLarg(9,this)">9 m</span>
-<span class="chip on" onclick="setLarg(20,this)">20 m</span>
-<span class="chip" onclick="setLarg(24,this)">24 m</span>
-<span class="chip" onclick="setLarg(30,this)">30 m</span>
-</div><br>
-<b>Opacidade da logo no talhão</b><br>
-<input type="range" min="0" max="40" value="11" style="width:100%" oninput="document.getElementById('watermark').style.opacity=this.value/100"><br><br>
-<button class="bbtn green" style="width:100%" onclick="document.getElementById('modal').classList.remove('open')">SALVAR E FECHAR</button>
+<div id="modal" style="position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;z-index:100;align-items:center;justify-content:center;padding:16px" onclick="this.style.display='none'">
+<div style="background:white;width:100%;max-width:360px;border-radius:14px;overflow:hidden" onclick="event.stopPropagation()">
+<div style="background:#367C2B;color:white;padding:12px;font-weight:900">CONFIG - Portal Sat GPS</div>
+<div style="padding:14px">
+<b>Largura</b><br>
+<span class="chip" style="padding:8px 12px;border:2px solid #CCC;border-radius:20px;margin:4px;display:inline-block;cursor:pointer" onclick="setLarg(6,this)">6 m</span>
+<span class="chip" style="padding:8px 12px;border:2px solid #CCC;border-radius:20px;margin:4px;display:inline-block;cursor:pointer" onclick="setLarg(12.2,this)">12.2 m</span>
+<span class="chip" style="padding:8px 12px;border:2px solid #CCC;border-radius:20px;margin:4px;display:inline-block;cursor:pointer;background:#367C2B;color:white" onclick="setLarg(20,this)">20 m</span>
+<span class="chip" style="padding:8px 12px;border:2px solid #CCC;border-radius:20px;margin:4px;display:inline-block;cursor:pointer" onclick="setLarg(24,this)">24 m</span>
+<br><br><button onclick="document.getElementById('modal').style.display='none'" style="width:100%;height:44px;background:#367C2B;color:white;border:none;border-radius:8px;font-weight:900">SALVAR</button>
 </div>
 </div>
 </div>
 
 <script>
-/* --- GS4 CORE 100% FUNCIONAL --- */
-const canvas=document.getElementById('mapCanvas'),ctx=canvas.getContext('2d');
-function resize(){canvas.width=canvas.parentElement.clientWidth*window.devicePixelRatio;canvas.height=canvas.parentElement.clientHeight*window.devicePixelRatio;ctx.setTransform(window.devicePixelRatio,0,0,window.devicePixelRatio,0,0);draw();}
-window.addEventListener('resize',resize);resize();
-
-const lb=document.getElementById('lightbar-wrap');
-let leds=[];for(let i=0;i<23;i++){let d=document.createElement('div');d.className='led'+(i==11?' center':'');lb.appendChild(d);leds.push(d);}
-
-let state={largura:20, heading:0, speed:0, A:null, B:null, bearingAB:0, track:[], dist:0, area:0, running:false, is3D:true, lastPos:null};
-
-function toRad(d){return d*Math.PI/180} function toDeg(r){return r*180/Math.PI}
-function haversine(a,b){const R=6371000,dLat=toRad(b.lat-a.lat),dLon=toRad(b.lon-a.lon),lat1=toRad(a.lat),lat2=toRad(b.lat);const h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
-function bearing(a,b){const y=Math.sin(toRad(b.lon-a.lon))*Math.cos(toRad(b.lat)),x=Math.cos(toRad(a.lat))*Math.sin(toRad(b.lat))-Math.sin(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.cos(toRad(b.lon-a.lon));return (toDeg(Math.atan2(y,x))+360)%360;}
-function crossTrack(pos){if(!state.A||!state.B)return 0;const d=haversine(state.A,pos);const br=bearing(state.A,pos);const brAB=state.bearingAB;return Math.asin(Math.sin(d/6371000)*Math.sin(toRad(br-brAB)))*6371000;}
-
-function setLightbar(err){leds.forEach(l=>l.className=l.classList.contains('center')?'led center':'led');leds[11].classList.add('active-green');const q=Math.round(Math.abs(err)/0.25);const cls=Math.abs(err)<0.15?'active-green':Math.abs(err)<0.5?'active-yellow':'active-red';if(err<0){for(let i=0;i<q&&i<11;i++)leds[10-i].classList.add(cls);}else{for(let i=0;i<q&&i<11;i++)leds[12+i].classList.add(cls);}document.getElementById('txtDesvio').innerText=(err>0?'+':'')+err.toFixed(2)+' m';}
-
-function draw(){
- const W=canvas.width/window.devicePixelRatio,H=canvas.height/window.devicePixelRatio;
- ctx.clearRect(0,0,W,H);
- // grid
- ctx.strokeStyle='#C7C9AD';ctx.lineWidth=1;const grid=40;for(let x=0;x<W;x+=grid){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}for(let y=0;y<H;y+=grid){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
- // rastros
- if(state.track.length>1){
-  ctx.strokeStyle='rgba(54,124,43,.35)';ctx.lineWidth=state.largura*1.2;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
-  state.track.forEach((p,i)=>{const sx=W/2+(p.x-state.track[state.track.length-1].x);const sy=H/2+(p.y-state.track[state.track.length-1].y);if(i==0)ctx.moveTo(sx,sy);else ctx.lineTo(sx,sy);});ctx.stroke();
-  // linha AB
-  if(state.A&&state.B){ctx.strokeStyle='#367C2B';ctx.lineWidth=3;ctx.setLineDash([12,8]);ctx.beginPath();ctx.moveTo(W/2-400, H/2);ctx.lineTo(W/2+400, H/2);ctx.stroke();ctx.setLineDash([]);}
- }
-}
-
-function onPos(pos){
- const c=pos.coords;const p={lat:c.latitude,lon:c.longitude,acc:c.accuracy,spd:c.speed||0,head:c.heading||0};
- document.getElementById('gpsAcc').innerText=`GPS ±${c.accuracy.toFixed(1)}m`;
- document.getElementById('txtPrec').innerText=c.accuracy<5?'Alta':c.accuracy<10?'Média':'Baixa';
- document.getElementById('txtPrec').style.color=c.accuracy<5?'#367C2B':'#E53935';
- state.speed=(p.spd*3.6);document.getElementById('txtVel').innerText=state.speed.toFixed(1)+' km/h';
- if(state.lastPos){const d=haversine(state.lastPos,p);if(d>1&&state.running){state.dist+=d/1000;state.area+= (d*state.largura)/10000;document.getElementById('txtDist').innerText=state.dist.toFixed(2)+' km';document.getElementById('txtArea').innerText=state.area.toFixed(2)+' ha';}}
- state.lastPos=p;
- const screenX=0,screenY=0; // simplificado centrado no trator
- state.track.push({x:0,y:0,lat:p.lat,lon:p.lon}); if(state.track.length>800)state.track.shift();
- const err=state.A&&state.B?crossTrack(p):(Math.random()*0.6-0.3);
- setLightbar(err); draw();
- document.getElementById('tractor-icon').style.setProperty('--heading', (p.head? p.head+'deg':'0deg'));
-}
-
-function setA(){if(!state.lastPos){alert('Aguardando GPS...');return;}state.A={...state.lastPos};document.getElementById('btnA').innerText='✓ A OK';document.getElementById('btnA').style.background='#C8E6C9';}
-function setB(){if(!state.A){alert('Marque A primeiro');return;}if(!state.lastPos)return;state.B={...state.lastPos};state.bearingAB=bearing(state.A,state.B);document.getElementById('btnB').innerText='✓ B OK';document.getElementById('btnB').style.background='#C8E6C9';alert('Linha AB criada! Direção: '+state.bearingAB.toFixed(1)+'°');}
-function toggleGo(){state.running=!state.running;document.getElementById('btnGo').innerText=state.running?'⏸ PAUSAR':'▶ INICIAR';document.getElementById('btnGo').style.background=state.running?'#E53935':'#367C2B';}
-function setLarg(v,el){state.largura=v;document.getElementById('txtLarg').innerText=v.toFixed(2)+' m';el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');draw();}
-function openCfg(){document.getElementById('modal').classList.add('open')}
-function clearAll(){state.track=[];state.dist=0;state.area=0;state.A=null;state.B=null;document.getElementById('txtArea').innerText='0.00 ha';document.getElementById('txtDist').innerText='0.00 km';document.getElementById('btnA').innerText='MARCAR A';document.getElementById('btnB').innerText='MARCAR B';draw();}
-function toggle3D(){state.is3D=!state.is3D;document.getElementById('btn3D').classList.toggle('active');}
-
-if(navigator.geolocation){navigator.geolocation.watchPosition(onPos, e=>{document.getElementById('gpsAcc').innerText='GPS ERRO';}, {enableHighAccuracy:true, maximumAge:0, timeout:10000});}else alert('GPS não suportado');
-setInterval(draw,1000);
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
-</script>
-</body>
-</html>
+const lb=document.getElementById('lightbar');let leds=[];for(let i=0;i<20;i++){let d=document.createElement('div');d.className='led';lb.appendChild(d);leds.push(d);}
+const canvas=document.getElementById('canvas-track');const ctx=canvas.getContext('2d');
+function resize(){canvas.width=canvas.parentElement.clientWidth;canvas.height=canvas.parentElement.clientHeight;}window.addEventListener('resize',resize);resize();
+let state={larg:12.2,A:null,B:null,bear:0,track:[],dist:0,area:0,run:false,last:null,err:0,simInt:null};
+function hav(a,b){const R=6371000,toR=x=>x*Math.PI/180;const dLat=toR(b.lat-a.lat),dLon=toR(b.lon-a.lon);const s=Math.sin(dLat/2)**2+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(s));}
+function bear(a,b){const toR=x=>x*Math.PI/180,toD=x=>x*180/Math.PI;const y=Math.sin(toR(b.lon-a.lon))*Math.cos(toR(b.lat));const x=Math.cos(toR(a.lat))*Math.sin(toR(b.lat))-Math.sin(toR(a.lat))*Math.cos(toR(b.lat))*Math.cos(toR(b.lon-a.lon));return (toD(Math.atan2(y,x))+360)%360;}
+function cross(p){if(!state.A||!state.B)return state.err;const d=hav(state.A,p);const br=bear(state.A,p);return Math.asin(Math.sin(d/6371000)*Math.sin((br-state.bear)*Math.PI/180))*6371000;}
+function light(e){leds.forEach(l=>l.className='led r');leds[9].className='led g';leds[10].className='led g';let q=Math.round(Math.abs(e)/0.15);let cls=Math.abs(e)<0.25?'g':Math.abs(e)<0.6?'y':'o';if(e<0){for(let i=0;i<q&&i<9;i++)leds[8-i].className='led '+cls;}else{for(let i=0;i<q&&i<9;i++)leds[11+i].className='led '+cls;}document
