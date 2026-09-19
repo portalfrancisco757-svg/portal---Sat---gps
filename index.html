@@ -3,486 +3,852 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#00ff00">
     <title>PORTAL SAT GPS</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         html, body {
+            background: #000; color: white;
+            height: 100vh; height: 100dvh;
+            width: 100vw; overflow: hidden; position: fixed;
+        }
+
+        /* ❌ FAIXA VERDE — REMOVIDA DEFINITIVAMENTE */
+        .barra-verde { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; pointer-events: none !important; }
+
+        /* 🔦 BARRA DE LEDS */
+        .barra-led {
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 26px; background: #000;
+            display: flex; justify-content: center; align-items: center;
+            gap: 1px; padding: 0 5px; border-bottom: 2px solid #333;
+            z-index: 50;
+        }
+        .led { width: 9px; height: 14px; border-radius: 2px; background: #222; transition: all 0.1s; }
+        .led.vermelho { background: #c00; box-shadow: 0 0 4px #c00; }
+        .led.laranja { background: #f80; box-shadow: 0 0 4px #f80; }
+        .led.verde { background: #0c0; box-shadow: 0 0 4px #0c0; }
+        .led.centro { width: 11px; background: #333; }
+        .led.centro.ativo { background: #fff; box-shadow: 0 0 6px #fff; }
+
+        /* 📱 CABEÇALHO — LIMPO */
+        .cabecalho {
+            position: absolute; top: 26px; left: 0; right: 0;
+            padding: 6px 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 40; height: 48px;
+            background: transparent;
+        }
+        .cabecalho-esquerda {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .titulo { font-size: 15px; font-weight: bold; color: #6cf; }
+        .status-topo { display: flex; align-items: center; gap: 10px; }
+        .btn-gps { background: #f90; border: none; padding: 3px 10px; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 12px; }
+        .btn-gps.rtk { background: #080; }
+        .relogio { font-family: monospace; font-size: 14px; }
+
+        /* 🎯 ÁREA DE MAPA */
+        .area-mapa {
+            position: absolute; top: 74px; left: 0; right: 0; bottom: 0;
             background: #000;
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
             overflow: hidden;
-            position: fixed;
+            perspective: 1000px;
+            transform-style: preserve-3d;
         }
 
-        /* 🟩 TELA QUADRICULADA — SEM CÍRCULO */
-        .tela-navegacao {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #051a05;
-            overflow: hidden;
-        }
-
-        /* Grade verde — TELA COMPLETA */
-        .grade {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+        /* 🗺️ PLANO DO MAPA */
+        .plano-mapa {
+            position: absolute; width: 400%; height: 400%;
+            top: -150%; left: -150%;
             background-image: 
-                linear-gradient(rgba(0,255,80,0.12) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,255,80,0.12) 1px, transparent 1px);
-            background-size: 35px 35px;
-        }
-
-        /* Linhas guia centrais */
-        .linha-vertical {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            width: 2px;
-            background: linear-gradient(180deg, transparent, #00ff00, #00ccff, #00ff00, transparent);
-            transform: translateX(-50%);
-            box-shadow: 0 0 8px rgba(0,255,0,0.5);
-            z-index: 6;
-        }
-        .linha-horizontal {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 50%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #00ff00, transparent);
-            transform: translateY(-50%);
-            box-shadow: 0 0 8px rgba(0,255,0,0.5);
-            z-index: 6;
-        }
-
-        /* ✨ BARRA DE LUZ — LINHA GUIADA ENTRE A E B */
-        .barra-luz-linha {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 5px;
-            background: linear-gradient(90deg, transparent, #00ff00, #aaff00, #00ff00, transparent);
-            box-shadow: 
-                0 0 20px #00ff00,
-                0 0 40px rgba(0,255,0,0.6),
-                inset 0 0 10px #fff;
-            transform-origin: left center;
-            z-index: 9;
-            transition: all 0.25s ease;
-            opacity: 0;
-            border-radius: 3px;
-        }
-        .barra-luz-linha.ativa { opacity: 1; }
-
-        /* 🟩 FAIXA/PINTURA QUE ACOMPANHA O TRIÂNGULO */
-        .faixa-direcao {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 120px;
-            background: linear-gradient(90deg, 
-                rgba(0,255,0,0.05) 0%, 
-                rgba(0,255,0,0.25) 30%, 
-                rgba(0,255,0,0.4) 50%, 
-                rgba(0,255,0,0.25) 70%, 
-                rgba(0,255,0,0.05) 100%);
-            transform-origin: left center;
-            transform: translateY(-50%);
-            z-index: 8;
-            pointer-events: none;
-            transition: all 0.15s ease;
-            border-radius: 60px;
-        }
-
-        /* Triângulo amarelo — veículo */
-        .triangulo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-left: 24px solid transparent;
-            border-right: 24px solid transparent;
-            border-bottom: 40px solid #ffcc00;
-            transform: translate(-50%, -50%);
-            filter: drop-shadow(0 0 15px #ffcc00);
-            z-index: 15;
+                linear-gradient(rgba(0,200,255,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,200,255,0.08) 1px, transparent 1px);
+            background-size: 30px 30px;
+            transform-origin: center center;
             transition: transform 0.1s linear;
         }
+        .modo-2d .plano-mapa { transform: translate(0, 0) scale(1) rotateX(0deg) !important; }
+        .modo-3d .plano-mapa { transform: translate(0, 0) scale(1) rotateX(60deg) !important; }
 
-        /* Distância no canto direito */
-        .distancia-display {
-            position: absolute;
-            top: 30px;
-            right: 30px;
-            font-size: 32px;
-            font-weight: bold;
-            color: #00ff00;
-            font-family: monospace;
-            text-shadow: 0 0 10px rgba(0,255,0,0.5);
+        /* 🟩 CANVAS DE COBERTURA */
+        .cobertura-canvas {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+        }
+
+        /* 📐 DESVIO GRANDE */
+        .desvio-grande {
+            position: absolute; top: 85px; right: 100px;
+            font-size: 42px; font-weight: bold; font-family: monospace;
+            color: #0f0; text-shadow: 0 0 10px rgba(0,255,0,0.5);
             z-index: 20;
         }
 
-        /* Botões Ponto A e B */
-        .bloco-pontos {
-            position: absolute;
-            left: 25px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 20;
+        /* 🎯 SETA FIXA NO CENTRO */
+        .container-seta {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 15; pointer-events: none;
         }
-        .btn-ponto {
-            width: 90px;
-            height: 70px;
-            border-radius: 8px;
-            border: 3px solid #fff;
-            font-size: 18px;
-            font-weight: 900;
-            color: #fff;
-            cursor: pointer;
-            touch-action: manipulation;
-            transition: all 0.2s;
+        .linha-centro {
+            position: absolute; left: 50%; top: -300px; bottom: -300px; width: 3px;
+            background: linear-gradient(180deg, transparent, #0cf, transparent);
+            transform: translateX(-50%); box-shadow: 0 0 15px rgba(0,200,255,0.5);
+            opacity: 0; transition: opacity 0.3s;
         }
-        .btn-a {
-            background: linear-gradient(180deg, #00c800, #008800);
-            border-color: #00ff00;
-        }
-        .btn-a.ativo {
-            box-shadow: 0 0 15px #00ff00, inset 0 0 10px rgba(255,255,255,0.3);
-        }
-        .btn-b {
-            background: linear-gradient(180deg, #0066ff, #0044cc);
-            border-color: #0088ff;
-        }
-        .btn-b:disabled {
-            background: #222;
-            border-color: #444;
-            color: #666;
-        }
-        .btn-b.ativo {
-            box-shadow: 0 0 15px #0088ff, inset 0 0 10px rgba(255,255,255,0.3);
+        .linha-centro.ativa { opacity: 1; }
+        .seta-navegacao {
+            width: 0; height: 0;
+            border-left: 28px solid transparent;
+            border-right: 28px solid transparent;
+            border-bottom: 40px solid #fc0;
+            filter: drop-shadow(0 0 15px rgba(255,200,0,0.6));
+            transition: transform 0.2s ease-out;
+            transform-origin: center;
         }
 
-        /* Controles lado direito */
-        .bloco-controles {
-            position: absolute;
-            right: 25px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 20;
-        }
-        .btn-controle {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            border: 2px solid #555;
-            font-size: 20px;
-            cursor: pointer;
-            background: #222;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        .btn-controle:hover { background: #333; }
-        .btn-controle.primario {
-            background: #005500;
-            border-color: #00ff00;
-        }
-        .btn-controle.primario.ativo {
-            box-shadow: 0 0 15px rgba(0,255,0,0.5);
-        }
-        .btn-2d {
-            background: #0055aa;
-            border-color: #00aaff;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .btn-2d.ativo {
-            box-shadow: 0 0 15px rgba(0,100,255,0.5);
+        /* ⬅️ ÁREA DOS BOTÕES A/B + PAINEL DE DADOS AO LADO */
+        .lado-esquerdo-conteiner {
+            position: absolute; left: 15px; top: 65%; transform: translateY(-50%);
+            display: flex; align-items: flex-start; gap: 12px;
+            z-index: 30;
         }
 
-        /* Status GPS topo */
-        .status-topo {
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            z-index: 25;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        /* 📊 PAINEL DE DADOS — AO LADO DOS BOTÕES, NÃO ATRÁS */
+        .painel-dados {
+            background: rgba(0,0,0,0.85); border: 1px solid #333;
+            border-radius: 6px; padding: 10px; min-width: 180px;
+            font-size: 13px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 1;
+            transform: translateX(0);
         }
-        .titulo-app {
-            font-size: 16px;
-            font-weight: bold;
-            color: #00ff00;
+        .painel-dados.escondido {
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
         }
-        .status-gps {
-            padding: 4px 10px;
+        .linha-dado {
+            display: flex; justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #222;
+        }
+        .etiqueta { color: #888; font-size: 12px; }
+        .valor { font-family: monospace; font-weight: bold; color: #0f0; font-size: 13px; }
+        .valor.azul { color: #0cf; }
+        .valor.vermelho { color: #f44; }
+        .valor.amarelo { color: #fc0; }
+
+        /* 🎛️ ÍCONES DE DADOS E CONFIGURAÇÃO — ACIMA DO BOTÃO A */
+        .icones-superior-esquerdo {
+            position: absolute; left: 15px; top: 120px;
+            display: flex; gap: 10px;
+            z-index: 35;
+        }
+        .btn-icone-topo {
+            width: 32px; height: 32px; border-radius: 6px; border: none;
+            background: #333; color: white;
+            font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-fechar-dados {
             background: #333;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
         }
-        .status-gps.ativo {
-            background: #008800;
-            color: #fff;
+        .btn-config {
+            background: #333;
         }
+
+        /* 🎯 BOTÕES A E B */
+        .botoes-navegacao-lado {
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .btn-lado {
+            width: 90px; height: 90px; border-radius: 8px; border: 4px solid white;
+            font-size: 16px; font-weight: bold; color: white;
+            cursor: pointer; touch-action: manipulation;
+            transition: all 0.15s;
+            box-shadow: 0 0 12px rgba(255,255,255,0.2);
+        }
+        .btn-lado:active { transform: scale(0.95); }
+        .btn-a { background: linear-gradient(180deg, #00c000, #009000); }
+        .btn-b { background: linear-gradient(180deg, #0088ff, #0066cc); }
+        .btn-b:disabled { background: #222; color: #666; border-color: #444; opacity: 1; }
+
+        /* ➡️ BOTÕES LADO DIREITO */
+        .botoes-lado-direito {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 30;
+        }
+        .btn-direito {
+            width: 60px; height: 60px; border-radius: 50%; border: 3px solid;
+            font-size: 22px; cursor: pointer; background: #222;
+            color: white; border-color: #444;
+            transition: all 0.15s;
+        }
+        .btn-direito:active { transform: scale(0.9); }
+        .btn-cobertura { background: #004400; border-color: #00ff00; font-size: 24px; box-shadow: 0 0 15px rgba(0,255,0,0.3); }
+        .btn-cobertura.ativo { background: #006600; box-shadow: 0 0 20px rgba(0,255,0,0.6); }
+        .btn-zoom { background: #333; border-color: #555; font-weight: bold; font-size: 24px; }
+        .btn-visao-unico {
+            background: #0066ff; border-color: #00ccff;
+            font-size: 13px; font-weight: bold;
+            box-shadow: 0 0 10px rgba(0,100,255,0.5);
+        }
+
+        /* 📋 MODAL */
+        .fundo-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            display: none; align-items: center; justify-content: center;
+            z-index: 200; padding: 15px;
+        }
+        .fundo-modal.mostrar { display: flex; }
+        .modal {
+            background: #1a1a1a; border: 2px solid #333;
+            border-radius: 10px; padding: 20px;
+            width: 100%; max-width: 420px;
+            max-height: 85vh; overflow-y: auto;
+        }
+        .modal-titulo { font-size: 18px; font-weight: bold; color: #0cf; margin-bottom: 15px; text-align: center; }
+        .abas { display: flex; gap: 8px; margin-bottom: 15px; }
+        .aba { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #333; color: white; }
+        .aba.ativa { background: #069; }
+        .campo { width: 100%; padding: 12px; margin: 8px 0; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 6px; font-size: 15px; }
+        .grupo-botoes { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .btn-cancelar { background: #444; color: white; }
+        .btn-salvar { background: #080; color: white; }
+        .info-bloco { background: #2a2a2a; padding: 12px; border-radius: 6px; margin-top: 10px; }
+        label { color: #aaa; font-size: 13px; display: block; margin-bottom: 4px; }
+        .sem-dados { color: #666; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
 
-<!-- Tela Principal - QUADRÍCULA COMPLETA -->
-<div class="tela-navegacao" id="telaNavegacao">
-    <div class="grade"></div>
-    
-    <!-- Status GPS -->
-    <div class="status-topo">
-        <div class="titulo-app">PORTAL SAT GPS</div>
-        <div class="status-gps" id="statusGPS">GPS</div>
+    <!-- ❌ FAIXA VERDE -->
+    <div class="barra-verde"></div>
+
+    <!-- 🔦 BARRA DE LEDS -->
+    <div class="barra-led" id="barraLED"></div>
+
+    <!-- 📱 CABEÇALHO -->
+    <div class="cabecalho">
+        <div class="cabecalho-esquerda">
+            <span style="font-size:18px;">🛰️</span>
+            <span class="titulo">PORTAL SAT GPS</span>
+            <div class="status-topo">
+                <button class="btn-gps" id="btnGPS">GPS</button>
+                <span class="relogio" id="relogio">16:15</span>
+            </div>
+        </div>
     </div>
 
-    <!-- Distância -->
-    <div class="distancia-display" id="distanciaDisplay">+0.00 m</div>
-    
-    <!-- Linhas Guia -->
-    <div class="linha-vertical"></div>
-    <div class="linha-horizontal"></div>
-
-    <!-- ✨ BARRA DE LUZ — SEGUE A LINHA A → B -->
-    <div class="barra-luz-linha" id="barraLuzLinha"></div>
-
-    <!-- 🟩 FAIXA/PINTURA — ACOMPANHA O TRIÂNGULO -->
-    <div class="faixa-direcao" id="faixaDirecao"></div>
-
-    <!-- Triângulo Veículo -->
-    <div class="triangulo" id="triangulo"></div>
-
-    <!-- Botões Ponto A / B -->
-    <div class="bloco-pontos">
-        <button class="btn-ponto btn-a" id="btnPontoA">PONTO A</button>
-        <button class="btn-ponto btn-b" id="btnPontoB" disabled>PONTO B</button>
+    <!-- 🎛️ ÍCONES DE DADOS E CONFIGURAÇÃO — ACIMA DO BOTÃO A -->
+    <div class="icones-superior-esquerdo">
+        <button class="btn-icone-topo btn-fechar-dados" id="btnDadosToggle" title="Mostrar/Esconder Dados">📊</button>
+        <button class="btn-icone-topo btn-config" id="btnConfig" title="Configurações">⚙</button>
     </div>
 
-    <!-- Controles Direitos -->
-    <div class="bloco-controles">
-        <button class="btn-controle primario ativo" title="Cobertura">🟩</button>
-        <button class="btn-controle" id="btnZoomMais" title="+">+</button>
-        <button class="btn-controle" id="btnZoomMenos" title="−">−</button>
-        <button class="btn-controle btn-2d ativo" id="btnModo" title="2D">2D</button>
+    <!-- ⬅️ LADO ESQUERDO: BOTÕES A/B + PAINEL DE DADOS AO LADO -->
+    <div class="lado-esquerdo-conteiner">
+        <div class="botoes-navegacao-lado">
+            <button class="btn-lado btn-a" id="btnA">PONTO A</button>
+            <button class="btn-lado btn-b" id="btnB" disabled>PONTO B</button>
+        </div>
+
+        <!-- 📊 PAINEL DE DADOS — AO LADO, NÃO ATRÁS -->
+        <div class="painel-dados" id="painelDados">
+            <div class="linha-dado"><span class="etiqueta">Talhão</span><span class="valor" id="nomeTalhao">---</span></div>
+            <div class="linha-dado"><span class="etiqueta">Implemento</span><span class="valor azul" id="larguraFaixa">--- m</span></div>
+            <div class="linha-dado"><span class="etiqueta">Latitude</span><span class="valor" id="lat">---</span></div>
+            <div class="linha-dado"><span class="etiqueta">Longitude</span><span class="valor" id="lon">---</span></div>
+            <div class="linha-dado"><span class="etiqueta">Rumo</span><span class="valor" id="rumo">0.0°</span></div>
+            <div class="linha-dado"><span class="etiqueta">Velocidade</span><span class="valor azul" id="vel">0.0 km/h</span></div>
+            <div class="linha-dado"><span class="etiqueta">Desvio</span><span class="valor vermelho" id="desvio">+0.00 m</span></div>
+            <div class="linha-dado"><span class="etiqueta">Precisão</span><span class="valor azul" id="precisao">--- m</span></div>
+        </div>
     </div>
-</div>
 
-<script>
-// ==================================================
-// PORTAL SAT GPS — BARRA DE LUZ + FAIXA DIREÇÃO
-// ✅ Barra de luz segue linha A→B
-// ✅ Faixa/pintura acompanha o triângulo
-// ✅ Todo o restante permanece igual
-// ==================================================
+    <!-- 🎯 ÁREA DE MAPA -->
+    <div class="area-mapa modo-2d" id="areaMapa">
+        <div class="plano-mapa" id="planoMapa"></div>
+        <canvas class="cobertura-canvas" id="coberturaCanvas"></canvas>
+        <div class="container-seta" id="containerSeta">
+            <div class="linha-centro" id="linhaCentro"></div>
+            <div class="seta-navegacao" id="seta"></div>
+        </div>
+    </div>
 
-const ESTADO = {
-    lat: null,
-    lon: null,
-    rumo: 0,
-    pontoA: null,
-    pontoB: null,
-    distancia: 0,
-    precisao: null,
-    ativo: false
-};
+    <!-- 📐 DESVIO GRANDE -->
+    <div class="desvio-grande" id="desvioGrande">+0.00 m</div>
 
-// 📡 GPS — FUNCIONA OFFLINE, SEM INTERNET
-function iniciarGPS() {
-    if (!navigator.geolocation) {
-        alert('❌ GPS não disponível no dispositivo');
-        return;
-    }
+    <!-- ➡️ BOTÕES LADO DIREITO + BOTÃO 2D/3D ÚNICO -->
+    <div class="botoes-lado-direito">
+        <button class="btn-direito btn-cobertura" id="btnCobertura" title="Ligar/Desligar Cobertura">🟩</button>
+        <button class="btn-direito btn-zoom" id="btnZoomMais" title="Aproximar">+</button>
+        <button class="btn-direito btn-zoom" id="btnZoomMenos" title="Distanciar">−</button>
+        <button class="btn-direito btn-visao-unico" id="btnVisaoUnica" title="Alternar 2D / 3D">2D</button>
+    </div>
 
-    document.getElementById('statusGPS').textContent = 'BUSCANDO...';
+    <!-- 📋 MODAL -->
+    <div class="fundo-modal" id="modal">
+        <div class="modal">
+            <h3 class="modal-titulo">⚙ CONFIGURAÇÕES</h3>
+            <div class="abas">
+                <button class="aba ativa" data-aba="criar">Criar</button>
+                <button class="aba" data-aba="talhoes">Talhões</button>
+                <button class="aba" data-aba="config">Geral</button>
+            </div>
+            <div id="aba-criar">
+                <div class="info-bloco">
+                    <label>Nome do Talhão *</label>
+                    <input type="text" id="nomeTalhaoInput" class="campo" placeholder="Ex: Talhão 1 - Soja">
+                    <label>Largura do Implemento (m) *</label>
+                    <input type="number" id="larguraImplemento" class="campo" value="20.0" step="0.1" min="0.5">
+                    <label>Cultura / Observação</label>
+                    <input type="text" id="observacao" class="campo" placeholder="Ex: Soja - Safra 2026">
+                </div>
+                <div class="grupo-botoes">
+                    <button class="btn-modal btn-cancelar" id="btnFechar">Fechar</button>
+                    <button class="btn-modal btn-salvar" id="btnSalvarTalhao">💾 Salvar</button>
+                </div>
+            </div>
+            <div id="aba-talhoes" style="display:none;">
+                <div id="listaTalhoes"><p class="sem-dados">Nenhum talhão salvo ainda</p></div>
+            </div>
+            <div id="aba-config" style="display:none;">
+                <div class="info-bloco">
+                    <label>Tipo de Linha de Guia</label>
+                    <select id="tipoLinhaGuia" class="campo">
+                        <option selected>AB Reta</option>
+                        <option>Curva Contínua</option>
+                        <option>Contorno</option>
+                        <option>Espiral</option>
+                    </select>
+                    <label>Unidades de Medida</label>
+                    <select id="unidades" class="campo">
+                        <option selected>Métrico (m, km/h)</option>
+                        <option>Imperial (pés, mph)</option>
+                    </select>
+                </div>
+                <div class="grupo-botoes">
+                    <button class="btn-modal btn-cancelar" id="btnFecharConfig">Fechar</button>
+                    <button class="btn-modal btn-salvar" id="btnAplicarConfig">✅ Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    const opcoes = {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 10000
-    };
+    <script>
+        // ==============================================
+        // 🚜 PORTAL SAT GPS — ALTERAÇÕES SOLICITADAS
+        // ==============================================
 
-    navigator.geolocation.watchPosition(
-        pos => {
-            ESTADO.lat = pos.coords.latitude;
-            ESTADO.lon = pos.coords.longitude;
-            ESTADO.precisao = pos.coords.accuracy;
+        // === VARIÁVEIS ===
+        let lat = null, lon = null;
+        let latAnterior = null, lonAnterior = null;
+        let rumo = 0, velocidade = 0, precisao = null;
+        let desvio = 0;
+        let temA = false, temB = false;
+        let pontoA = null, pontoB = null;
+        let larguraFaixa = 20.0;
+        let nomeTalhaoAtual = '---';
+        let unidadesMetricas = true;
+        let tipoLinha = 'AB Reta';
+        let talhoes = [];
+        let painelVisivel = true;
+        let coberturaAtiva = true;
+        let zoom = 1;
+        let visao2D = true;
+        const TOTAL_LEDS = 27;
+        const CENTRO_LED = 13;
+        const leds = [];
+        
+        let ultimoPonto = null;
+        let escalaMetrosPorPixel = 0.05;
+        let deslocamentoX = 0;
+        let deslocamentoY = 0;
+        let fatorMovimento = 20;
+
+        // === ELEMENTOS ===
+        const el = {
+            barraLED: document.getElementById('barraLED'),
+            btnGPS: document.getElementById('btnGPS'),
+            relogio: document.getElementById('relogio'),
+            btnConfig: document.getElementById('btnConfig'),
+            btnDadosToggle: document.getElementById('btnDadosToggle'),
+            painelDados: document.getElementById('painelDados'),
+            nomeTalhao: document.getElementById('nomeTalhao'),
+            larguraFaixaEl: document.getElementById('larguraFaixa'),
+            lat: document.getElementById('lat'),
+            lon: document.getElementById('lon'),
+            rumo: document.getElementById('rumo'),
+            vel: document.getElementById('vel'),
+            desvio: document.getElementById('desvio'),
+            desvioGrande: document.getElementById('desvioGrande'),
+            precisao: document.getElementById('precisao'),
+            modal: document.getElementById('modal'),
+            btnVisaoUnica: document.getElementById('btnVisaoUnica'),
+            areaMapa: document.getElementById('areaMapa'),
+            planoMapa: document.getElementById('planoMapa'),
+            seta: document.getElementById('seta'),
+            linhaCentro: document.getElementById('linhaCentro'),
+            btnA: document.getElementById('btnA'),
+            btnB: document.getElementById('btnB'),
+            btnCobertura: document.getElementById('btnCobertura'),
+            coberturaCanvas: document.getElementById('coberturaCanvas'),
+            btnZoomMais: document.getElementById('btnZoomMais'),
+            btnZoomMenos: document.getElementById('btnZoomMenos'),
+        };
+
+        const ctx = el.coberturaCanvas.getContext('2d');
+        
+        function ajustarCanvas() {
+            const rect = el.areaMapa.getBoundingClientRect();
+            el.coberturaCanvas.width = rect.width * 2;
+            el.coberturaCanvas.height = rect.height * 2;
+            el.coberturaCanvas.style.width = rect.width + 'px';
+            el.coberturaCanvas.style.height = rect.height + 'px';
+            ctx.scale(2, 2);
+            escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
+        }
+        window.addEventListener('resize', ajustarCanvas);
+        ajustarCanvas();
+
+        // ==============================================
+        // 🔦 INICIALIZAR BARRA DE LEDS
+        // ==============================================
+        function inicializarLEDs() {
+            el.barraLED.innerHTML = '';
+            leds.length = 0;
+            for (let i = 0; i < TOTAL_LEDS; i++) {
+                const led = document.createElement('div');
+                led.className = 'led';
+                if (i === CENTRO_LED) led.classList.add('centro');
+                el.barraLED.appendChild(led);
+                leds.push(led);
+            }
+        }
+        inicializarLEDs();
+
+        // ==============================================
+        // 🟩 COBERTURA
+        // ==============================================
+        function desenharFaixaCobertura(x, y, angulo) {
+            if (!coberturaAtiva || !temA) return;
             
-            if (pos.coords.heading !== null) {
-                ESTADO.rumo = Math.round(pos.coords.heading);
+            const w = el.coberturaCanvas.width / 2;
+            const h = el.coberturaCanvas.height / 2;
+            const larguraPx = (larguraFaixa / escalaMetrosPorPixel) * zoom;
+            const rad = angulo * Math.PI / 180;
+            const perpRad = rad + Math.PI / 2;
+            const meiaLargura = larguraPx / 2;
+            const dx = Math.cos(perpRad) * meiaLargura;
+            const dy = Math.sin(perpRad) * meiaLargura;
+            
+            ctx.save();
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.25)';
+            ctx.strokeStyle = 'rgba(0, 255, 0, 0.7)';
+            ctx.lineWidth = 2;
+            
+            if (ultimoPonto) {
+                ctx.beginPath();
+                ctx.moveTo(ultimoPonto.x - dx, ultimoPonto.y - dy);
+                ctx.lineTo(ultimoPonto.x + dx, ultimoPonto.y + dy);
+                ctx.lineTo(x + dx, y + dy);
+                ctx.lineTo(x - dx, y - dy);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.arc(x, y, meiaLargura, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+            ultimoPonto = { x, y };
+        }
+
+        function limparCobertura() {
+            ctx.clearRect(0, 0, el.coberturaCanvas.width / 2, el.coberturaCanvas.height / 2);
+            ultimoPonto = null;
+            deslocamentoX = 0;
+            deslocamentoY = 0;
+        }
+
+        // ==============================================
+        // ✅ 2D / 3D — BOTÃO ÚNICO
+        // ==============================================
+        function aplicarModoVisao() {
+            if (visao2D) {
+                el.areaMapa.classList.remove('modo-3d');
+                el.areaMapa.classList.add('modo-2d');
+                el.btnVisaoUnica.textContent = '2D';
+            } else {
+                el.areaMapa.classList.remove('modo-2d');
+                el.areaMapa.classList.add('modo-3d');
+                el.btnVisaoUnica.textContent = '3D';
+            }
+            atualizarMovimentoMapa();
+        }
+
+        el.btnVisaoUnica.addEventListener('click', () => {
+            visao2D = !visao2D;
+            aplicarModoVisao();
+        });
+
+        // ==============================================
+        // 🗺️ ATUALIZAR MOVIMENTO DO MAPA
+        // ==============================================
+        function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function atualizarMovimentoMapa() {
+            const rotacao = -rumo;
+            const inclinacao = visao2D ? 0 : 60;
+            
+            el.planoMapa.style.transform = `
+                translate(${deslocamentoX}px, ${deslocamentoY}px) 
+                scale(${zoom}) 
+                rotate(${rotacao}deg) 
+                rotateX(${inclinacao}deg)
+            `;
+        }
+
+        // ==============================================
+        // 🔦 ATUALIZAR LEDS
+        // ==============================================
+        function atualizarLEDs(desvioMetros) {
+            leds.forEach(led => {
+                led.classList.remove('verde', 'laranja', 'vermelho', 'ativo');
+                led.style.background = '#222';
+            });
+            leds[CENTRO_LED].classList.add('centro', 'ativo');
+            if (!temA || !temB) return;
+
+            const maxDesvio = 0.6;
+            const fator = (desvioMetros / maxDesvio) * (TOTAL_LEDS / 2);
+            let alvo = Math.round(CENTRO_LED - fator);
+            alvo = Math.max(0, Math.min(TOTAL_LEDS - 1, alvo));
+            const qtd = Math.max(1, Math.abs(alvo - CENTRO_LED));
+            const dir = alvo > CENTRO_LED ? 1 : -1;
+
+            for (let i = 1; i <= qtd; i++) {
+                const idx = CENTRO_LED + (i * dir);
+                if (idx < 0 || idx >= TOTAL_LEDS) break;
+                if (Math.abs(idx - CENTRO_LED) <= 4) leds[idx].classList.add('verde');
+                else if (Math.abs(idx - CENTRO_LED) <= 9) leds[idx].classList.add('laranja');
+                else leds[idx].classList.add('vermelho');
+            }
+        }
+
+        // ==============================================
+        // 🕐 RELÓGIO
+        // ==============================================
+        function atualizarRelogio() {
+            const agora = new Date();
+            el.relogio.textContent = agora.toLocaleTimeString('pt-BR', {
+                hour: '2-digit', minute: '2-digit', hour12: false
+            });
+        }
+        setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
+
+        // ==============================================
+        // 📏 CALCULAR DESVIO
+        // ==============================================
+        function calcularDesvio(lat1, lon1, lat2, lon2, lat3, lon3) {
+            const toRad = g => g * Math.PI / 180;
+            const dLon = toRad(lon2 - lon1);
+            const lat1r = toRad(lat1), lat2r = toRad(lat2), lat3r = toRad(lat3);
+            const dX = dLon * Math.cos((lat1r + lat2r) / 2);
+            const dY = toRad(lat2 - lat1);
+            const lenLinha = Math.sqrt(dX * dX + dY * dY);
+            if (lenLinha < 0.000001) return 0;
+            const dX3 = toRad(lon3 - lon1);
+            const dY3 = toRad(lat3 - lat1);
+            const proj = (dX3 * dX + dY3 * dY) / (lenLinha * lenLinha);
+            const distX = dX3 - dX * proj, distY = dY3 - dY * proj;
+            let desv = Math.sqrt(distX * distX + distY * distY) * 6371000;
+            if ((dX * dY3 - dY * dX3) < 0) desv = -desv;
+            return Math.max(-0.6, Math.min(0.6, desv));
+        }
+
+        // ==============================================
+        // 🔍 ZOOM
+        // ==============================================
+        el.btnZoomMais.addEventListener('click', () => {
+            zoom = Math.min(3.0, zoom + 0.15);
+            escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
+            atualizarMovimentoMapa();
+        });
+        el.btnZoomMenos.addEventListener('click', () => {
+            zoom = Math.max(0.3, zoom - 0.15);
+            escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
+            atualizarMovimentoMapa();
+        });
+
+        // ==============================================
+        // 🟩 BOTÃO COBERTURA
+        // ==============================================
+        el.btnCobertura.addEventListener('click', () => {
+            coberturaAtiva = !coberturaAtiva;
+            el.btnCobertura.classList.toggle('ativo', coberturaAtiva);
+            if (!coberturaAtiva) limparCobertura();
+        });
+
+        // ==============================================
+        // 📊 BOTÃO DADOS — FUNCIONAL
+        // ==============================================
+        el.btnDadosToggle.addEventListener('click', () => {
+            painelVisivel = !painelVisivel;
+            el.painelDados.classList.toggle('escondido', !painelVisivel);
+        });
+
+        // ==============================================
+        // 📍 BOTÕES A E B
+        // ==============================================
+        el.btnA.addEventListener('click', () => {
+            if (!lat) { alert('⚠️ Aguarde o sinal GPS!'); return; }
+            temA = true;
+            pontoA = { lat, lon };
+            el.btnA.style.boxShadow = '0 0 0 3px #fff, 0 0 20px rgba(0,255,0,0.5)';
+            el.btnB.disabled = false;
+            el.linhaCentro.classList.add('ativa');
+            limparCobertura();
+            latAnterior = lat;
+            lonAnterior = lon;
+        });
+        el.btnB.addEventListener('click', () => {
+            if (!temA) { alert('⚠️ Marque o Ponto A primeiro!'); return; }
+            if (!lat) { alert('⚠️ Aguarde o sinal GPS!'); return; }
+            temB = true;
+            pontoB = { lat, lon };
+            el.btnB.style.boxShadow = '0 0 0 3px #fff, 0 0 20px rgba(0,100,255,0.5)';
+        });
+
+        // ==============================================
+        // 🔄 ATUALIZAR TELA
+        // ==============================================
+        function atualizarTela() {
+            el.nomeTalhao.textContent = nomeTalhaoAtual;
+            el.larguraFaixaEl.textContent = larguraFaixa.toFixed(1) + (unidadesMetricas ? ' m' : ' ft');
+            el.lat.textContent = lat ? lat.toFixed(6) : '---';
+            el.lon.textContent = lon ? lon.toFixed(6) : '---';
+            el.rumo.textContent = rumo.toFixed(1) + '°';
+            el.vel.textContent = velocidade.toFixed(1) + (unidadesMetricas ? ' km/h' : ' mph');
+            el.precisao.textContent = precisao ? precisao.toFixed(2) + ' m' : '---';
+
+            const desvioStr = (desvio >= 0 ? '+' : '') + desvio.toFixed(2) + ' m';
+            el.desvio.textContent = desvioStr;
+            el.desvioGrande.textContent = desvioStr;
+            const cor = Math.abs(desvio) > 0.5 ? '#f44' : Math.abs(desvio) > 0.25 ? '#fa0' : '#0f0';
+            el.desvio.style.color = cor;
+            el.desvioGrande.style.color = cor;
+
+            el.seta.style.transform = `rotate(0deg)`;
+
+            if (lat && lon && latAnterior !== null && lonAnterior !== null) {
+                const distancia = calcularDistanciaMetros(latAnterior, lonAnterior, lat, lon);
+                if (distancia > 0.01) {
+                    const rad = rumo * Math.PI / 180;
+                    deslocamentoX += Math.sin(rad) * distancia * fatorMovimento * zoom;
+                    deslocamentoY -= Math.cos(rad) * distancia * fatorMovimento * zoom;
+                    latAnterior = lat;
+                    lonAnterior = lon;
+                }
             }
 
-            // Atualizar status
-            const status = document.getElementById('statusGPS');
-            status.textContent = ESTADO.precisao <= 5 ? 'GPS FIX' : 'GPS';
-            status.classList.add('ativo');
-
-            // Girar triângulo + FAIXA QUE ACOMPANHA
-            atualizarDirecao();
-
-            // Calcular distância e barra de luz se A e B marcados
-            if (ESTADO.pontoA && ESTADO.pontoB) {
-                ESTADO.distancia = calcularDistancia(
-                    ESTADO.pontoA.lat, ESTADO.pontoA.lon,
-                    ESTADO.lat, ESTADO.lon
-                );
-                document.getElementById('distanciaDisplay').textContent = 
-                    '+' + ESTADO.distancia.toFixed(2) + ' m';
-                
-                // ✨ Atualizar barra de luz entre A e B
-                atualizarBarraLuz();
+            if (coberturaAtiva && temA) {
+                const cx = el.coberturaCanvas.width / 2 / 2;
+                const cy = el.coberturaCanvas.height / 2 / 2;
+                desenharFaixaCobertura(cx, cy, rumo);
             }
-        },
-        erro => {
-            document.getElementById('statusGPS').textContent = 'SEM SINAL';
-            document.getElementById('statusGPS').classList.remove('ativo');
-            console.warn('GPS Erro:', erro.message);
-        },
-        opcoes
-    );
-}
 
-// 🟩 ATUALIZA FAIXA/PINTURA QUE ACOMPANHA O TRIÂNGULO
-function atualizarDirecao() {
-    const triangulo = document.getElementById('triangulo');
-    const faixa = document.getElementById('faixaDirecao');
-    const rumo = ESTADO.rumo;
+            atualizarMovimentoMapa();
+            atualizarLEDs(desvio);
+        }
 
-    // Triângulo gira
-    triangulo.style.transform = `translate(-50%, -50%) rotate(${rumo}deg)`;
-    
-    // Faixa verde se espalha na direção do triângulo
-    const comprimento = 180; // pixels de alcance da faixa
-    faixa.style.width = comprimento + 'px';
-    faixa.style.transform = `translateY(-50%) rotate(${rumo}deg)`;
-}
+        // ==============================================
+        // 💾 GERENCIAMENTO DE TALHÕES
+        // ==============================================
+        function carregarTalhoesSalvos() {
+            try {
+                const salvos = localStorage.getItem('talhoesGPS');
+                talhoes = salvos ? JSON.parse(salvos) : [];
+            } catch (e) { talhoes = []; }
+        }
+        function salvarTalhoes() {
+            localStorage.setItem('talhoesGPS', JSON.stringify(talhoes));
+        }
+        function renderizarListaTalhoes() {
+            carregarTalhoesSalvos();
+            const lista = document.getElementById('listaTalhoes');
+            if (talhoes.length === 0) {
+                lista.innerHTML = '<p class="sem-dados">Nenhum talhão salvo ainda</p>';
+                return;
+            }
+            lista.innerHTML = '';
+            talhoes.forEach((t, i) => {
+                const div = document.createElement('div');
+                div.className = 'item-talhao';
+                div.innerHTML = `
+                    <div style="font-weight:bold;margin-bottom:4px;">🌱 ${t.nome}</div>
+                    <div style="font-size:12px;color:#888;">Implemento: ${t.largura}m | ${t.data}</div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <button data-i="${i}" class="btnCarregar" style="padding:6px 14px;background:#06c;border:none;border-radius:4px;color:white;cursor:pointer;font-weight:bold;">Carregar</button>
+                        <button data-i="${i}" class="btnExcluir" style="padding:6px 14px;background:#822;border:none;border-radius:4px;color:white;cursor:pointer;font-weight:bold;">Excluir</button>
+                    </div>`;
+                lista.appendChild(div);
+            });
+            document.querySelectorAll('.btnCarregar').forEach(b => {
+                b.onclick = (e) => {
+                    const t = talhoes[e.target.dataset.i];
+                    nomeTalhaoAtual = t.nome;
+                    larguraFaixa = t.largura;
+                    escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
+                    limparCobertura();
+                    fecharModal();
+                    atualizarTela();
+                    alert(`✅ Talhão "${t.nome}" carregado!\nImplemento: ${larguraFaixa}m`);
+                };
+            });
+            document.querySelectorAll('.btnExcluir').forEach(b => {
+                b.onclick = (e) => {
+                    if (confirm('Excluir este talhão?')) {
+                        talhoes.splice(e.target.dataset.i, 1);
+                        salvarTalhoes();
+                        renderizarListaTalhoes();
+                    }
+                };
+            });
+        }
 
-// ✨ ATUALIZA BARRA DE LUZ — LINHA ENTRE A E B
-function atualizarBarraLuz() {
-    if (!ESTADO.pontoA || !ESTADO.lat) return;
+        // ==============================================
+        // 📋 MODAL
+        // ==============================================
+        el.btnConfig.addEventListener('click', () => {
+            el.modal.classList.add('mostrar');
+            carregarTalhoesSalvos();
+        });
+        document.querySelectorAll('[data-aba]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const aba = btn.dataset.aba;
+                document.querySelectorAll('[data-aba]').forEach(b => b.classList.remove('ativa'));
+                btn.classList.add('ativa');
+                document.getElementById('aba-criar').style.display = aba === 'criar' ? 'block' : 'none';
+                document.getElementById('aba-talhoes').style.display = aba === 'talhoes' ? 'block' : 'none';
+                document.getElementById('aba-config').style.display = aba === 'config' ? 'block' : 'none';
+                if (aba === 'talhoes') renderizarListaTalhoes();
+            });
+        });
+        document.getElementById('btnSalvarTalhao').addEventListener('click', () => {
+            const nome = document.getElementById('nomeTalhaoInput').value.trim();
+            const larg = parseFloat(document.getElementById('larguraImplemento').value);
+            const obs = document.getElementById('observacao').value.trim();
+            if (!nome) { alert('⚠️ Digite o nome do talhão!'); return; }
+            if (!larg || larg <= 0) { alert('⚠️ Digite a largura do implemento!'); return; }
+            const talhao = {
+                nome, largura: larg, obs,
+                lat: lat || 0, lon: lon || 0,
+                data: new Date().toLocaleDateString('pt-BR')
+            };
+            talhoes.unshift(talhoes.unshift(talhao));
+            salvarTalhoes();
+            nomeTalhaoAtual = nome;
+            larguraFaixa = larg;
+            escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
+            limparCobertura();
+            alert(`✅ Talhão "${nome}" salvo!\nImplemento: ${larg}m`);
+            document.getElementById('nomeTalhaoInput').value = '';
+            document.getElementById('larguraImplemento').value = '20.0';
+            document.getElementById('observacao').value = '';
+            fecharModal();
+            atualizarTela();
+        });
+        document.getElementById('btnAplicarConfig').addEventListener('click', () => {
+            tipoLinha = document.getElementById('tipoLinhaGuia').value;
+            unidadesMetricas = document.getElementById('unidades').value.startsWith('Métrico');
+            localStorage.setItem('tipoLinha', tipoLinha);
+            localStorage.setItem('unidadesMetricas', unidadesMetricas);
+            alert('✅ Configurações aplicadas!');
+            fecharModal();
+            atualizarTela();
+        });
+        document.getElementById('btnFechar').addEventListener('click', fecharModal);
+        document.getElementById('btnFecharConfig').addEventListener('click', fecharModal);
+        function fecharModal() { el.modal.classList.remove('mostrar'); }
 
-    const barra = document.getElementById('barraLuzLinha');
-    barra.classList.add('ativa');
+        // ==============================================
+        // 📡 GPS — ANTENA EXTERNA
+        // ==============================================
+        if (!navigator.geolocation) {
+            alert('❌ GPS não suportado! Use Chrome ou Safari.');
+        } else {
+            navigator.geolocation.watchPosition(
+                (posicao) => {
+                    lat = posicao.coords.latitude;
+                    lon = posicao.coords.longitude;
+                    precisao = posicao.coords.accuracy;
+                    
+                    if (posicao.coords.heading !== null && posicao.coords.heading !== 0) {
+                        rumo = posicao.coords.heading;
+                    }
+                    
+                    if (posicao.coords.speed !== null) {
+                        velocidade = Math.round((posicao.coords.speed * (unidadesMetricas ? 3.6 : 2.237)) * 10) / 10;
+                    }
+                    
+                    el.btnGPS.classList.remove('rtk');
+                    if (precisao <= 0.3) {
+                        el.btnGPS.textContent = 'RTK-FIX';
+                        el.btnGPS.classList.add('rtk');
+                    } else if (precisao <= 1) {
+                        el.btnGPS.textContent = 'DGPS';
+                    } else {
+                        el.btnGPS.textContent = 'GPS';
+                    }
+                    
+                    if (temA && temB && pontoA && pontoB) {
+                        desvio = calcularDesvio(pontoA.lat, pontoA.lon, pontoB.lat, pontoB.lon, lat, lon);
+                    }
+                    
+                    atualizarTela();
+                },
+                (erro) => {
+                    el.btnGPS.textContent = erro.code === 1 ? 'PERMISSÃO' : 'SEM SINAL';
+                    lat = lon = null;
+                    atualizarTela();
+                },
+                { enableHighAccuracy: true, maximumAge: 500, timeout: 3000 }
+            );
+        }
 
-    // Calcula ângulo entre A e posição atual
-    const angulo = calcularAngulo(
-        ESTADO.pontoA.lat, ESTADO.pontoA.lon,
-        ESTADO.lat, ESTADO.lon
-    );
+        // ==============================================
+        // 🔄 ATUALIZAÇÃO CONTÍNUA
+        // ==============================================
+        setInterval(() => {
+            if (temA && temB && lat && pontoA && pontoB) {
+                desvio = calcularDesvio(pontoA.lat, pontoA.lon, pontoB.lat, pontoB.lon, lat, lon);
+            }
+            atualizarTela();
+        }, 200);
 
-    // Mapeia distância para comprimento visual (escala ajustável)
-    const dist = ESTADO.distancia;
-    const comprimentoVisivel = Math.min(40 + (dist / 10), 250); // escala dinâmica
-
-    barra.style.width = comprimentoVisivel + 'px';
-    barra.style.transform = `translateY(-50%) rotate(${angulo}deg)`;
-}
-
-// 📍 Ponto A
-document.getElementById('btnPontoA').addEventListener('click', () => {
-    if (!ESTADO.lat) {
-        alert('📡 Aguarde o sinal GPS...');
-        return;
-    }
-    ESTADO.pontoA = { lat: ESTADO.lat, lon: ESTADO.lon };
-    ESTADO.pontoB = null;
-    document.getElementById('btnPontoA').classList.add('ativo');
-    document.getElementById('btnPontoB').classList.remove('ativo');
-    document.getElementById('btnPontoB').disabled = false;
-    document.getElementById('distanciaDisplay').textContent = '+0.00 m';
-    document.getElementById('barraLuzLinha').classList.remove('ativa');
-    ESTADO.ativo = true;
-});
-
-// 📍 Ponto B — ATIVA BARRA DE LUZ
-document.getElementById('btnPontoB').addEventListener('click', () => {
-    if (!ESTADO.pontoA || !ESTADO.lat) return;
-    ESTADO.pontoB = { lat: ESTADO.lat, lon: ESTADO.lon };
-    document.getElementById('btnPontoB').classList.add('ativo');
-    ESTADO.distancia = calcularDistancia(
-        ESTADO.pontoA.lat, ESTADO.pontoA.lon,
-        ESTADO.lat, ESTADO.lon
-    );
-    document.getElementById('distanciaDisplay').textContent = 
-        '+' + ESTADO.distancia.toFixed(2) + ' m';
-    
-    // ✨ Ativar barra de luz
-    atualizarBarraLuz();
-});
-
-// 📐 CÁLCULO DE DISTÂNCIA (Haversine)
-function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + 
-              Math.cos(lat1 * Math.PI / 180) * 
-              Math.cos(lat2 * Math.PI / 180) * 
-              Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-// 📐 CÁLCULO DE ÂNGULO ENTRE DOIS PONTOS
-function calcularAngulo(lat1, lon1, lat2, lon2) {
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const lat1Rad = lat1 * Math.PI / 180;
-    const lat2Rad = lat2 * Math.PI / 180;
-    const y = Math.sin(dLon) * Math.cos(lat2Rad);
-    const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - 
-              Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
-    let ang = Math.atan2(y, x) * 180 / Math.PI;
-    return (ang + 360) % 360;
-}
-
-// 🔍 Zoom
-let zoom = 1;
-document.getElementById('btnZoomMais').addEventListener('click', () => {
-    zoom = Math.min(zoom * 1.15, 3);
-    document.getElementById('telaNavegacao').style.transform = `scale(${zoom})`;
-});
-document.getElementById('btnZoomMenos').addEventListener('click', () => {
-    zoom = Math.max(zoom / 1.15, 0.5);
-    document.getElementById('telaNavegacao').style.transform = `scale(${zoom})`;
-});
-
-// ▶️ Iniciar GPS ao carregar
-window.addEventListener('load', iniciarGPS);
-
-// Salvar dados localmente (funciona offline)
-window.addEventListener('beforeunload', () => {
-    if (ESTADO.pontoA) {
-        localStorage.setItem('ultimoPontoA', JSON.stringify(ESTADO.pontoA));
-    }
-});
-</script>
+        // ==============================================
+        // 🚀 INICIALIZAÇÃO
+        // ==============================================
+        carregarTalhoesSalvos();
+        ajustarCanvas();
+        aplicarModoVisao();
+        atualizarTela();
+    </script>
 </body>
 </html>
