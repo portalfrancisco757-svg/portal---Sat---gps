@@ -12,8 +12,8 @@
             width: 100vw; overflow: hidden; position: fixed;
         }
 
-        /* ❌ REMOVIDA FAIXA VERDE DO TOPO — TOTALMENTE OCULTA */
-        .barra-verde { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; overflow: hidden !important; }
+        /* ❌ FAIXA VERDE DO TOPO — REMOVIDA DEFINITIVAMENTE */
+        .barra-verde { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; pointer-events: none !important; }
 
         /* 🔦 BARRA DE LEDS */
         .barra-led {
@@ -23,10 +23,7 @@
             gap: 1px; padding: 0 5px; border-bottom: 2px solid #333;
             z-index: 50;
         }
-        .led {
-            width: 9px; height: 14px; border-radius: 2px;
-            background: #222; transition: all 0.1s;
-        }
+        .led { width: 9px; height: 14px; border-radius: 2px; background: #222; transition: all 0.1s; }
         .led.vermelho { background: #c00; box-shadow: 0 0 4px #c00; }
         .led.laranja { background: #f80; box-shadow: 0 0 4px #f80; }
         .led.verde { background: #0c0; box-shadow: 0 0 4px #0c0; }
@@ -42,150 +39,124 @@
         }
         .titulo { font-size: 15px; font-weight: bold; color: #6cf; display: flex; align-items: center; gap: 6px; }
         .status-topo { display: flex; align-items: center; gap: 10px; }
-        .btn-gps {
-            background: #c80; border: none; padding: 3px 10px;
-            border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 12px;
-        }
+        .btn-gps { background: #f90; border: none; padding: 3px 10px; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 12px; }
         .btn-gps.rtk { background: #080; }
         .relogio { font-family: monospace; font-size: 14px; }
-        .btn-config {
-            width: 32px; height: 32px; border-radius: 6px; border: none;
-            background: #333; color: white; font-size: 18px; cursor: pointer;
-        }
+        .btn-config { width: 32px; height: 32px; border-radius: 6px; border: none; background: #333; color: white; font-size: 18px; cursor: pointer; }
 
-        /* 📂 BOTÃO MOSTRAR/ESCONDER DADOS */
-        .btn-dados-toggle {
-            position: absolute; top: 82px; left: 8px;
-            background: #2a2a2a; border: 1px solid #444;
-            color: white; padding: 4px 10px; border-radius: 5px;
-            cursor: pointer; font-size: 12px; z-index: 35;
+        /* 🔄 BOTÕES 2D / 3D — IGUAL DA IMAGEM */
+        .btn-visao {
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 6px; z-index: 30;
         }
+        .btn-2d, .btn-3d {
+            padding: 10px 28px; border: none; border-radius: 6px;
+            font-size: 20px; font-weight: bold; cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0,100,255,0.4);
+        }
+        .btn-2d { background: #0066ff; color: white; }
+        .btn-3d { background: #0066ff; color: white; }
 
-        /* 📊 PAINEL DE DADOS */
-        .painel-dados {
-            position: absolute; top: 115px; left: 8px;
-            background: rgba(0,0,0,0.85); border: 1px solid #333;
-            border-radius: 6px; padding: 10px; min-width: 180px;
-            z-index: 30; transition: all 0.3s ease;
-            font-size: 13px;
-        }
-        .painel-dados.escondido {
-            opacity: 0; transform: translateX(-200px); pointer-events: none;
-        }
-        .linha-dado {
-            display: flex; justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid #222;
-        }
-        .etiqueta { color: #888; font-size: 12px; }
-        .valor { font-family: monospace; font-weight: bold; color: #0f0; font-size: 13px; }
-        .valor.azul { color: #0cf; }
-        .valor.vermelho { color: #f44; }
-        .valor.amarelo { color: #fc0; }
-
-        /* 🎯 ÁREA DE MAPA — PERSPECTIVA CORRIGIDA PARA 2D/3D */
+        /* 🎯 ÁREA DE MAPA — PERSPECTIVA PARA MOVIMENTO 2D/3D */
         .area-mapa {
             position: absolute; top: 74px; left: 0; right: 0; bottom: 0;
-            background: #0a0a0a;
-            background-image: 
-                linear-gradient(rgba(60,180,255,0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(60,180,255,0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
+            background: #000;
             overflow: hidden;
             perspective: 1000px;
             transform-style: preserve-3d;
         }
 
-        /* 🟩 COBERTURA — CANVAS */
+        /* 🗺️ PLANO DO MAPA — SE MOVIMENTA EM 2D E 3D */
+        .plano-mapa {
+            position: absolute; width: 400%; height: 400%;
+            top: -150%; left: -150%;
+            background-image: 
+                linear-gradient(rgba(0,200,255,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,200,255,0.08) 1px, transparent 1px);
+            background-size: 30px 30px;
+            transform-origin: center center;
+            transition: transform 0.1s linear;
+        }
+        .modo-2d .plano-mapa { transform: translate(0, 0) scale(1) rotateX(0deg) !important; }
+        .modo-3d .plano-mapa { transform: translate(0, 0) scale(1) rotateX(60deg) !important; }
+
+        /* 🟩 CANVAS DE COBERTURA — SOBRE O MAPA */
         .cobertura-canvas {
-            position: absolute; inset: 0;
+            position: absolute; inset: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 5;
         }
 
-        /* 📐 DESVIO GRANDE */
+        /* 📐 DESVIO GRANDE — IGUAL DA IMAGEM */
         .desvio-grande {
-            position: absolute; top: 80px; right: 80px;
-            font-size: 32px; font-weight: bold; font-family: monospace;
-            color: #f44; text-shadow: 0 0 12px rgba(255,0,0,0.4);
+            position: absolute; top: 85px; right: 100px;
+            font-size: 42px; font-weight: bold; font-family: monospace;
+            color: #0f0; text-shadow: 0 0 10px rgba(0,255,0,0.5);
             z-index: 20;
         }
 
-        /* 🔄 BOTÕES 2D / 3D — ESTILO IGUAL DA IMAGEM */
-        .btn-visao {
-            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 4px; z-index: 30;
-        }
-        .btn-2d, .btn-3d {
-            padding: 8px 24px; border: none; border-radius: 4px;
-            font-size: 16px; font-weight: bold; cursor: pointer;
-            transition: all 0.25s ease;
-        }
-        .btn-2d { background: #0066ff; color: white; }
-        .btn-2d.ativo { background: #0066ff; color: white; box-shadow: 0 0 10px rgba(0,100,255,0.5); }
-        .btn-3d { background: #333; color: #888; }
-        .btn-3d.ativo { background: #0066ff; color: white; box-shadow: 0 0 10px rgba(0,100,255,0.5); }
-
-        /* 🎯 CONTAINER SETA — TRANSFORMAÇÃO 2D/3D FUNCIONAL */
+        /* 🎯 SETA FIXA NO CENTRO — MAPA SE MOVE AO REDOR */
         .container-seta {
-            position: absolute; top: 50%; left: 50%;
-            transform-style: preserve-3d;
-            transition: transform 0.4s ease;
-            z-index: 10;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 15; pointer-events: none;
         }
-        .modo-2d { transform: translate(-50%, -50%) rotateX(0deg) scale(1) !important; }
-        .modo-3d { transform: translate(-50%, -50%) rotateX(45deg) scale(0.85) !important; }
-
         .linha-centro {
-            position: absolute; left: 50%; top: -300px; bottom: -300px; width: 2px;
+            position: absolute; left: 50%; top: -300px; bottom: -300px; width: 3px;
             background: linear-gradient(180deg, transparent, #0cf, transparent);
-            transform: translateX(-50%); box-shadow: 0 0 12px rgba(0,200,255,0.3);
+            transform: translateX(-50%); box-shadow: 0 0 15px rgba(0,200,255,0.5);
             opacity: 0; transition: opacity 0.3s;
         }
         .linha-centro.ativa { opacity: 1; }
         .seta-navegacao {
             width: 0; height: 0;
-            border-left: 25px solid transparent;
-            border-right: 25px solid transparent;
-            border-bottom: 35px solid #fc0;
-            filter: drop-shadow(0 0 12px rgba(255,200,0,0.5));
+            border-left: 28px solid transparent;
+            border-right: 28px solid transparent;
+            border-bottom: 40px solid #fc0;
+            filter: drop-shadow(0 0 15px rgba(255,200,0,0.6));
             transition: transform 0.2s ease-out;
-            transform-origin: center bottom;
-            z-index: 15;
+            transform-origin: center;
         }
 
-        /* ⬅️ BOTÕES A E B */
+        /* ⬅️ BOTÕES A E B — IGUAL DA IMAGEM */
         .botoes-navegacao-lado {
-            position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 12px; z-index: 30;
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 30;
         }
         .btn-lado {
-            width: 90px; height: 90px; border-radius: 8px; border: 3px solid;
-            font-size: 16px; font-weight: bold; color: white;
+            width: 110px; height: 110px; border-radius: 8px; border: 4px solid white;
+            font-size: 20px; font-weight: bold; color: white;
             cursor: pointer; touch-action: manipulation;
             transition: all 0.15s;
+            box-shadow: 0 0 12px rgba(255,255,255,0.2);
         }
         .btn-lado:active { transform: scale(0.95); }
-        .btn-a { background: linear-gradient(180deg, #00aa00, #008800); border-color: #ffffff; }
-        .btn-b { background: linear-gradient(180deg, #0088ff, #0066cc); border-color: #ffffff; }
-        .btn-b:disabled { background: #222; color: #666; border-color: #333; opacity: 1; }
+        .btn-a { background: linear-gradient(180deg, #00c000, #009000); }
+        .btn-b { background: linear-gradient(180deg, #0088ff, #0066cc); }
+        .btn-b:disabled { background: #222; color: #666; border-color: #444; opacity: 1; }
+        .btn-fechar-dados {
+            position: absolute; top: 0; left: 0; right: 0;
+            background: #333; border: none; color: white;
+            padding: 6px; font-size: 14px; font-weight: bold;
+            border-radius: 6px 6px 0 0; cursor: pointer;
+        }
 
         /* ➡️ BOTÕES LADO DIREITO */
         .botoes-lado-direito {
-            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 15px; z-index: 30;
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 20px; z-index: 30;
         }
         .btn-direito {
-            width: 60px; height: 60px; border-radius: 50%; border: 2px solid;
-            font-size: 22px; cursor: pointer; background: #2a2a2a;
+            width: 70px; height: 70px; border-radius: 50%; border: 3px solid;
+            font-size: 24px; cursor: pointer; background: #222;
             color: white; border-color: #444;
             transition: all 0.15s;
         }
-        .btn-direito:active { transform: scale(0.9); background: #3a3a3a; }
-        .btn-cobertura { background: #004400; border-color: #00ff00; font-size: 20px; }
-        .btn-cobertura.ativo { background: #006600; border-color: #00ff00; box-shadow: 0 0 15px rgba(0,255,0,0.6); }
-        .btn-zoom { background: #333; border-color: #555; font-weight: bold; font-size: 22px; }
+        .btn-direito:active { transform: scale(0.9); }
+        .btn-cobertura { background: #004400; border-color: #00ff00; font-size: 26px; box-shadow: 0 0 15px rgba(0,255,0,0.3); }
+        .btn-cobertura.ativo { background: #006600; box-shadow: 0 0 20px rgba(0,255,0,0.6); }
+        .btn-zoom { background: #333; border-color: #555; font-weight: bold; font-size: 26px; }
 
-        /* 📋 MODAL DE CONFIGURAÇÕES */
+        /* 📋 MODAL */
         .fundo-modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.92);
             display: none; align-items: center; justify-content: center;
@@ -202,30 +173,19 @@
         .abas { display: flex; gap: 8px; margin-bottom: 15px; }
         .aba { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #333; color: white; }
         .aba.ativa { background: #069; }
-        .campo {
-            width: 100%; padding: 12px; margin: 8px 0;
-            background: #2a2a2a; border: 1px solid #444;
-            color: white; border-radius: 6px; font-size: 15px;
-        }
+        .campo { width: 100%; padding: 12px; margin: 8px 0; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 6px; font-size: 15px; }
         .grupo-botoes { display: flex; gap: 10px; margin-top: 15px; }
         .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; }
         .btn-cancelar { background: #444; color: white; }
         .btn-salvar { background: #080; color: white; }
-        .item-talhao {
-            padding: 12px; background: #2a2a2a; border-radius: 6px;
-            margin: 6px 0; border-left: 3px solid #0cf;
-        }
-        .info-bloco {
-            background: #2a2a2a; padding: 12px; border-radius: 6px;
-            margin-top: 10px;
-        }
+        .info-bloco { background: #2a2a2a; padding: 12px; border-radius: 6px; margin-top: 10px; }
         label { color: #aaa; font-size: 13px; display: block; margin-bottom: 4px; }
         .sem-dados { color: #666; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- ❌ FAIXA VERDE — REMOVIDA E TOTALMENTE OCULTA -->
+    <!-- ❌ FAIXA VERDE — REMOVIDA DEFINITIVAMENTE -->
     <div class="barra-verde"></div>
 
     <!-- 🔦 BARRA DE LEDS -->
@@ -236,39 +196,27 @@
         <div class="titulo">🛰️ PORTAL SAT GPS</div>
         <div class="status-topo">
             <button class="btn-gps" id="btnGPS">GPS</button>
-            <span class="relogio" id="relogio">00:00</span>
+            <span class="relogio" id="relogio">15:37</span>
         </div>
         <button class="btn-config" id="btnConfig">⚙</button>
     </div>
 
-    <!-- 📂 BOTÃO MOSTRAR/ESCONDER DADOS -->
-    <button class="btn-dados-toggle" id="btnDadosToggle">📊 Dados</button>
-
-    <!-- 📊 PAINEL DE DADOS -->
-    <div class="painel-dados" id="painelDados">
-        <div class="linha-dado"><span class="etiqueta">Talhão</span><span class="valor" id="nomeTalhao">---</span></div>
-        <div class="linha-dado"><span class="etiqueta">Implemento</span><span class="valor azul" id="larguraFaixa">--- m</span></div>
-        <div class="linha-dado"><span class="etiqueta">Latitude</span><span class="valor" id="lat">---</span></div>
-        <div class="linha-dado"><span class="etiqueta">Longitude</span><span class="valor" id="lon">---</span></div>
-        <div class="linha-dado"><span class="etiqueta">Rumo</span><span class="valor" id="rumo">0.0°</span></div>
-        <div class="linha-dado"><span class="etiqueta">Velocidade</span><span class="valor azul" id="vel">0.0 km/h</span></div>
-        <div class="linha-dado"><span class="etiqueta">Desvio</span><span class="valor vermelho" id="desvio">+0.00 m</span></div>
-        <div class="linha-dado"><span class="etiqueta">Precisão</span><span class="valor azul" id="precisao">--- m</span></div>
-    </div>
-
     <!-- 🔄 BOTÕES 2D / 3D -->
     <div class="btn-visao">
-        <button class="btn-2d ativo" id="btn2D">2D</button>
+        <button class="btn-2d" id="btn2D">2D</button>
         <button class="btn-3d" id="btn3D">3D</button>
     </div>
 
-    <!-- 🎯 ÁREA DE MAPA + COBERTURA -->
-    <div class="area-mapa" id="areaMapa">
-        <!-- 🟩 CANVAS DE COBERTURA -->
+    <!-- 🎯 ÁREA DE MAPA — PLANO QUE SE MOVE + COBERTURA -->
+    <div class="area-mapa modo-2d" id="areaMapa">
+        <!-- 🗺️ PLANO DO MAPA — SE MOVIMENTA EM 2D E 3D -->
+        <div class="plano-mapa" id="planoMapa"></div>
+        
+        <!-- 🟩 CANVAS DE COBERTURA — SOBRE O MAPA -->
         <canvas class="cobertura-canvas" id="coberturaCanvas"></canvas>
         
-        <!-- CENTRO: LINHA E SETA — 2D/3D FUNCIONAL -->
-        <div class="container-seta modo-2d" id="containerSeta">
+        <!-- 🎯 SETA FIXA NO CENTRO -->
+        <div class="container-seta" id="containerSeta">
             <div class="linha-centro" id="linhaCentro"></div>
             <div class="seta-navegacao" id="seta"></div>
         </div>
@@ -279,7 +227,10 @@
 
     <!-- ⬅️ BOTÕES A E B -->
     <div class="botoes-navegacao-lado">
-        <button class="btn-lado btn-a" id="btnA">PONTO A</button>
+        <button class="btn-lado btn-a" id="btnA">
+            <span style="display:block;font-size:12px;opacity:0.8;">📊 Fechar</span>
+            PONTO A
+        </button>
         <button class="btn-lado btn-b" id="btnB" disabled>PONTO B</button>
     </div>
 
@@ -290,7 +241,7 @@
         <button class="btn-direito btn-zoom" id="btnZoomMenos" title="Distanciar">−</button>
     </div>
 
-    <!-- 📋 MODAL DE CONFIGURAÇÕES -->
+    <!-- 📋 MODAL -->
     <div class="fundo-modal" id="modal">
         <div class="modal">
             <h3 class="modal-titulo">⚙ CONFIGURAÇÕES</h3>
@@ -341,11 +292,12 @@
 
     <script>
         // ==============================================
-        // 🚜 PORTAL SAT GPS — CORRIGIDO 2D/3D + SEM FAIXA VERDE NO TOPO
+        // 🚜 PORTAL SAT GPS — PLANO SE MOVE EM 2D/3D
         // ==============================================
 
         // === VARIÁVEIS ===
         let lat = null, lon = null;
+        let latAnterior = null, lonAnterior = null;
         let rumo = 0, velocidade = 0, precisao = null;
         let desvio = 0;
         let temA = false, temB = false;
@@ -355,17 +307,19 @@
         let unidadesMetricas = true;
         let tipoLinha = 'AB Reta';
         let talhoes = [];
-        let painelVisivel = true;
-        let coberturaAtiva = false;
+        let coberturaAtiva = true; // ✅ Ligado por padrão
         let zoom = 1;
-        let visao2D = true; // ✅ 2D/3D funcional
+        let visao2D = true;
         const TOTAL_LEDS = 27;
         const CENTRO_LED = 13;
         const leds = [];
         
-        // Cobertura
+        // Cobertura e movimento do mapa
         let ultimoPonto = null;
         let escalaMetrosPorPixel = 0.05;
+        let deslocamentoX = 0; // Pixels — movimento do mapa
+        let deslocamentoY = 0;
+        let fatorMovimento = 20; // Quanto o mapa se move por metro real
 
         // === ELEMENTOS ===
         const el = {
@@ -374,27 +328,17 @@
             relogio: document.getElementById('relogio'),
             btnConfig: document.getElementById('btnConfig'),
             modal: document.getElementById('modal'),
-            btnDadosToggle: document.getElementById('btnDadosToggle'),
-            painelDados: document.getElementById('painelDados'),
-            nomeTalhao: document.getElementById('nomeTalhao'),
-            larguraFaixaEl: document.getElementById('larguraFaixa'),
-            lat: document.getElementById('lat'),
-            lon: document.getElementById('lon'),
-            rumo: document.getElementById('rumo'),
-            vel: document.getElementById('vel'),
-            desvio: document.getElementById('desvio'),
-            desvioGrande: document.getElementById('desvioGrande'),
-            precisao: document.getElementById('precisao'),
             btn2D: document.getElementById('btn2D'),
             btn3D: document.getElementById('btn3D'),
+            areaMapa: document.getElementById('areaMapa'),
+            planoMapa: document.getElementById('planoMapa'),
             seta: document.getElementById('seta'),
-            containerSeta: document.getElementById('containerSeta'),
             linhaCentro: document.getElementById('linhaCentro'),
             btnA: document.getElementById('btnA'),
             btnB: document.getElementById('btnB'),
             btnCobertura: document.getElementById('btnCobertura'),
             coberturaCanvas: document.getElementById('coberturaCanvas'),
-            areaMapa: document.getElementById('areaMapa'),
+            desvioGrande: document.getElementById('desvioGrande'),
             btnZoomMais: document.getElementById('btnZoomMais'),
             btnZoomMenos: document.getElementById('btnZoomMenos'),
         };
@@ -403,8 +347,11 @@
         
         function ajustarCanvas() {
             const rect = el.areaMapa.getBoundingClientRect();
-            el.coberturaCanvas.width = rect.width;
-            el.coberturaCanvas.height = rect.height;
+            el.coberturaCanvas.width = rect.width * 2; // Maior resolução
+            el.coberturaCanvas.height = rect.height * 2;
+            el.coberturaCanvas.style.width = rect.width + 'px';
+            el.coberturaCanvas.style.height = rect.height + 'px';
+            ctx.scale(2, 2); // Compensar resolução
             escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
         }
         window.addEventListener('resize', ajustarCanvas);
@@ -432,9 +379,8 @@
         function desenharFaixaCobertura(x, y, angulo) {
             if (!coberturaAtiva || !temA) return;
             
-            const w = el.coberturaCanvas.width;
-            const h = el.coberturaCanvas.height;
-            
+            const w = el.coberturaCanvas.width / 2;
+            const h = el.coberturaCanvas.height / 2;
             const larguraPx = (larguraFaixa / escalaMetrosPorPixel) * zoom;
             const rad = angulo * Math.PI / 180;
             const perpRad = rad + Math.PI / 2;
@@ -444,7 +390,7 @@
             
             ctx.save();
             ctx.fillStyle = 'rgba(0, 255, 0, 0.25)';
-            ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
+            ctx.strokeStyle = 'rgba(0, 255, 0, 0.7)';
             ctx.lineWidth = 2;
             
             if (ultimoPonto) {
@@ -468,27 +414,28 @@
         }
 
         function limparCobertura() {
-            ctx.clearRect(0, 0, el.coberturaCanvas.width, el.coberturaCanvas.height);
+            ctx.clearRect(0, 0, el.coberturaCanvas.width / 2, el.coberturaCanvas.height / 2);
             ultimoPonto = null;
+            deslocamentoX = 0;
+            deslocamentoY = 0;
         }
 
         // ==============================================
-        // ✅ 2D / 3D — FUNCIONAL CORRIGIDO
+        // ✅ 2D / 3D — PLANO DO MAPA SE MOVIMENTA E INCLINA
         // ==============================================
         function aplicarModoVisao() {
             if (visao2D) {
-                // Modo 2D — Plano
-                el.containerSeta.classList.remove('modo-3d');
-                el.containerSeta.classList.add('modo-2d');
-                el.btn2D.classList.add('ativo');
-                el.btn3D.classList.remove('ativo');
+                el.areaMapa.classList.remove('modo-3d');
+                el.areaMapa.classList.add('modo-2d');
+                el.btn2D.style.background = '#0066ff';
+                el.btn3D.style.background = '#0066ff';
             } else {
-                // Modo 3D — Perspectiva inclinada
-                el.containerSeta.classList.remove('modo-2d');
-                el.containerSeta.classList.add('modo-3d');
-                el.btn3D.classList.add('ativo');
-                el.btn2D.classList.remove('ativo');
+                el.areaMapa.classList.remove('modo-2d');
+                el.areaMapa.classList.add('modo-3d');
+                el.btn2D.style.background = '#0066ff';
+                el.btn3D.style.background = '#0066ff';
             }
+            atualizarMovimentoMapa();
         }
 
         el.btn2D.addEventListener('click', () => {
@@ -500,6 +447,33 @@
             visao2D = false;
             aplicarModoVisao();
         });
+
+        // ==============================================
+        // 🗺️ ATUALIZAR MOVIMENTO DO MAPA — SETA FIXA, MAPA SE MOVE
+        // ==============================================
+        function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Raio da Terra em metros
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function atualizarMovimentoMapa() {
+            // Rotação do mapa alinhada com o rumo — seta sempre aponta para cima
+            const rotacao = -rumo;
+            const inclinacao = visao2D ? 0 : 60;
+            
+            el.planoMapa.style.transform = `
+                translate(${deslocamentoX}px, ${deslocamentoY}px) 
+                scale(${zoom}) 
+                rotate(${rotacao}deg) 
+                rotateX(${inclinacao}deg)
+            `;
+        }
 
         // ==============================================
         // 🔦 ATUALIZAR LEDS
@@ -566,10 +540,12 @@
         el.btnZoomMais.addEventListener('click', () => {
             zoom = Math.min(3.0, zoom + 0.15);
             escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
+            atualizarMovimentoMapa();
         });
         el.btnZoomMenos.addEventListener('click', () => {
             zoom = Math.max(0.3, zoom - 0.15);
             escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
+            atualizarMovimentoMapa();
         });
 
         // ==============================================
@@ -582,64 +558,59 @@
         });
 
         // ==============================================
-        // 📂 MOSTRAR/ESCONDER PAINEL
-        // ==============================================
-        el.btnDadosToggle.addEventListener('click', () => {
-            painelVisivel = !painelVisivel;
-            el.painelDados.classList.toggle('escondido', !painelVisivel);
-            el.btnDadosToggle.textContent = painelVisivel ? '📊 Dados' : '📊 Fechar';
-        });
-
-        // ==============================================
         // 📍 BOTÕES A E B
         // ==============================================
         el.btnA.addEventListener('click', () => {
             if (!lat) { alert('⚠️ Aguarde o sinal GPS!'); return; }
             temA = true;
             pontoA = { lat, lon };
-            el.btnA.style.boxShadow = '0 0 0 2px #fff, 0 0 15px rgba(0,255,0,0.4)';
+            el.btnA.style.boxShadow = '0 0 0 3px #fff, 0 0 20px rgba(0,255,0,0.5)';
             el.btnB.disabled = false;
-            el.btnB.classList.add('ativo');
             el.linhaCentro.classList.add('ativa');
             limparCobertura();
+            latAnterior = lat;
+            lonAnterior = lon;
         });
         el.btnB.addEventListener('click', () => {
             if (!temA) { alert('⚠️ Marque o Ponto A primeiro!'); return; }
             if (!lat) { alert('⚠️ Aguarde o sinal GPS!'); return; }
             temB = true;
             pontoB = { lat, lon };
-            el.btnB.style.boxShadow = '0 0 0 2px #fff, 0 0 15px rgba(0,100,255,0.4)';
+            el.btnB.style.boxShadow = '0 0 0 3px #fff, 0 0 20px rgba(0,100,255,0.5)';
         });
 
         // ==============================================
         // 🔄 ATUALIZAR TELA
         // ==============================================
         function atualizarTela() {
-            el.nomeTalhao.textContent = nomeTalhaoAtual;
-            el.larguraFaixaEl.textContent = larguraFaixa.toFixed(1) + (unidadesMetricas ? ' m' : ' ft');
-            el.lat.textContent = lat ? lat.toFixed(6) : '---';
-            el.lon.textContent = lon ? lon.toFixed(6) : '---';
-            el.rumo.textContent = rumo.toFixed(1) + '°';
-            el.vel.textContent = velocidade.toFixed(1) + (unidadesMetricas ? ' km/h' : ' mph');
-            el.precisao.textContent = precisao ? precisao.toFixed(2) + ' m' : '---';
-            
+            // Desvio
             const desvioStr = (desvio >= 0 ? '+' : '') + desvio.toFixed(2) + ' m';
-            el.desvio.textContent = desvioStr;
             el.desvioGrande.textContent = desvioStr;
-            const cor = Math.abs(desvio) > 0.5 ? '#f44' : Math.abs(desvio) > 0.25 ? '#fa0' : '#0f0';
-            el.desvio.style.color = cor;
-            el.desvioGrande.style.color = cor;
+            el.desvioGrande.style.color = Math.abs(desvio) > 0.5 ? '#f00' : Math.abs(desvio) > 0.25 ? '#ff0' : '#0f0';
 
-            // Rotação da seta
-            el.seta.style.transform = `rotate(${rumo}deg)`;
+            // Rotação da seta — mapa gira ao contrário
+            el.seta.style.transform = `rotate(0deg)`; // Seta sempre aponta para cima
 
-            // Cobertura
+            // Movimento do mapa com base na posição real
+            if (lat && lon && latAnterior !== null && lonAnterior !== null) {
+                const distancia = calcularDistanciaMetros(latAnterior, lonAnterior, lat, lon);
+                if (distancia > 0.01) { // Mais de 1cm
+                    const rad = rumo * Math.PI / 180;
+                    deslocamentoX += Math.sin(rad) * distancia * fatorMovimento * zoom;
+                    deslocamentoY -= Math.cos(rad) * distancia * fatorMovimento * zoom;
+                    latAnterior = lat;
+                    lonAnterior = lon;
+                }
+            }
+
+            // Desenha cobertura no centro (onde a seta está fixa)
             if (coberturaAtiva && temA) {
-                const cx = el.coberturaCanvas.width / 2;
-                const cy = el.coberturaCanvas.height / 2;
+                const cx = el.coberturaCanvas.width / 2 / 2;
+                const cy = el.coberturaCanvas.height / 2 / 2;
                 desenharFaixaCobertura(cx, cy, rumo);
             }
-            
+
+            atualizarMovimentoMapa();
             atualizarLEDs(desvio);
         }
 
@@ -683,7 +654,6 @@
                     escalaMetrosPorPixel = (larguraFaixa / 100) / zoom;
                     limparCobertura();
                     fecharModal();
-                    atualizarTela();
                     alert(`✅ Talhão "${t.nome}" carregado!\nImplemento: ${larguraFaixa}m`);
                 };
             });
@@ -738,7 +708,6 @@
             document.getElementById('larguraImplemento').value = '20.0';
             document.getElementById('observacao').value = '';
             fecharModal();
-            atualizarTela();
         });
         document.getElementById('btnAplicarConfig').addEventListener('click', () => {
             tipoLinha = document.getElementById('tipoLinhaGuia').value;
@@ -747,7 +716,6 @@
             localStorage.setItem('unidadesMetricas', unidadesMetricas);
             alert('✅ Configurações aplicadas!');
             fecharModal();
-            atualizarTela();
         });
         document.getElementById('btnFechar').addEventListener('click', fecharModal);
         document.getElementById('btnFecharConfig').addEventListener('click', fecharModal);
@@ -813,7 +781,7 @@
         // ==============================================
         carregarTalhoesSalvos();
         ajustarCanvas();
-        aplicarModoVisao(); // ✅ 2D ativo por padrão
+        aplicarModoVisao();
         atualizarTela();
     </script>
 </body>
