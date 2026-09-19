@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Portal Sat GPS 🛰️ | Navegación Agrícola</title>
+    <title>PORTAL SAT GPS — Navegación Agrícola RTK</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
@@ -12,660 +12,428 @@
                 extend: {
                     colors: {
                         jdgreen: '#008000',
-                        jdgreendark: '#004d00',
-                        jdgreenlight: '#339966',
                         jdyellow: '#FFCC00',
-                        jdyelight: '#FFE044',
+                        jdred: '#cc0000',
                         jdblue: '#0066FF',
-                        jdred: '#CC0000',
-                        jdgray: '#2A2A2A',
-                        darkbg: '#0A0A0A',
+                        darkbg: '#0F1A0F',
                     },
-                    fontFamily: {
-                        sans: ['Roboto', 'sans-serif'],
-                    },
+                    fontFamily: { mono: ['"Roboto Mono"', 'monospace'] }
                 }
             }
         }
     </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto { content-visibility: auto; }
-            .shadow-panel { box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
-
-            .grid-field {
-                background-image: 
-                    linear-gradient(rgba(0, 128, 0, 0.15) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 128, 0, 0.15) 1px, transparent 1px);
-                background-size: 60px 60px;
-            }
-
-            .light-bar {
-                background: linear-gradient(90deg, 
-                    #cc0000 0%, #ff6600 15%, #ffcc00 30%, 
-                    #009933 45%, #00cc00 50%, 
-                    #009933 55%, #ffcc00 70%, #ff6600 85%, #cc0000 100%);
-                border-radius: 999px;
-            }
-
-            .ab-line-vertical {
-                background: linear-gradient(180deg, transparent, #0066FF, transparent);
-                width: 5px;
-                height: 100%;
-            }
-
-            .btn-float {
-                @apply w-14 h-14 rounded-full flex items-center justify-center text-white bg-jdgray/85 backdrop-blur-sm hover:bg-jdgreen transition-all active:scale-95 shadow-lg border border-white/10 text-xl font-bold;
-            }
-
-            .btn-panel {
-                @apply px-3 py-2 rounded-lg bg-jdgreen text-white font-semibold hover:bg-jdgreenlight transition text-sm;
-            }
-
-            .input-field {
-                @apply bg-darkbg/80 border border-jdgreen/50 rounded-lg px-3 py-2 text-white focus:border-jdyellow focus:outline-none;
-            }
-
-            .panel-drawer {
-                @apply fixed top-0 bottom-0 w-72 bg-jdgray/95 backdrop-blur-md shadow-2xl z-50 transition-transform duration-300 ease-out;
-            }
-
-            .panel-closed { transform: translateX(-100%); }
-            .panel-closed-right { transform: translateX(100%); }
-
-            .no-system-bar {
-                height: 100vh;
-                height: 100dvh;
-                overflow: hidden;
-                position: fixed;
-                inset: 0;
-                padding-top: 0 !important;
-            }
-
-            /* Triângulo amarelo apontando para cima */
-            .center-triangle {
-                width: 0;
-                height: 0;
-                border-left: 35px solid transparent;
-                border-right: 35px solid transparent;
-                border-bottom: 55px solid #FFCC00;
-                filter: drop-shadow(0 0 12px rgba(255, 204, 0, 0.8));
-                transition: transform 0.2s ease;
-                transform-origin: center center;
-            }
-
-            @media (orientation: landscape) {
-                .safe-area {
-                    padding-left: env(safe-area-inset-left);
-                    padding-right: env(safe-area-inset-right);
-                    padding-top: 0 !important;
-                }
-            }
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0F1A0F;
+            color: white;
+            font-family: Roboto, sans-serif;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            position: relative;
         }
+        .grid-field {
+            background-image: 
+                linear-gradient(rgba(0,200,0,0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,200,0,0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .light-bar-container { position: relative; width: 100%; height: 28px; }
+        .light-bar {
+            background: linear-gradient(90deg, #c00 0%, #f60 20%, #fc0 35%, #0c0 50%, #fc0 65%, #f60 80%, #c00 100%);
+            border-radius: 999px; width: 100%; height: 100%; position: relative;
+        }
+        .center-marker {
+            position: absolute; top: 0; bottom: 0; left: 50%; width: 3px;
+            background: white; transform: translateX(-50%); z-index: 3;
+        }
+        .position-indicator {
+            position: absolute; top: -4px; width: 10px; height: 36px;
+            background: white; border-radius: 3px; z-index: 4;
+            box-shadow: 0 0 8px rgba(255,255,255,0.8);
+            transition: left 0.15s ease-out;
+        }
+        .cm-label { position: absolute; top: 30px; font-size: 9px; color: #aaa; transform: translateX(-50%); }
+        .triangle-yellow {
+            width: 0; height: 0;
+            border-left: 35px solid transparent;
+            border-right: 35px solid transparent;
+            border-bottom: 55px solid #FFCC00;
+            filter: drop-shadow(0 0 14px rgba(255,204,0,0.9));
+            transition: transform 0.25s ease-out;
+            z-index: 15;
+        }
+        .coverage-band {
+            background: rgba(0,90,0,0.35);
+            border: 2px solid rgba(0,220,0,0.45);
+            border-radius: 2px;
+        }
+        .ab-line {
+            position: absolute; width: 4px; background: linear-gradient(180deg, #0066FF 0%, #00CCFF 50%, #0066FF 100%);
+            border-radius: 2px; z-index: 10; transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,100,255,0.4);
+        }
+        .point-marker {
+            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: bold; z-index: 11; position: absolute;
+            box-shadow: 0 0 12px rgba(0,0,0,0.5);
+        }
+        .btn-round {
+            width: 54px; height: 54px; border-radius: 50%; background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;
+            backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s;
+        }
+        .btn-round:active { transform: scale(0.92); background: rgba(0,200,0,0.3); }
+        .btn-ab {
+            width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 22px; font-weight: bold; transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .data-panel {
+            background: rgba(0,0,0,0.6); border-radius: 10px; padding: 10px 12px;
+            backdrop-filter: blur(8px); border: 1px solid rgba(0,255,0,0.1);
+        }
+        .status-badge {
+            padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;
+        }
+        .sat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin: 1px; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .searching { animation: pulse 1s infinite; }
     </style>
 </head>
-<body class="bg-darkbg text-white font-sans antialiased no-system-bar safe-area" id="main-body">
+<body class="grid-field">
 
-    <!-- ==== BARRA SUPERIOR ==== -->
-    <header class="absolute top-0 left-0 right-0 bg-jdgreen/95 backdrop-blur-sm px-4 py-3 flex items-center justify-between z-40 shadow-md">
-        <div class="flex items-center gap-3">
-            <button id="toggle-left-panel" class="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center hover:bg-black/40 flex-shrink-0">
-                <i class="fa fa-bars text-xl"></i>
-            </button>
-            <span class="text-lg font-bold whitespace-nowrap">🛰️ PORTAL SAT GPS</span>
-            <span class="bg-jdyellow text-black px-3 py-1 rounded text-sm font-bold whitespace-nowrap">AG PRECISIÓN</span>
+    <!-- === BARRA SUPERIOR === -->
+    <header class="bg-jdgreen px-3 py-2 relative z-50">
+        <!-- Barra de Luz — Desvio Lateral em Centímetros -->
+        <div class="light-bar-container mb-3">
+            <div class="light-bar"></div>
+            <div class="center-marker"></div>
+            <div id="dev-indicator" class="position-indicator" style="left: 50%; transform: translateX(-50%);"></div>
+            <!-- Marcas de cm do centro para ambos lados -->
+            <span class="cm-label" style="left: 50%;">0</span>
+            <span class="cm-label" style="left: 42.5%;">-15</span>
+            <span class="cm-label" style="left: 35%;">-30</span>
+            <span class="cm-label" style="left: 27.5%;">-45</span>
+            <span class="cm-label" style="left: 20%;">-60</span>
+            <span class="cm-label" style="left: 57.5%;">+15</span>
+            <span class="cm-label" style="left: 65%;">+30</span>
+            <span class="cm-label" style="left: 72.5%;">+45</span>
+            <span class="cm-label" style="left: 80%;">+60</span>
         </div>
-        <div class="flex items-center gap-4 text-base flex-shrink-0">
-            <span id="current-time" class="whitespace-nowrap font-mono">13:13:00</span>
-            <span class="text-jdyellow font-semibold whitespace-nowrap">14/14</span>
-            <span class="text-green-300 font-bold whitespace-nowrap">RTK-FIX</span>
-            <button id="toggle-right-panel" class="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center hover:bg-jdgreen flex-shrink-0">
-                <i class="fa fa-cog text-xl"></i>
-            </button>
+
+        <!-- Cabeçalho -->
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <button id="btn-menu" class="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center text-lg">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <span class="text-lg font-bold">PORTAL SAT GPS</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+                <span id="clock" class="font-mono">00:00:00</span>
+                <span id="fix-status" class="status-badge bg-green-600 text-white">RTK-FIX</span>
+                <span id="sat-count" class="font-mono text-xs">14/14</span>
+                <button id="btn-settings" class="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center">
+                    <i class="fa fa-cog text-lg"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- ==== ÁREA DE TRABALHO ==== -->
-    <main class="absolute inset-0 pt-20 bg-darkbg overflow-hidden">
+    <!-- === ÁREA PRINCIPAL === -->
+    <main class="absolute inset-0 pt-32 pb-4 px-3 overflow-hidden">
 
-        <!-- Fundo de grade -->
-        <div id="field-bg" class="absolute inset-0 grid-field z-0"></div>
+        <!-- Botões A / B — Definição de Linha -->
+        <div class="absolute left-4 top-4 flex flex-col items-center gap-2 z-30">
+            <button id="btn-set-a" class="btn-ab bg-green-600 border-2 border-green-400">A</button>
+            <button id="btn-set-b" class="btn-ab bg-gray-700 text-gray-400 border-2 border-gray-600" disabled>B</button>
+            <div class="w-0.5 h-6 bg-gray-500"></div>
+        </div>
 
-        <!-- ✅ BARRA DE LUZ EM CIMA -->
-        <div class="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-[40rem] h-6 rounded-full overflow-hidden shadow-xl z-30">
-            <div class="light-bar w-full h-full relative">
-                <div class="absolute top-0 left-1/2 w-0.5 h-full bg-white -translate-x-1/2 shadow-md"></div>
-                <div id="light-indicator" class="absolute top-0 w-4 h-6 bg-white rounded-full -translate-x-1/2 shadow-lg transition-all duration-150" style="left: 50%;"></div>
+        <!-- 📊 Painel de Dados — Canto Superior Direito -->
+        <div class="absolute top-4 right-4 data-panel z-30 w-52">
+            <div class="flex justify-between items-center text-sm mb-2">
+                <span class="text-gray-400">Rumbo</span>
+                <span id="heading-val" class="font-mono font-bold text-lg">310.0°</span>
+            </div>
+            <div class="flex justify-between items-center text-sm mb-2">
+                <span class="text-gray-400">Desvío</span>
+                <span id="dev-val" class="font-mono font-bold text-lg text-jdyellow">-0.05 m</span>
+            </div>
+            <div class="flex justify-between items-center text-sm mb-2">
+                <span class="text-gray-400">Velocidad</span>
+                <span id="speed-val" class="font-mono font-bold text-lg">0.0 km/h</span>
+            </div>
+            <div class="border-t border-gray-700 my-2"></div>
+            <div class="text-xs space-y-1">
+                <div class="flex justify-between"><span class="text-gray-500">Latitud</span><span id="lat-val" class="font-mono">-24.489275°</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Longitud</span><span id="lon-val" class="font-mono">-54.614722°</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Precisión</span><span id="acc-val" class="font-mono text-green-400">±0.02 m</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Ancho faja</span><span id="width-val" class="font-mono">12.0 m</span></div>
+            </div>
+            <div class="border-t border-gray-700 my-2"></div>
+            <!-- Status Antena Externa -->
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-400"><i class="fa fa-wifi mr-1"></i> Antena Externa</span>
+                <span id="antenna-status" class="text-green-400 font-bold">CONECTADA</span>
+            </div>
+            <!-- Satélites -->
+            <div class="flex justify-center mt-2" id="sat-bars">
+                <span class="sat-dot bg-green-400"></span><span class="sat-dot bg-green-400"></span>
+                <span class="sat-dot bg-green-400"></span><span class="sat-dot bg-green-400"></span>
+                <span class="sat-dot bg-green-400"></span><span class="sat-dot bg-green-400"></span>
+                <span class="sat-dot bg-green-400"></span><span class="sat-dot bg-green-400"></span>
             </div>
         </div>
 
-        <!-- DADOS CENTRAIS -->
-        <div class="absolute top-16 left-1/2 -translate-x-1/2 flex items-center justify-center gap-6 md:gap-12 z-10 w-full px-6">
-            <div class="text-center">
-                <div class="text-5xl md:text-7xl font-bold text-white" id="heading-display">359°</div>
-                <div class="text-base text-gray-400">Rumbo</div>
-            </div>
-            <div class="text-center">
-                <div class="text-5xl md:text-7xl font-bold text-jdyellow" id="deviation-display">-0.05 m</div>
-                <div class="text-base text-gray-400">Desvío</div>
-            </div>
-            <div class="text-center">
-                <div class="text-5xl md:text-7xl font-bold text-white" id="speed-display">7.1 km/h</div>
-                <div class="text-base text-gray-400">Velocidad</div>
-            </div>
+        <!-- Controles Esquerdos -->
+        <div class="absolute left-4 top-36 flex flex-col items-center gap-4 z-30">
+            <button id="btn-zoom-in" class="btn-round"><i class="fa fa-search-plus"></i></button>
+            <button id="btn-zoom-out" class="btn-round"><i class="fa fa-search-minus"></i></button>
+            <button id="btn-center" class="btn-round"><i class="fa fa-crosshairs"></i></button>
+            <button id="btn-view" class="btn-round"><i class="fa fa-cubes"></i></button>
         </div>
 
-        <!-- ✅ LINHA AZUL VERTICAL -->
-        <div id="ab-guide-line" class="absolute top-0 bottom-0 left-1/2 ab-line-vertical -translate-x-1/2 opacity-0 transition-opacity duration-500 z-10"></div>
-
-        <!-- ✅ PONTO A EM BAIXO, PONTO B EM CIMA -->
-        <div id="point-a-marker" class="absolute w-16 h-16 bg-jdblue rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-lg opacity-0 transition-opacity z-15" style="bottom: 12%; left: 50%; transform: translate(-50%, 50%);">A</div>
-        <div id="point-b-marker" class="absolute w-16 h-16 bg-jdblue rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-lg opacity-0 transition-opacity z-15" style="top: 20%; left: 50%; transform: translate(-50%, -50%);">B</div>
-
-        <!-- ✅ SETA AMARELA - SEGUE A LINHA AZUL VERTICAL -->
-        <div id="vehicle" class="absolute left-1/2 -translate-x-1/2 center-triangle z-20" style="top: 50%; transform: translateY(-50%) rotate(0deg);"></div>
-
-        <!-- ✅ COBERTURA HORIZONTAL - PERPENDICULAR À LINHA AZUL -->
-        <canvas id="coverage-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-12"></canvas>
-
-        <!-- ✅ BOTÕES ESQUERDA - A VERDE ATIVO, B BLOQUEADO -->
-        <div class="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-30">
-            <button id="btn-set-a" class="btn-float bg-green-600 border-2 border-green-400" title="Ponto A (Abaixo)">
-                A
-            </button>
-            <button id="btn-set-b" class="btn-float bg-jdgray opacity-30 cursor-not-allowed" title="Ponto B - Recorra 5m primeiro" disabled>
-                B
-            </button>
-            <div class="w-0.5 h-5 bg-white/25 mx-auto my-1"></div>
-            <button id="zoom-in" class="btn-float" title="Zoom +">
-                <i class="fa fa-search-plus"></i>
-            </button>
-            <button id="zoom-out" class="btn-float" title="Zoom -">
-                <i class="fa fa-search-minus"></i>
-            </button>
-            <button class="btn-float" title="Centrar" id="center-btn">
-                <i class="fa fa-crosshairs"></i>
-            </button>
-            <button id="btn-view-toggle" class="btn-float mt-1" title="Vista 2D / 3D">
-                <i class="fa fa-cubes"></i>
-            </button>
+        <!-- Controles Direitos -->
+        <div class="absolute right-4 bottom-1/3 flex flex-col items-center gap-4 z-30">
+            <button id="btn-start" class="btn-round bg-green-600/40 border border-green-400/40"><i class="fa fa-play"></i></button>
+            <button id="btn-stop" class="btn-round"><i class="fa fa-times"></i></button>
+            <button id="btn-reset" class="btn-round"><i class="fa fa-refresh"></i></button>
         </div>
 
-        <!-- ✅ BOTÕES DIREITA -->
-        <div class="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-30">
-            <button id="btn-work" class="btn-float bg-jdgreen w-16 h-16" title="Iniciar trabalho">
-                <i class="fa fa-play text-2xl"></i>
-            </button>
-            <button id="btn-clear-ab" class="btn-float bg-jdred" title="Apagar linha AB">
-                <i class="fa fa-times"></i>
-            </button>
-            <button id="btn-reset" class="btn-float" title="Reiniciar">
-                <i class="fa fa-refresh"></i>
-            </button>
-        </div>
+        <!-- === LINHA AB + FAIXA DE COBERTURA === -->
+        <div id="ab-line" class="ab-line absolute left-1/2 top-0 bottom-0" style="height: 0; opacity: 0; transform: translateX(-50%);"></div>
+        <div id="point-a" class="point-marker bg-green-600 text-white border-2 border-green-400" style="bottom: 10%; left: 50%; transform: translateX(-50%) scale(0); opacity: 0;">A</div>
+        <div id="point-b" class="point-marker bg-jdblue text-white border-2 border-blue-400" style="top: 15%; left: 50%; transform: translateX(-50%) scale(0); opacity: 0;">B</div>
+        <div id="coverage" class="coverage-band absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-20 opacity-0 transition-opacity duration-500"></div>
+        <div id="vehicle" class="triangle-yellow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style="transform: translate(-50%, -50%) rotate(0deg);"></div>
 
     </main>
 
-    <!-- ==== PAINEL ESQUERDO ==== -->
-    <div id="left-panel" class="panel-drawer left-0 panel-closed">
-        <div class="p-5 h-full overflow-y-auto">
-            <div class="flex justify-between items-center mb-5">
-                <h2 class="text-xl font-bold text-jdyellow">📍 Informação</h2>
-                <button id="close-left-panel" class="w-9 h-9 rounded-full bg-jdgray flex items-center justify-center hover:bg-jdgreen">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-
-            <div class="bg-darkbg/50 rounded-xl p-4 mb-4">
-                <h3 class="text-jdyellow font-semibold mb-3">📡 GPS EXTERNO</h3>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-400">Estado:</span>
-                        <span id="gps-status" class="font-bold text-green-400">Conectado</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Latitude:</span>
-                        <span id="lat-value" class="font-mono">-24.489275</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Longitude:</span>
-                        <span id="lon-value" class="font-mono">-54.614722</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Altitude:</span>
-                        <span id="alt-value" class="font-mono">248.5 m</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Precisão:</span>
-                        <span class="font-mono text-green-400">±0.02 m (RTK)</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-darkbg/50 rounded-xl p-4 mb-4">
-                <h3 class="text-jdyellow font-semibold mb-3">📏 LINHA AB</h3>
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Ponto A (Abaixo):</span>
-                        <span id="point-a-coord" class="font-mono">—</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Distância percorrida:</span>
-                        <span id="distance-from-a" class="font-bold text-jdyellow">0.00 m / 5.00 m</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Ponto B (Cima):</span>
-                        <span id="point-b-coord" class="font-mono">—</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Rumo AB:</span>
-                        <span id="ab-heading" class="font-mono">—</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==== PAINEL DIREITO ==== -->
-    <div id="right-panel" class="panel-drawer right-0 panel-closed-right">
-        <div class="p-5 h-full overflow-y-auto">
-            <div class="flex justify-between items-center mb-5">
-                <h2 class="text-xl font-bold text-jdyellow">⚙️ Configuração</h2>
-                <button id="close-right-panel" class="w-9 h-9 rounded-full bg-jdgray flex items-center justify-center hover:bg-jdgreen">
-                    <i class="fa fa-times"></i>
-                </button>
-            </div>
-
-            <div class="bg-darkbg/50 rounded-xl p-4 mb-4">
-                <h3 class="text-jdyellow font-semibold mb-3">📏 IMPLEMENTO</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-gray-400 block mb-2">Largura de trabalho (m)</label>
-                        <input type="number" id="implement-width" value="12.00" step="0.1" class="input-field w-full">
-                    </div>
-                    <div>
-                        <label class="text-gray-400 block mb-2">Sobreposição (%)</label>
-                        <input type="number" id="overlap" value="0" min="0" max="30" class="input-field w-full">
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-darkbg/50 rounded-xl p-4">
-                <h3 class="text-jdyellow font-semibold mb-3">📡 GPS EXTERNO</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span>Usar antena externa</span>
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="external-gps-toggle" class="sr-only peer" checked>
-                            <div class="relative w-12 h-6 bg-jdgray rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[3px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-jdgreen"></div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="overlay" class="fixed inset-0 bg-black/60 z-40 hidden transition-opacity duration-300"></div>
-
     <script>
-        // ==== ESTADO GLOBAL ====
+        // ==================================================
+        // 🛰️ SISTEMA DE NAVEGACIÓN AGRÍCOLA RTK — FUNCIONAL
+        // ==================================================
         const state = {
             lat: -24.489275,
             lon: -54.614722,
-            heading: 359,
-            speed: 7.1,
-            deviation: -0.05,
-            area: 0,
-            isWorking: false,
-            pointA: null,
-            pointB: null,
-            abHeading: 0,
-            distanceFromA: 0,
-            minDistanceForB: 5.0,
-            implementWidth: 12.00,
-            overlapPercent: 0,
-            coveragePoints: [],
+            heading: 310.0,      // Rumbo en grados
+            speed: 0.0,          // km/h
+            devLateral: -0.05,   // Desvio lateral en metros (+ derecha, - izquierda)
+            accuracy: 0.02,      // Precisión en metros
+            fixType: 'RTK-FIX',  // NO_FIX, GPS, DGPS, RTK-FIX
+            satellites: { total: 14, used: 14 },
+            antennaConnected: true,
+            lineA: null,         // Coordenadas punto A
+            lineB: null,         // Coordenadas punto B
+            lineActive: false,
+            workingWidth: 12.0,  // Ancho de faixa en metros
+            isRunning: false,
             zoom: 1,
-            externalGpsEnabled: true
+            time: 0
         };
 
-        let coverageCanvas, coverageCtx;
+        // Elementos del DOM
+        const el = {
+            clock: document.getElementById('clock'),
+            lat: document.getElementById('lat-val'),
+            lon: document.getElementById('lon-val'),
+            heading: document.getElementById('heading-val'),
+            dev: document.getElementById('dev-val'),
+            speed: document.getElementById('speed-val'),
+            acc: document.getElementById('acc-val'),
+            fixStatus: document.getElementById('fix-status'),
+            satCount: document.getElementById('sat-count'),
+            antenna: document.getElementById('antenna-status'),
+            devIndicator: document.getElementById('dev-indicator'),
+            btnA: document.getElementById('btn-set-a'),
+            btnB: document.getElementById('btn-set-b'),
+            abLine: document.getElementById('ab-line'),
+            pointA: document.getElementById('point-a'),
+            pointB: document.getElementById('point-b'),
+            coverage: document.getElementById('coverage'),
+            vehicle: document.getElementById('vehicle'),
+            widthVal: document.getElementById('width-val')
+        };
 
-        // ==== INICIALIZAÇÃO ====
-        document.addEventListener('DOMContentLoaded', () => {
-            initCanvas();
-            initEvents();
-            updateTime();
-            setInterval(updateTime, 1000);
-            setInterval(updateData, 200);
+        // ========== UTILIDADES ==========
+        function updateClock() {
+            const now = new Date();
+            el.clock.textContent = now.toLocaleTimeString('es-PY', { hour12: false });
+        }
 
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+        // Convierte desvio (metros) → posición en la barra de luz (porcentaje)
+        function devToPercent(dev) {
+            const maxDev = 0.6; // ±60cm máximo visualizado
+            let percent = 50 + (dev / maxDev) * 40;
+            return Math.max(5, Math.min(95, percent));
+        }
+
+        // ========== ACTUALIZAR INTERFAZ ==========
+        function updateUI() {
+            el.lat.textContent = state.lat.toFixed(6) + '°';
+            el.lon.textContent = state.lon.toFixed(6) + '°';
+            el.heading.textContent = state.heading.toFixed(1) + '°';
+            el.dev.textContent = (state.devLateral >= 0 ? '+' : '') + state.devLateral.toFixed(2) + ' m';
+            el.dev.className = state.devLateral > 0.5 ? 'font-mono font-bold text-lg text-jdred'
+                             : state.devLateral < -0.5 ? 'font-mono font-bold text-lg text-jdred'
+                             : 'font-mono font-bold text-lg text-jdyellow';
+            el.speed.textContent = state.speed.toFixed(1) + ' km/h';
+            el.acc.textContent = '±' + state.accuracy.toFixed(2) + ' m';
+            
+            // Indicador visual de desvio en la barra de luz
+            el.devIndicator.style.left = devToPercent(state.devLateral) + '%';
+            
+            // Estado de fix
+            el.fixStatus.textContent = state.fixType;
+            if (state.fixType === 'RTK-FIX') {
+                el.fixStatus.className = 'status-badge bg-green-600 text-white';
+            } else if (state.fixType === 'DGPS') {
+                el.fixStatus.className = 'status-badge bg-blue-600 text-white';
+            } else if (state.fixType === 'GPS') {
+                el.fixStatus.className = 'status-badge bg-yellow-500 text-black';
+            } else {
+                el.fixStatus.className = 'status-badge bg-red-600 text-white searching';
             }
-            if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(() => {});
-            }
 
-            initExternalGPS();
+            el.satCount.textContent = state.satellites.used + '/' + state.satellites.total;
+            el.antenna.textContent = state.antennaConnected ? 'CONECTADA' : 'SIN SEÑAL';
+            el.antenna.className = state.antennaConnected ? 'text-green-400 font-bold' : 'text-red-400 font-bold';
+            
+            // Rotación del triángulo según rumbo
+            el.vehicle.style.transform = `translate(-50%, -50%) rotate(${state.heading - 90}deg)`;
+        }
+
+        // ========== DEFINIR PUNTOS A Y B ==========
+        el.btnA.addEventListener('click', () => {
+            state.lineA = { lat: state.lat, lon: state.lon, heading: state.heading };
+            el.btnA.classList.add('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-green-800');
+            el.btnB.disabled = false;
+            el.btnB.classList.remove('bg-gray-700', 'text-gray-400', 'border-gray-600');
+            el.btnB.classList.add('bg-jdblue', 'border-blue-400', 'text-white');
+            el.pointA.style.transform = 'translate(-50%, -50%) scale(1)';
+            el.pointA.style.opacity = '1';
+            el.abLine.style.height = '70%';
+            el.abLine.style.opacity = '1';
+            state.lineActive = false;
         });
 
-        // ==== GPS EXTERNO ====
-        function initExternalGPS() {
-            if (!navigator.geolocation) {
-                document.getElementById('gps-status').textContent = 'Indisponível';
-                document.getElementById('gps-status').classList.remove('text-green-400');
-                document.getElementById('gps-status').classList.add('text-red-400');
-                return;
-            }
+        el.btnB.addEventListener('click', () => {
+            if (!state.lineA) return;
+            state.lineB = { lat: state.lat + 0.001, lon: state.lon, heading: state.heading };
+            el.btnB.classList.add('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-blue-800');
+            el.pointB.style.transform = 'translate(-50%, -50%) scale(1)';
+            el.pointB.style.opacity = '1';
+            el.coverage.style.opacity = '1';
+            state.lineActive = true;
+        });
 
-            const options = { enableHighAccuracy: true, maximumAge: 500, timeout: 3000 };
+        // ========== SIMULACIÓN DE MOVIMIENTO (como GPS real) ==========
+        function simulateGPS() {
+            if (!state.isRunning) return;
+            
+            // Simula avance
+            const speedFactor = state.speed / 3.6; // m/s
+            const rad = state.heading * Math.PI / 180;
+            state.lat += (Math.cos(rad) * speedFactor * 0.00001);
+            state.lon += (Math.sin(rad) * speedFactor * 0.00001);
+            
+            // Simula pequeño desvio lateral oscilante
+            state.devLateral = -0.05 + Math.sin(Date.now() / 2000) * 0.08;
+            
+            updateUI();
+        }
+
+        // ========== CONTROLES ==========
+        document.getElementById('btn-start').addEventListener('click', () => {
+            state.isRunning = !state.isRunning;
+            state.speed = state.isRunning ? 7.2 : 0;
+            document.getElementById('btn-start').innerHTML = state.isRunning 
+                ? '<i class="fa fa-pause"></i>' 
+                : '<i class="fa fa-play"></i>';
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            state.lineA = null;
+            state.lineB = null;
+            state.lineActive = false;
+            state.devLateral = -0.05;
+            el.btnA.classList.remove('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-green-800');
+            el.btnB.classList.add('bg-gray-700', 'text-gray-400', 'border-gray-600');
+            el.btnB.classList.remove('bg-jdblue', 'border-blue-400', 'text-white', 'ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-blue-800');
+            el.btnB.disabled = true;
+            el.pointA.style.transform = 'translate(-50%, -50%) scale(0)';
+            el.pointA.style.opacity = '0';
+            el.pointB.style.transform = 'translate(-50%, -50%) scale(0)';
+            el.pointB.style.opacity = '0';
+            el.abLine.style.height = '0';
+            el.abLine.style.opacity = '0';
+            el.coverage.style.opacity = '0';
+            state.isRunning = false;
+            state.speed = 0;
+            document.getElementById('btn-start').innerHTML = '<i class="fa fa-play"></i>';
+            updateUI();
+        });
+
+        // Zoom
+        document.getElementById('btn-zoom-in').addEventListener('click', () => {
+            state.zoom = Math.min(3, state.zoom * 1.2);
+            document.body.style.backgroundSize = (70 / state.zoom) + 'px ' + (70 / state.zoom) + 'px';
+        });
+        document.getElementById('btn-zoom-out').addEventListener('click', () => {
+            state.zoom = Math.max(0.5, state.zoom / 1.2);
+            document.body.style.backgroundSize = (70 / state.zoom) + 'px ' + (70 / state.zoom) + 'px';
+        });
+
+        // ========== CONEXIÓN CON GPS REAL (API Nativa) ==========
+        if ('geolocation' in navigator) {
+            const geoOptions = {
+                enableHighAccuracy: true,  // ⚠️ Requiere antena externa
+                maximumAge: 0,
+                timeout: 1000
+            };
 
             navigator.geolocation.watchPosition(
-                (position) => {
-                    if (state.externalGpsEnabled) {
-                        state.lat = position.coords.latitude;
-                        state.lon = position.coords.longitude;
-                        if (position.coords.heading !== null) {
-                            state.heading = parseFloat(position.coords.heading.toFixed(0));
-                        }
-                        if (position.coords.speed !== null) {
-                            state.speed = parseFloat((position.coords.speed * 3.6).toFixed(1));
-                        }
-                        
-                        if (state.pointA) {
-                            const dist = calculateDistance(
-                                state.pointA.lat, state.pointA.lon,
-                                state.lat, state.lon
-                            );
-                            state.distanceFromA = dist;
-                            updateDistanceIndicator();
-                        }
-                    }
-                    document.getElementById('gps-status').textContent = 'Conectado';
-                    document.getElementById('gps-status').classList.add('text-green-400');
-                    document.getElementById('gps-status').classList.remove('text-red-400');
+                (pos) => {
+                    state.lat = pos.coords.latitude;
+                    state.lon = pos.coords.longitude;
+                    state.accuracy = Math.max(0.01, pos.coords.accuracy / 100 || 0.02);
+                    state.antennaConnected = true;
+                    
+                    // Si hay datos de rumbo y velocidad
+                    if (pos.coords.heading !== null) state.heading = pos.coords.heading;
+                    if (pos.coords.speed !== null) state.speed = (pos.coords.speed * 3.6); // m/s → km/h
+                    
+                    // Determinar tipo de corrección según precisión
+                    if (state.accuracy <= 0.03) state.fixType = 'RTK-FIX';
+                    else if (state.accuracy <= 1.0) state.fixType = 'DGPS';
+                    else state.fixType = 'GPS';
+                    
+                    updateUI();
                 },
-                (error) => {
-                    document.getElementById('gps-status').textContent = 'Sem sinal';
-                    document.getElementById('gps-status').classList.remove('text-green-400');
-                    document.getElementById('gps-status').classList.add('text-red-400');
+                (err) => {
+                    console.warn('GPS Error:', err);
+                    state.antennaConnected = false;
+                    state.fixType = err.code === 1 ? 'NO_PERM' : 'NO_FIX';
+                    updateUI();
                 },
-                options
+                geoOptions
             );
+        } else {
+            state.fixType = 'NO_FIX';
+            state.antennaConnected = false;
+            updateUI();
         }
 
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
-        // ==== EVENTOS ====
-        function initEvents() {
-            document.getElementById('toggle-left-panel').addEventListener('click', () => togglePanel('left'));
-            document.getElementById('close-left-panel').addEventListener('click', closeAllPanels);
-            document.getElementById('toggle-right-panel').addEventListener('click', () => togglePanel('right'));
-            document.getElementById('close-right-panel').addEventListener('click', closeAllPanels);
-            document.getElementById('overlay').addEventListener('click', closeAllPanels);
-
-            document.getElementById('btn-set-a').addEventListener('click', setPointA);
-            document.getElementById('btn-set-b').addEventListener('click', setPointB);
-            document.getElementById('btn-clear-ab').addEventListener('click', clearAB);
-
-            document.getElementById('zoom-in').addEventListener('click', () => {
-                state.zoom = Math.min(3, state.zoom * 1.3);
-                applyZoom();
-            });
-            document.getElementById('zoom-out').addEventListener('click', () => {
-                state.zoom = Math.max(0.5, state.zoom / 1.3);
-                applyZoom();
-            });
-            document.getElementById('center-btn').addEventListener('click', () => {
-                state.zoom = 1;
-                applyZoom();
-            });
-
-            document.getElementById('implement-width').addEventListener('change', e => {
-                state.implementWidth = parseFloat(e.target.value) || 12;
-                drawCoverage();
-            });
-            document.getElementById('overlap').addEventListener('change', e => {
-                state.overlapPercent = parseFloat(e.target.value) || 0;
-                drawCoverage();
-            });
-
-            document.getElementById('external-gps-toggle').addEventListener('change', e => {
-                state.externalGpsEnabled = e.target.checked;
-            });
-
-            document.getElementById('btn-work').addEventListener('click', () => {
-                state.isWorking = !state.isWorking;
-                const btn = document.getElementById('btn-work');
-                if (state.isWorking) {
-                    btn.innerHTML = '<i class="fa fa-pause text-2xl"></i>';
-                    btn.classList.add('bg-jdred');
-                    btn.classList.remove('bg-jdgreen');
-                    addCoveragePoint();
-                } else {
-                    btn.innerHTML = '<i class="fa fa-play text-2xl"></i>';
-                    btn.classList.remove('bg-jdred');
-                    btn.classList.add('bg-jdgreen');
-                }
-            });
-
-            document.getElementById('btn-reset').addEventListener('click', () => {
-                if (confirm('Reiniciar todos os dados?')) {
-                    state.coveragePoints = [];
-                    state.distanceFromA = 0;
-                    drawCoverage();
-                    updateDistanceIndicator();
-                }
-            });
-        }
-
-        function applyZoom() {
-            const fieldBg = document.getElementById('field-bg');
-            const coverageCanvas = document.getElementById('coverage-canvas');
-            fieldBg.style.transform = `scale(${state.zoom})`;
-            coverageCanvas.style.transform = `scale(${state.zoom})`;
-        }
-
-        function togglePanel(side) {
-            closeAllPanels();
-            const overlay = document.getElementById('overlay');
-            if (side === 'left') {
-                document.getElementById('left-panel').classList.remove('panel-closed');
-            } else {
-                document.getElementById('right-panel').classList.remove('panel-closed-right');
-            }
-            overlay.classList.remove('hidden');
-        }
-
-        function closeAllPanels() {
-            document.getElementById('left-panel').classList.add('panel-closed');
-            document.getElementById('right-panel').classList.add('panel-closed-right');
-            document.getElementById('overlay').classList.add('hidden');
-        }
-
-        // ==== CANVAS DE COBERTURA ====
-        function initCanvas() {
-            coverageCanvas = document.getElementById('coverage-canvas');
-            coverageCtx = coverageCanvas.getContext('2d');
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-        }
-
-        function resizeCanvas() {
-            const rect = coverageCanvas.parentElement.getBoundingClientRect();
-            coverageCanvas.width = rect.width;
-            coverageCanvas.height = rect.height;
-            drawCoverage();
-        }
-
-        // ==== ✅ COBERTURA HORIZONTAL - PERPENDICULAR À LINHA AZUL ====
-        function drawCoverage() {
-            coverageCtx.clearRect(0, 0, coverageCanvas.width, coverageCanvas.height);
-            
-            const baseGreen = 'rgba(0, 77, 0, 0.6)';
-            const overlapYellow = 'rgba(255, 204, 0, 0.5)';
-
-            state.coveragePoints.forEach((p) => {
-                const effectiveWidth = state.implementWidth * (1 - state.overlapPercent / 100);
-                const drawWidth = effectiveWidth * 3;
-                
-                coverageCtx.save();
-                coverageCtx.translate(p.x, p.y);
-                coverageCtx.rotate((p.heading || state.abHeading || state.heading) * Math.PI / 180);
-                
-                // ✅ FAIXA HORIZONTAL - perpendicular à linha azul
-                coverageCtx.fillStyle = baseGreen;
-                coverageCtx.fillRect(-drawWidth/2, -40, drawWidth, 80);
-                
-                coverageCtx.strokeStyle = 'rgba(0, 120, 0, 0.7)';
-                coverageCtx.lineWidth = 2;
-                coverageCtx.strokeRect(-drawWidth/2, -40, drawWidth, 80);
-                
-                coverageCtx.restore();
-            });
-
-            // Sobreposição amarela
-            if (state.coveragePoints.length > 1) {
-                coverageCtx.globalCompositeOperation = 'multiply';
-                state.coveragePoints.forEach((p) => {
-                    const effectiveWidth = state.implementWidth * (1 - state.overlapPercent / 100);
-                    const drawWidth = effectiveWidth * 3;
-                    
-                    coverageCtx.save();
-                    coverageCtx.translate(p.x, p.y);
-                    coverageCtx.rotate((p.heading || state.abHeading || state.heading) * Math.PI / 180);
-                    coverageCtx.fillStyle = overlapYellow;
-                    coverageCtx.fillRect(-drawWidth/2, -40, drawWidth, 80);
-                    coverageCtx.restore();
-                });
-                coverageCtx.globalCompositeOperation = 'source-over';
-            }
-        }
-
-        // ==== ✅ PONTO A EM BAIXO, PONTO B EM CIMA (5m) ====
-        function setPointA() {
-            state.pointA = { lat: state.lat, lon: state.lon };
-            document.getElementById('point-a-coord').textContent = state.lat.toFixed(6) + ', ' + state.lon.toFixed(6);
-            document.getElementById('point-a-marker').classList.remove('opacity-0');
-            document.getElementById('ab-guide-line').classList.remove('opacity-0');
-            state.distanceFromA = 0;
-            updateDistanceIndicator();
-            
-            state.pointB = null;
-            document.getElementById('point-b-marker').classList.add('opacity-0');
-            document.getElementById('btn-set-b').disabled = true;
-            document.getElementById('btn-set-b').classList.add('opacity-30', 'cursor-not-allowed');
-        }
-
-        function setPointB() {
-            if (!state.pointA || state.distanceFromA < state.minDistanceForB) return;
-            
-            state.pointB = { lat: state.lat, lon: state.lon };
-            document.getElementById('point-b-coord').textContent = state.lat.toFixed(6) + ', ' + state.lon.toFixed(6);
-            document.getElementById('point-b-marker').classList.remove('opacity-0');
-            state.abHeading = 0;
-            document.getElementById('ab-heading').textContent = '0.0°';
-        }
-
-        function clearAB() {
-            state.pointA = state.pointB = null;
-            state.abHeading = null;
-            state.distanceFromA = 0;
-            
-            document.getElementById('point-a-coord').textContent = '—';
-            document.getElementById('point-b-coord').textContent = '—';
-            document.getElementById('ab-heading').textContent = '—';
-            document.getElementById('point-a-marker').classList.add('opacity-0');
-            document.getElementById('point-b-marker').classList.add('opacity-0');
-            document.getElementById('ab-guide-line').classList.add('opacity-0');
-            
-            document.getElementById('btn-set-b').disabled = true;
-            document.getElementById('btn-set-b').classList.add('opacity-30', 'cursor-not-allowed');
-            
-            updateDistanceIndicator();
-        }
-
-        // ==== ✅ HABILITAR B APÓS 5m ====
-        function updateDistanceIndicator() {
-            const dist = state.distanceFromA;
-            document.getElementById('distance-from-a').textContent = `${dist.toFixed(2)} m / ${state.minDistanceForB.toFixed(2)} m`;
-            
-            if (dist >= state.minDistanceForB && !state.pointB) {
-                document.getElementById('btn-set-b').disabled = false;
-                document.getElementById('btn-set-b').classList.remove('opacity-30', 'cursor-not-allowed');
-                document.getElementById('distance-from-a').classList.add('text-green-400');
-            } else {
-                document.getElementById('distance-from-a').classList.remove('text-green-400');
-            }
-        }
-
-        // ==== ✅ COBERTURA HORIZONTAL ACOMPANHANDO A SETA ====
-        function addCoveragePoint() {
-            if (!state.isWorking) return;
-            const vehicleEl = document.getElementById('vehicle');
-            const rect = vehicleEl.getBoundingClientRect();
-            const canvasRect = coverageCanvas.getBoundingClientRect();
-            
-            const centerX = rect.left + rect.width/2 - canvasRect.left;
-            const centerY = rect.top + rect.height/2 - canvasRect.top;
-
-            state.coveragePoints.push({
-                x: centerX,
-                y: centerY,
-                heading: state.abHeading !== null ? state.abHeading : state.heading
-            });
-            drawCoverage();
-        }
-
-        // ==== ATUALIZAÇÃO DE DADOS ====
-        function updateData() {
-            if (!state.externalGpsEnabled || !navigator.geolocation) {
-                if (state.isWorking) {
-                    state.speed = 7.1 + (Math.random() - 0.5) * 0.5;
-                    state.deviation = -0.05 + (Math.random() - 0.5) * 0.1;
-                    
-                    if (state.pointA) {
-                        state.lat += 0.00001 * Math.cos(state.heading * Math.PI / 180) * (state.speed / 3.6);
-                        state.lon += 0.00001 * Math.sin(state.heading * Math.PI / 180) * (state.speed / 3.6);
-                        state.distanceFromA += (state.speed / 3.6) * 0.2;
-                        updateDistanceIndicator();
-                    }
-                    addCoveragePoint();
-                } else {
-                    state.speed = Math.max(0, state.speed - 0.3);
-                    state.deviation = state.deviation * 0.98;
-                }
-            }
-
-            // Atualizar posição da seta amarela ao longo da linha azul
-            if (state.pointA && state.isWorking) {
-                const progress = Math.min(1, state.distanceFromA / 50);
-                const vehicle = document.getElementById('vehicle');
-                vehicle.style.top = `${50 - progress * 30}%`;
-            }
-
-            document.getElementById('lat-value').textContent = state.lat.toFixed(6);
-            document.getElementById('lon-value').textContent = state.lon.toFixed(6);
-            document.getElementById('heading-display').textContent = Math.round(state.heading) + '°';
-            document.getElementById('deviation-display').textContent = (state.deviation >= 0 ? '+' : '') + state.deviation.toFixed(2) + ' m';
-            document.getElementById('speed-display').textContent = state.speed.toFixed(1) + ' km/h';
-
-            const lightPos = 50 + state.deviation * 150;
-            document.getElementById('light-indicator').style.left = `${Math.max(5, Math.min(95, lightPos))}%`;
-        }
-
-        function updateTime() {
-            document.getElementById('current-time').textContent = new Date().toLocaleTimeString('es-ES', { hour12: false });
-        }
+        // ========== BUCLE PRINCIPAL ==========
+        updateClock();
+        updateUI();
+        setInterval(updateClock, 1000);
+        setInterval(simulateGPS, 200);
     </script>
+
 </body>
 </html>
