@@ -1,439 +1,640 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PORTAL SAT GPS — Navegación Agrícola RTK</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        jdgreen: '#008000',
-                        jdyellow: '#FFCC00',
-                        jdred: '#cc0000',
-                        jdblue: '#0066FF',
-                        darkbg: '#0F1A0F',
-                    },
-                    fontFamily: { mono: ['"Roboto Mono"', 'monospace'] }
-                }
-            }
-        }
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PORTAL SAT GPS</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #0F1A0F;
-            color: white;
-            font-family: Roboto, sans-serif;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-            position: relative;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        html, body {
+            background: #121212; color: white;
+            height: 100vh; height: 100dvh;
+            width: 100vw; overflow: hidden; position: fixed;
         }
-        .grid-field {
-            background-image: 
-                linear-gradient(rgba(0,200,0,0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,200,0,0.08) 1px, transparent 1px);
-            background-size: 50px 50px;
+
+        /* 🔦 BARRA DE LEDS */
+        .barra-led {
+            height: 26px; background: #000;
+            display: flex; justify-content: center; align-items: center;
+            gap: 1px; padding: 0 5px; border-bottom: 2px solid #333;
         }
-        .light-bar-container { position: relative; width: 100%; height: 28px; }
-        .light-bar {
-            background: linear-gradient(90deg, #c00 0%, #f60 20%, #fc0 35%, #0c0 50%, #fc0 65%, #f60 80%, #c00 100%);
-            border-radius: 999px; width: 100%; height: 100%; position: relative;
+        .led {
+            width: 9px; height: 14px; border-radius: 2px;
+            background: #222; transition: all 0.1s;
         }
-        .center-marker {
-            position: absolute; top: 0; bottom: 0; left: 50%; width: 3px;
-            background: white; transform: translateX(-50%); z-index: 3;
+        .led.verde { background: #0c0; box-shadow: 0 0 4px #0c0; }
+        .led.laranja { background: #f80; box-shadow: 0 0 4px #f80; }
+        .led.vermelho { background: #c00; box-shadow: 0 0 4px #c00; }
+        .led.centro { width: 11px; background: #333; }
+        .led.centro.ativo { background: #fff; box-shadow: 0 0 6px #fff; }
+
+        /* 📱 BARRA SUPERIOR */
+        .topo {
+            background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+            padding: 8px 12px; display: flex; align-items: center;
+            justify-content: space-between; border-bottom: 1px solid #000; height: 56px;
         }
-        .position-indicator {
-            position: absolute; top: -4px; width: 10px; height: 36px;
-            background: white; border-radius: 3px; z-index: 4;
-            box-shadow: 0 0 8px rgba(255,255,255,0.8);
-            transition: left 0.15s ease-out;
+        .titulo { font-size: 15px; font-weight: bold; color: #6cf; }
+        .status { display: flex; gap: 8px; align-items: center; font-size: 12px; }
+        .status-sinal { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .rtk { background: #080; } .dgps { background: #08c; }
+        .gps { background: #c80; } .sem-sinal { background: #400; }
+        .relogio { font-family: monospace; font-size: 13px; }
+        .btn-config {
+            width: 36px; height: 36px; border-radius: 6px; border: none;
+            background: #333; color: white; font-size: 18px; cursor: pointer;
+            touch-action: manipulation;
         }
-        .cm-label { position: absolute; top: 30px; font-size: 9px; color: #aaa; transform: translateX(-50%); }
-        .triangle-yellow {
+        .btn-config:active { background: #444; transform: scale(0.95); }
+
+        /* 📊 DADOS */
+        .dados {
+            position: absolute; top: 62px; left: 10px;
+            background: rgba(0,0,0,0.8); border: 1px solid #333;
+            border-radius: 6px; padding: 10px; min-width: 170px; z-index: 10;
+        }
+        .linha { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+        .etiqueta { color: #888; }
+        .valor { font-family: monospace; font-weight: bold; color: #0f0; }
+        .valor.azul { color: #0cf; } .valor.amarelo { color: #fc0; } .valor.vermelho { color: #f44; }
+
+        /* 🎯 NAVEGAÇÃO */
+        .navegacao {
+            position: absolute; top: 120px; bottom: 100px; left: 0; right: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .seta {
             width: 0; height: 0;
             border-left: 35px solid transparent;
             border-right: 35px solid transparent;
-            border-bottom: 55px solid #FFCC00;
-            filter: drop-shadow(0 0 14px rgba(255,204,0,0.9));
-            transition: transform 0.25s ease-out;
-            z-index: 15;
+            border-bottom: 55px solid #fc0;
+            filter: drop-shadow(0 0 8px rgba(255,200,0,0.5));
+            transition: transform 0.2s ease-out;
+            transform-origin: center bottom;
         }
-        .coverage-band {
-            background: rgba(0,90,0,0.35);
-            border: 2px solid rgba(0,220,0,0.45);
-            border-radius: 2px;
+        .desvio-grande {
+            position: absolute; top: 130px; right: 15px;
+            font-size: 28px; font-weight: bold; font-family: monospace;
+            color: #fc0; text-shadow: 0 0 8px rgba(255,200,0,0.4);
         }
-        .ab-line {
-            position: absolute; width: 4px; background: linear-gradient(180deg, #0066FF 0%, #00CCFF 50%, #0066FF 100%);
-            border-radius: 2px; z-index: 10; transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0,100,255,0.4);
+        .linha-centro {
+            position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+            background: #0cf; opacity: 0; transform: translateX(-50%);
+            box-shadow: 0 0 10px #0cf;
         }
-        .point-marker {
-            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 20px; font-weight: bold; z-index: 11; position: absolute;
-            box-shadow: 0 0 12px rgba(0,0,0,0.5);
+        .linha-centro.ativa { opacity: 0.5; }
+
+        /* 🔘 BOTÕES */
+        .botoes {
+            position: absolute; bottom: 15px; left: 10px; right: 10px;
+            display: flex; gap: 8px; justify-content: space-between;
         }
-        .btn-round {
-            width: 54px; height: 54px; border-radius: 50%; background: rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;
-            backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.2s;
+        .btn {
+            flex: 1; height: 70px; border-radius: 8px; border: none;
+            font-size: 15px; font-weight: bold; color: white;
+            cursor: pointer; touch-action: manipulation;
+            transition: all 0.1s;
         }
-        .btn-round:active { transform: scale(0.92); background: rgba(0,200,0,0.3); }
-        .btn-ab {
-            width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 22px; font-weight: bold; transition: all 0.2s;
-            border: 2px solid transparent;
+        .btn:active { transform: scale(0.96); }
+        .btn-a { background: linear-gradient(180deg, #0c0, #080); border: 2px solid #0f0; }
+        .btn-b { background: #333; color: #888; border: 2px solid #444; }
+        .btn-b.ativo { background: linear-gradient(180deg, #08f, #06c); color: white; border-color: #0cf; }
+        .btn-parar { background: linear-gradient(180deg, #c00, #800); border: 2px solid #f44; }
+        .btn-reiniciar { background: linear-gradient(180deg, #555, #333); border: 2px solid #666; font-size: 20px; }
+
+        /* 📋 MODAL DE CONFIGURAÇÕES */
+        .fundo-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            display: none; align-items: center; justify-content: center;
+            z-index: 100; padding: 15px;
         }
-        .data-panel {
-            background: rgba(0,0,0,0.6); border-radius: 10px; padding: 10px 12px;
-            backdrop-filter: blur(8px); border: 1px solid rgba(0,255,0,0.1);
+        .fundo-modal.mostrar { display: flex; }
+        .modal {
+            background: #1a1a1a; border: 2px solid #333;
+            border-radius: 10px; padding: 20px;
+            width: 100%; max-width: 420px;
+            max-height: 85vh; overflow-y: auto;
         }
-        .status-badge {
-            padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;
+        .modal-titulo { font-size: 18px; font-weight: bold; color: #0cf; margin-bottom: 15px; text-align: center; }
+        .abas { display: flex; gap: 8px; margin-bottom: 15px; }
+        .aba { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; background: #333; color: white; touch-action: manipulation; }
+        .aba.ativa { background: #069; }
+        .campo {
+            width: 100%; padding: 12px; margin: 8px 0;
+            background: #2a2a2a; border: 1px solid #444;
+            color: white; border-radius: 6px; font-size: 15px;
         }
-        .sat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin: 1px; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        .searching { animation: pulse 1s infinite; }
+        .grupo-botoes { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; touch-action: manipulation; }
+        .btn-cancelar { background: #444; color: white; }
+        .btn-salvar { background: #080; color: white; }
+        .item-talhao {
+            padding: 12px; background: #2a2a2a; border-radius: 6px;
+            margin: 6px 0; border-left: 3px solid #0cf;
+        }
+        .info-bloco {
+            background: #2a2a2a; padding: 12px; border-radius: 6px;
+            margin-top: 10px;
+        }
+        label { color: #aaa; font-size: 13px; display: block; margin-bottom: 4px; }
+        select.campo { appearance: none; cursor: pointer; }
+        .sem-dados { color: #666; text-align: center; padding: 20px; }
     </style>
 </head>
-<body class="grid-field">
+<body>
 
-    <!-- === BARRA SUPERIOR === -->
-    <header class="bg-jdgreen px-3 py-2 relative z-50">
-        <!-- Barra de Luz — Desvio Lateral em Centímetros -->
-        <div class="light-bar-container mb-3">
-            <div class="light-bar"></div>
-            <div class="center-marker"></div>
-            <div id="dev-indicator" class="position-indicator" style="left: 50%; transform: translateX(-50%);"></div>
-            <!-- Marcas de cm do centro para ambos lados -->
-            <span class="cm-label" style="left: 50%;">0</span>
-            <span class="cm-label" style="left: 42.5%;">-15</span>
-            <span class="cm-label" style="left: 35%;">-30</span>
-            <span class="cm-label" style="left: 27.5%;">-45</span>
-            <span class="cm-label" style="left: 20%;">-60</span>
-            <span class="cm-label" style="left: 57.5%;">+15</span>
-            <span class="cm-label" style="left: 65%;">+30</span>
-            <span class="cm-label" style="left: 72.5%;">+45</span>
-            <span class="cm-label" style="left: 80%;">+60</span>
+    <!-- 🔦 BARRA DE 27 LEDS -->
+    <div class="barra-led" id="barraLED"></div>
+
+    <!-- 📱 BARRA SUPERIOR -->
+    <div class="topo">
+        <div class="titulo">🛰️ PORTAL SAT GPS</div>
+        <div class="status">
+            <span class="status-sinal sem-sinal" id="statusSinal">SEM SINAL</span>
+            <span class="relogio" id="relogio">00:00</span>
         </div>
+        <button class="btn-config" id="btnConfig">⚙</button>
+    </div>
 
-        <!-- Cabeçalho -->
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <button id="btn-menu" class="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center text-lg">
-                    <i class="fa fa-bars"></i>
-                </button>
-                <span class="text-lg font-bold">PORTAL SAT GPS</span>
+    <!-- 📊 DADOS -->
+    <div class="dados" id="dados">
+        <div class="linha"><span class="etiqueta">Talhão</span><span class="valor" id="nomeTalhaoAtual">---</span></div>
+        <div class="linha"><span class="etiqueta">Implemento</span><span class="valor azul" id="larguraFaixa">--- m</span></div>
+        <div class="linha"><span class="etiqueta">Latitude</span><span class="valor" id="lat">---</span></div>
+        <div class="linha"><span class="etiqueta">Longitude</span><span class="valor" id="lon">---</span></div>
+        <div class="linha"><span class="etiqueta">Rumo</span><span class="valor" id="rumo">0.0°</span></div>
+        <div class="linha"><span class="etiqueta">Velocidade</span><span class="valor azul" id="vel">0.0 km/h</span></div>
+        <div class="linha"><span class="etiqueta">Desvio</span><span class="valor amarelo" id="desvio">+0.00 m</span></div>
+        <div class="linha"><span class="etiqueta">Precisão</span><span class="valor azul" id="precisao">--- m</span></div>
+    </div>
+
+    <!-- 🎯 NAVEGAÇÃO -->
+    <div class="desvio-grande" id="desvioGrande">0.00 m</div>
+    <div class="navegacao">
+        <div class="linha-centro" id="linhaCentro"></div>
+        <div class="seta" id="seta"></div>
+    </div>
+
+    <!-- 🔘 BOTÕES -->
+    <div class="botoes">
+        <button class="btn btn-a" id="btnA">PONTO A</button>
+        <button class="btn btn-b" id="btnB" disabled>PONTO B</button>
+        <button class="btn btn-parar" id="btnParar">PARAR</button>
+        <button class="btn btn-reiniciar" id="btnReiniciar">↻</button>
+    </div>
+
+    <!-- 📋 MODAL DE CONFIGURAÇÕES COMPLETO -->
+    <div class="fundo-modal" id="modal">
+        <div class="modal">
+            <h3 class="modal-titulo">⚙ CONFIGURAÇÕES</h3>
+            <div class="abas">
+                <button class="aba ativa" data-aba="criar">Criar</button>
+                <button class="aba" data-aba="talhoes">Talhões</button>
+                <button class="aba" data-aba="config">Geral</button>
             </div>
-            <div class="flex items-center gap-3 text-sm">
-                <span id="clock" class="font-mono">00:00:00</span>
-                <span id="fix-status" class="status-badge bg-green-600 text-white">RTK-FIX</span>
-                <span id="sat-count" class="font-mono text-xs">14/14</span>
-                <button id="btn-settings" class="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center">
-                    <i class="fa fa-cog text-lg"></i>
-                </button>
+
+            <!-- ABA CRIAR TALHÃO -->
+            <div id="aba-criar">
+                <div class="info-bloco">
+                    <label>Nome do Talhão *</label>
+                    <input type="text" id="nomeTalhao" class="campo" placeholder="Ex: Talhão 1 - Soja">
+                    
+                    <label>Largura do Implemento (m) *</label>
+                    <input type="number" id="larguraImplemento" class="campo" placeholder="Ex: 12.0" step="0.1" min="0.5" value="12.0">
+                    
+                    <label>Cultura / Observação</label>
+                    <input type="text" id="observacao" class="campo" placeholder="Ex: Soja - Safra 2026">
+                </div>
+                <div class="grupo-botoes">
+                    <button class="btn-modal btn-cancelar" id="btnFechar">Fechar</button>
+                    <button class="btn-modal btn-salvar" id="btnSalvarTalhao">💾 Salvar</button>
+                </div>
+            </div>
+
+            <!-- ABA GERENCIAR TALHÕES -->
+            <div id="aba-talhoes" style="display:none;">
+                <div id="listaTalhoes">
+                    <p class="sem-dados">Nenhum talhão salvo ainda</p>
+                </div>
+            </div>
+
+            <!-- ABA CONFIGURAÇÕES GERAIS -->
+            <div id="aba-config" style="display:none;">
+                <div class="info-bloco">
+                    <label>Tipo de Linha de Guia</label>
+                    <select id="tipoLinhaGuia" class="campo">
+                        <option selected>AB Reta</option>
+                        <option>Curva Contínua</option>
+                        <option>Contorno</option>
+                        <option>Espiral</option>
+                    </select>
+                    
+                    <label>Unidades de Medida</label>
+                    <select id="unidades" class="campo">
+                        <option selected>Métrico (metros, km/h)</option>
+                        <option>Imperial (pés, mph)</option>
+                    </select>
+                    
+                    <label>Largura Padrão de Faixa (m)</label>
+                    <input type="number" id="larguraPadrao" class="campo" value="12.0" step="0.5" min="0.5">
+                </div>
+                <div class="grupo-botoes">
+                    <button class="btn-modal btn-cancelar" id="btnFecharConfig">Fechar</button>
+                    <button class="btn-modal btn-salvar" id="btnAplicarConfig">✅ Aplicar</button>
+                </div>
             </div>
         </div>
-    </header>
-
-    <!-- === ÁREA PRINCIPAL === -->
-    <main class="absolute inset-0 pt-32 pb-4 px-3 overflow-hidden">
-
-        <!-- Botões A / B — Definição de Linha -->
-        <div class="absolute left-4 top-4 flex flex-col items-center gap-2 z-30">
-            <button id="btn-set-a" class="btn-ab bg-green-600 border-2 border-green-400">A</button>
-            <button id="btn-set-b" class="btn-ab bg-gray-700 text-gray-400 border-2 border-gray-600" disabled>B</button>
-            <div class="w-0.5 h-6 bg-gray-500"></div>
-        </div>
-
-        <!-- 📊 Painel de Dados — Canto Superior Direito -->
-        <div class="absolute top-4 right-4 data-panel z-30 w-52">
-            <div class="flex justify-between items-center text-sm mb-2">
-                <span class="text-gray-400">Rumbo</span>
-                <span id="heading-val" class="font-mono font-bold text-lg">310.0°</span>
-            </div>
-            <div class="flex justify-between items-center text-sm mb-2">
-                <span class="text-gray-400">Desvío</span>
-                <span id="dev-val" class="font-mono font-bold text-lg text-jdyellow">-0.05 m</span>
-            </div>
-            <div class="flex justify-between items-center text-sm mb-2">
-                <span class="text-gray-400">Velocidad</span>
-                <span id="speed-val" class="font-mono font-bold text-lg">0.0 km/h</span>
-            </div>
-            <div class="border-t border-gray-700 my-2"></div>
-            <div class="text-xs space-y-1">
-                <div class="flex justify-between"><span class="text-gray-500">Latitud</span><span id="lat-val" class="font-mono">-24.489275°</span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Longitud</span><span id="lon-val" class="font-mono">-54.614722°</span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Precisión</span><span id="acc-val" class="font-mono text-green-400">±0.02 m</span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Ancho faja</span><span id="width-val" class="font-mono">12.0 m</span></div>
-            </div>
-            <div class="border-t border-gray-700 my-2"></div>
-            <!-- Status Antena Externa -->
-            <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-400"><i class="fa fa-wifi mr-1"></i> Antena Externa</span>
-                <span id="antenna-status" class="text-green-400 font-bold">CONECTADA</span>
-            </div>
-            <!-- Satélites -->
-            <div class="flex justify-center mt-2" id="sat-bars">
-                <span class="sat-dot bg-green-400"></span><span class="sat-dot bg-green-400"></span>
-                <span class="sat-dot bg-green-400"></span><span class="sat-dot bg-green-400"></span>
-                <span class="sat-dot bg-green-400"></span><span class="sat-dot bg-green-400"></span>
-                <span class="sat-dot bg-green-400"></span><span class="sat-dot bg-green-400"></span>
-            </div>
-        </div>
-
-        <!-- Controles Esquerdos -->
-        <div class="absolute left-4 top-36 flex flex-col items-center gap-4 z-30">
-            <button id="btn-zoom-in" class="btn-round"><i class="fa fa-search-plus"></i></button>
-            <button id="btn-zoom-out" class="btn-round"><i class="fa fa-search-minus"></i></button>
-            <button id="btn-center" class="btn-round"><i class="fa fa-crosshairs"></i></button>
-            <button id="btn-view" class="btn-round"><i class="fa fa-cubes"></i></button>
-        </div>
-
-        <!-- Controles Direitos -->
-        <div class="absolute right-4 bottom-1/3 flex flex-col items-center gap-4 z-30">
-            <button id="btn-start" class="btn-round bg-green-600/40 border border-green-400/40"><i class="fa fa-play"></i></button>
-            <button id="btn-stop" class="btn-round"><i class="fa fa-times"></i></button>
-            <button id="btn-reset" class="btn-round"><i class="fa fa-refresh"></i></button>
-        </div>
-
-        <!-- === LINHA AB + FAIXA DE COBERTURA === -->
-        <div id="ab-line" class="ab-line absolute left-1/2 top-0 bottom-0" style="height: 0; opacity: 0; transform: translateX(-50%);"></div>
-        <div id="point-a" class="point-marker bg-green-600 text-white border-2 border-green-400" style="bottom: 10%; left: 50%; transform: translateX(-50%) scale(0); opacity: 0;">A</div>
-        <div id="point-b" class="point-marker bg-jdblue text-white border-2 border-blue-400" style="top: 15%; left: 50%; transform: translateX(-50%) scale(0); opacity: 0;">B</div>
-        <div id="coverage" class="coverage-band absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-20 opacity-0 transition-opacity duration-500"></div>
-        <div id="vehicle" class="triangle-yellow absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style="transform: translate(-50%, -50%) rotate(0deg);"></div>
-
-    </main>
+    </div>
 
     <script>
-        // ==================================================
-        // 🛰️ SISTEMA DE NAVEGACIÓN AGRÍCOLA RTK — FUNCIONAL
-        // ==================================================
-        const state = {
-            lat: -24.489275,
-            lon: -54.614722,
-            heading: 310.0,      // Rumbo en grados
-            speed: 0.0,          // km/h
-            devLateral: -0.05,   // Desvio lateral en metros (+ derecha, - izquierda)
-            accuracy: 0.02,      // Precisión en metros
-            fixType: 'RTK-FIX',  // NO_FIX, GPS, DGPS, RTK-FIX
-            satellites: { total: 14, used: 14 },
-            antennaConnected: true,
-            lineA: null,         // Coordenadas punto A
-            lineB: null,         // Coordenadas punto B
-            lineActive: false,
-            workingWidth: 12.0,  // Ancho de faixa en metros
-            isRunning: false,
-            zoom: 1,
-            time: 0
-        };
+        // ==============================================
+        // 🚜 PORTAL SAT GPS — VERSÃO FINAL
+        // ==============================================
 
-        // Elementos del DOM
+        // === VARIÁVEIS GLOBAIS ===
+        let lat = null, lon = null;
+        let rumo = 0, velocidade = 0, precisao = null;
+        let desvio = 0;
+        let temA = false, temB = false;
+        let pontoA = null, pontoB = null;
+        let larguraFaixa = 12.0;
+        let nomeTalhaoAtual = '---';
+        let unidadesMetricas = true;
+        let tipoLinha = 'AB Reta';
+        let talhoes = [];
+        const TOTAL_LEDS = 27;
+        const CENTRO_LED = 13;
+        const leds = [];
+
+        // === ELEMENTOS ===
         const el = {
-            clock: document.getElementById('clock'),
-            lat: document.getElementById('lat-val'),
-            lon: document.getElementById('lon-val'),
-            heading: document.getElementById('heading-val'),
-            dev: document.getElementById('dev-val'),
-            speed: document.getElementById('speed-val'),
-            acc: document.getElementById('acc-val'),
-            fixStatus: document.getElementById('fix-status'),
-            satCount: document.getElementById('sat-count'),
-            antenna: document.getElementById('antenna-status'),
-            devIndicator: document.getElementById('dev-indicator'),
-            btnA: document.getElementById('btn-set-a'),
-            btnB: document.getElementById('btn-set-b'),
-            abLine: document.getElementById('ab-line'),
-            pointA: document.getElementById('point-a'),
-            pointB: document.getElementById('point-b'),
-            coverage: document.getElementById('coverage'),
-            vehicle: document.getElementById('vehicle'),
-            widthVal: document.getElementById('width-val')
+            barraLED: document.getElementById('barraLED'),
+            statusSinal: document.getElementById('statusSinal'),
+            relogio: document.getElementById('relogio'),
+            lat: document.getElementById('lat'),
+            lon: document.getElementById('lon'),
+            rumo: document.getElementById('rumo'),
+            vel: document.getElementById('vel'),
+            desvio: document.getElementById('desvio'),
+            desvioGrande: document.getElementById('desvioGrande'),
+            precisao: document.getElementById('precisao'),
+            seta: document.getElementById('seta'),
+            linhaCentro: document.getElementById('linhaCentro'),
+            btnA: document.getElementById('btnA'),
+            btnB: document.getElementById('btnB'),
+            btnParar: document.getElementById('btnParar'),
+            btnReiniciar: document.getElementById('btnReiniciar'),
+            btnConfig: document.getElementById('btnConfig'),
+            modal: document.getElementById('modal'),
+            nomeTalhaoAtual: document.getElementById('nomeTalhaoAtual'),
+            larguraFaixaEl: document.getElementById('larguraFaixa'),
         };
 
-        // ========== UTILIDADES ==========
-        function updateClock() {
-            const now = new Date();
-            el.clock.textContent = now.toLocaleTimeString('es-PY', { hour12: false });
-        }
-
-        // Convierte desvio (metros) → posición en la barra de luz (porcentaje)
-        function devToPercent(dev) {
-            const maxDev = 0.6; // ±60cm máximo visualizado
-            let percent = 50 + (dev / maxDev) * 40;
-            return Math.max(5, Math.min(95, percent));
-        }
-
-        // ========== ACTUALIZAR INTERFAZ ==========
-        function updateUI() {
-            el.lat.textContent = state.lat.toFixed(6) + '°';
-            el.lon.textContent = state.lon.toFixed(6) + '°';
-            el.heading.textContent = state.heading.toFixed(1) + '°';
-            el.dev.textContent = (state.devLateral >= 0 ? '+' : '') + state.devLateral.toFixed(2) + ' m';
-            el.dev.className = state.devLateral > 0.5 ? 'font-mono font-bold text-lg text-jdred'
-                             : state.devLateral < -0.5 ? 'font-mono font-bold text-lg text-jdred'
-                             : 'font-mono font-bold text-lg text-jdyellow';
-            el.speed.textContent = state.speed.toFixed(1) + ' km/h';
-            el.acc.textContent = '±' + state.accuracy.toFixed(2) + ' m';
-            
-            // Indicador visual de desvio en la barra de luz
-            el.devIndicator.style.left = devToPercent(state.devLateral) + '%';
-            
-            // Estado de fix
-            el.fixStatus.textContent = state.fixType;
-            if (state.fixType === 'RTK-FIX') {
-                el.fixStatus.className = 'status-badge bg-green-600 text-white';
-            } else if (state.fixType === 'DGPS') {
-                el.fixStatus.className = 'status-badge bg-blue-600 text-white';
-            } else if (state.fixType === 'GPS') {
-                el.fixStatus.className = 'status-badge bg-yellow-500 text-black';
-            } else {
-                el.fixStatus.className = 'status-badge bg-red-600 text-white searching';
+        // ==============================================
+        // 🔦 INICIALIZAR BARRA DE LEDS
+        // ==============================================
+        function inicializarLEDs() {
+            el.barraLED.innerHTML = '';
+            leds.length = 0;
+            for (let i = 0; i < TOTAL_LEDS; i++) {
+                const led = document.createElement('div');
+                led.className = 'led';
+                if (i === CENTRO_LED) led.classList.add('centro');
+                el.barraLED.appendChild(led);
+                leds.push(led);
             }
+        }
+        inicializarLEDs();
 
-            el.satCount.textContent = state.satellites.used + '/' + state.satellites.total;
-            el.antenna.textContent = state.antennaConnected ? 'CONECTADA' : 'SIN SEÑAL';
-            el.antenna.className = state.antennaConnected ? 'text-green-400 font-bold' : 'text-red-400 font-bold';
-            
-            // Rotación del triángulo según rumbo
-            el.vehicle.style.transform = `translate(-50%, -50%) rotate(${state.heading - 90}deg)`;
+        // ==============================================
+        // 🔦 ATUALIZAR LEDS CONFORME DESVIO
+        // ==============================================
+        function atualizarLEDs(desvioMetros) {
+            leds.forEach(led => {
+                led.classList.remove('verde', 'laranja', 'vermelho', 'ativo');
+                led.style.background = '#222';
+            });
+            leds[CENTRO_LED].classList.add('centro', 'ativo');
+
+            if (!temA || !temB) return;
+
+            const maxDesvio = 0.6;
+            const fator = (desvioMetros / maxDesvio) * (TOTAL_LEDS / 2);
+            let alvo = Math.round(CENTRO_LED - fator);
+            alvo = Math.max(0, Math.min(TOTAL_LEDS - 1, alvo));
+
+            const qtd = Math.max(1, Math.abs(alvo - CENTRO_LED));
+            const dir = alvo > CENTRO_LED ? 1 : -1;
+
+            for (let i = 1; i <= qtd; i++) {
+                const idx = CENTRO_LED + (i * dir);
+                if (idx < 0 || idx >= TOTAL_LEDS) break;
+                if (Math.abs(idx - CENTRO_LED) <= 4) leds[idx].classList.add('verde');
+                else if (Math.abs(idx - CENTRO_LED) <= 9) leds[idx].classList.add('laranja');
+                else leds[idx].classList.add('vermelho');
+            }
         }
 
-        // ========== DEFINIR PUNTOS A Y B ==========
+        // ==============================================
+        // 🕐 RELÓGIO
+        // ==============================================
+        function atualizarRelogio() {
+            const agora = new Date();
+            el.relogio.textContent = agora.toLocaleTimeString('pt-BR', {
+                hour: '2-digit', minute: '2-digit', hour12: false
+            });
+        }
+        setInterval(atualizarRelogio, 1000);
+        atualizarRelogio();
+
+        // ==============================================
+        // 📏 CALCULAR DESVIO LATERAL
+        // ==============================================
+        function calcularDesvio(lat1, lon1, lat2, lon2, lat3, lon3) {
+            const toRad = g => g * Math.PI / 180;
+            const dLon = toRad(lon2 - lon1);
+            const lat1r = toRad(lat1), lat2r = toRad(lat2), lat3r = toRad(lat3);
+            const lon1r = toRad(lon1), lon3r = toRad(lon3);
+            const dX = dLon * Math.cos((lat1r + lat2r) / 2);
+            const dY = toRad(lat2 - lat1);
+            const lenLinha = Math.sqrt(dX * dX + dY * dY);
+            if (lenLinha < 0.000001) return 0;
+
+            const dX3 = toRad(lon3 - lon1);
+            const dY3 = toRad(lat3 - lat1);
+            const proj = (dX3 * dX + dY3 * dY) / (lenLinha * lenLinha);
+            const distX = dX3 - dX * proj, distY = dY3 - dY * proj;
+            let desv = Math.sqrt(distX * distX + distY * distY) * 6371000;
+            if ((dX * dY3 - dY * dX3) < 0) desv = -desv;
+            return Math.max(-0.6, Math.min(0.6, desv));
+        }
+
+        // ==============================================
+        // 🔄 ATUALIZAR TELA
+        // ==============================================
+        function atualizarTela() {
+            el.nomeTalhaoAtual.textContent = nomeTalhaoAtual;
+            el.larguraFaixaEl.textContent = larguraFaixa.toFixed(1) + (unidadesMetricas ? ' m' : ' ft');
+            el.lat.textContent = lat ? lat.toFixed(6) : '---';
+            el.lon.textContent = lon ? lon.toFixed(6) : '---';
+            el.rumo.textContent = rumo.toFixed(1) + '°';
+            el.vel.textContent = velocidade.toFixed(1) + (unidadesMetricas ? ' km/h' : ' mph');
+            el.precisao.textContent = precisao ? precisao.toFixed(2) + ' m' : '---';
+            
+            const desvioStr = (desvio >= 0 ? '+' : '') + desvio.toFixed(2) + ' m';
+            el.desvio.textContent = desvioStr;
+            el.desvioGrande.textContent = desvioStr;
+            const cor = Math.abs(desvio) > 0.5 ? '#f44' : Math.abs(desvio) > 0.25 ? '#fa0' : '#0f0';
+            el.desvio.style.color = cor;
+            el.desvioGrande.style.color = cor;
+
+            el.seta.style.transform = `rotate(${rumo}deg)`;
+            atualizarLEDs(desvio);
+        }
+
+        // ==============================================
+        // 💾 GERENCIAMENTO DE TALHÕES
+        // ==============================================
+        function carregarTalhoesSalvos() {
+            try {
+                const salvos = localStorage.getItem('talhoesGPS');
+                talhoes = salvos ? JSON.parse(salvos) : [];
+            } catch (e) { talhoes = []; }
+        }
+        function salvarTalhoes() {
+            localStorage.setItem('talhoesGPS', JSON.stringify(talhoes));
+        }
+        function renderizarListaTalhoes() {
+            carregarTalhoesSalvos();
+            const lista = document.getElementById('listaTalhoes');
+            if (talhoes.length === 0) {
+                lista.innerHTML = '<p class="sem-dados">Nenhum talhão salvo ainda</p>';
+                return;
+            }
+            lista.innerHTML = '';
+            talhoes.forEach((t, i) => {
+                const div = document.createElement('div');
+                div.className = 'item-talhao';
+                div.innerHTML = `
+                    <div style="font-weight:bold;margin-bottom:4px;">🌱 ${t.nome}</div>
+                    <div style="font-size:12px;color:#888;">Implemento: ${t.largura}m | ${t.data}</div>
+                    <div style="font-size:11px;color:#666;margin-top:4px;">${t.obs || ''}</div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <button data-i="${i}" class="btnCarregar" style="padding:6px 14px;background:#06c;border:none;border-radius:4px;color:white;cursor:pointer;font-weight:bold;">Carregar</button>
+                        <button data-i="${i}" class="btnExcluir" style="padding:6px 14px;background:#822;border:none;border-radius:4px;color:white;cursor:pointer;font-weight:bold;">Excluir</button>
+                    </div>`;
+                lista.appendChild(div);
+            });
+            document.querySelectorAll('.btnCarregar').forEach(b => {
+                b.onclick = (e) => {
+                    const t = talhoes[e.target.dataset.i];
+                    nomeTalhaoAtual = t.nome;
+                    larguraFaixa = t.largura;
+                    fecharModal();
+                    atualizarTela();
+                    alert(`✅ Talhão "${t.nome}" carregado!\nImplemento: ${larguraFaixa}m`);
+                };
+            });
+            document.querySelectorAll('.btnExcluir').forEach(b => {
+                b.onclick = (e) => {
+                    if (confirm('Excluir este talhão?')) {
+                        talhoes.splice(e.target.dataset.i, 1);
+                        salvarTalhoes();
+                        renderizarListaTalhoes();
+                    }
+                };
+            });
+        }
+
+        // ==============================================
+        // 📋 CONTROLE DO MODAL
+        // ==============================================
+        el.btnConfig.addEventListener('click', () => {
+            el.modal.classList.add('mostrar');
+            carregarTalhoesSalvos();
+            document.getElementById('larguraPadrao').value = larguraFaixa;
+            document.getElementById('tipoLinhaGuia').value = tipoLinha;
+            document.getElementById('unidades').value = unidadesMetricas ? 'Métrico (metros, km/h)' : 'Imperial (pés, mph)';
+        });
+
+        // Trocar abas
+        document.querySelectorAll('[data-aba]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const aba = btn.dataset.aba;
+                document.querySelectorAll('[data-aba]').forEach(b => b.classList.remove('ativa'));
+                btn.classList.add('ativa');
+                document.getElementById('aba-criar').style.display = aba === 'criar' ? 'block' : 'none';
+                document.getElementById('aba-talhoes').style.display = aba === 'talhoes' ? 'block' : 'none';
+                document.getElementById('aba-config').style.display = aba === 'config' ? 'block' : 'none';
+                if (aba === 'talhoes') renderizarListaTalhoes();
+            });
+        });
+
+        // Salvar novo talhão
+        document.getElementById('btnSalvarTalhao').addEventListener('click', () => {
+            const nome = document.getElementById('nomeTalhao').value.trim();
+            const larg = parseFloat(document.getElementById('larguraImplemento').value);
+            const obs = document.getElementById('observacao').value.trim();
+            
+            if (!nome) { alert('⚠️ Digite o nome do talhão!'); return; }
+            if (!larg || larg <= 0) { alert('⚠️ Digite a largura do implemento!'); return; }
+            
+            const talhao = {
+                nome, largura: larg, obs,
+                lat: lat || 0, lon: lon || 0,
+                data: new Date().toLocaleDateString('pt-BR')
+            };
+            talhoes.unshift(talhao);
+            salvarTalhoes();
+            
+            nomeTalhaoAtual = nome;
+            larguraFaixa = larg;
+            
+            alert(`✅ Talhão "${nome}" salvo!\nImplemento: ${larg}m`);
+            document.getElementById('nomeTalhao').value = '';
+            document.getElementById('observacao').value = '';
+            fecharModal();
+            atualizarTela();
+        });
+
+        // Aplicar configurações gerais
+        document.getElementById('btnAplicarConfig').addEventListener('click', () => {
+            larguraFaixa = parseFloat(document.getElementById('larguraPadrao').value) || 12;
+            tipoLinha = document.getElementById('tipoLinhaGuia').value;
+            unidadesMetricas = document.getElementById('unidades').value.startsWith('Métrico');
+            
+            localStorage.setItem('larguraPadrao', larguraFaixa);
+            localStorage.setItem('tipoLinha', tipoLinha);
+            localStorage.setItem('unidadesMetricas', unidadesMetricas);
+            
+            alert('✅ Configurações salvas!');
+            fecharModal();
+            atualizarTela();
+        });
+
+        // Fechar modal
+        document.getElementById('btnFechar').addEventListener('click', fecharModal);
+        document.getElementById('btnFecharConfig').addEventListener('click', fecharModal);
+        function fecharModal() {
+            el.modal.classList.remove('mostrar');
+        }
+
+        // ==============================================
+        // 📍 BOTÕES DE NAVEGAÇÃO
+        // ==============================================
         el.btnA.addEventListener('click', () => {
-            state.lineA = { lat: state.lat, lon: state.lon, heading: state.heading };
-            el.btnA.classList.add('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-green-800');
+            if (!lat) { alert('⚠️ Aguarde o sinal GPS!'); return; }
+            temA = true;
+            pontoA = { lat, lon };
+            el.btnA.style.background = '#060';
             el.btnB.disabled = false;
-            el.btnB.classList.remove('bg-gray-700', 'text-gray-400', 'border-gray-600');
-            el.btnB.classList.add('bg-jdblue', 'border-blue-400', 'text-white');
-            el.pointA.style.transform = 'translate(-50%, -50%) scale(1)';
-            el.pointA.style.opacity = '1';
-            el.abLine.style.height = '70%';
-            el.abLine.style.opacity = '1';
-            state.lineActive = false;
+            el.btnB.classList.add('ativo');
+            el.linhaCentro.classList.add('ativa');
+            atualizarTela();
         });
 
         el.btnB.addEventListener('click', () => {
-            if (!state.lineA) return;
-            state.lineB = { lat: state.lat + 0.001, lon: state.lon, heading: state.heading };
-            el.btnB.classList.add('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-blue-800');
-            el.pointB.style.transform = 'translate(-50%, -50%) scale(1)';
-            el.pointB.style.opacity = '1';
-            el.coverage.style.opacity = '1';
-            state.lineActive = true;
+            if (!temA) { alert('⚠️ Marque o Ponto A primeiro!'); return; }
+            if (!lat) { alert('⚠️ Aguarde o sinal GPS!'); return; }
+            temB = true;
+            pontoB = { lat, lon };
+            el.btnB.style.background = '#008';
+            atualizarTela();
         });
 
-        // ========== SIMULACIÓN DE MOVIMIENTO (como GPS real) ==========
-        function simulateGPS() {
-            if (!state.isRunning) return;
-            
-            // Simula avance
-            const speedFactor = state.speed / 3.6; // m/s
-            const rad = state.heading * Math.PI / 180;
-            state.lat += (Math.cos(rad) * speedFactor * 0.00001);
-            state.lon += (Math.sin(rad) * speedFactor * 0.00001);
-            
-            // Simula pequeño desvio lateral oscilante
-            state.devLateral = -0.05 + Math.sin(Date.now() / 2000) * 0.08;
-            
-            updateUI();
-        }
-
-        // ========== CONTROLES ==========
-        document.getElementById('btn-start').addEventListener('click', () => {
-            state.isRunning = !state.isRunning;
-            state.speed = state.isRunning ? 7.2 : 0;
-            document.getElementById('btn-start').innerHTML = state.isRunning 
-                ? '<i class="fa fa-pause"></i>' 
-                : '<i class="fa fa-play"></i>';
+        el.btnParar.addEventListener('click', () => {
+            desvio = 0;
+            temB = false;
+            atualizarLEDs(0);
+            atualizarTela();
         });
 
-        document.getElementById('btn-reset').addEventListener('click', () => {
-            state.lineA = null;
-            state.lineB = null;
-            state.lineActive = false;
-            state.devLateral = -0.05;
-            el.btnA.classList.remove('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-green-800');
-            el.btnB.classList.add('bg-gray-700', 'text-gray-400', 'border-gray-600');
-            el.btnB.classList.remove('bg-jdblue', 'border-blue-400', 'text-white', 'ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-blue-800');
+        el.btnReiniciar.addEventListener('click', () => {
+            temA = temB = false;
+            desvio = 0;
+            pontoA = pontoB = null;
+            el.btnA.style.background = '';
+            el.btnB.style.background = '';
+            el.btnB.classList.remove('ativo');
             el.btnB.disabled = true;
-            el.pointA.style.transform = 'translate(-50%, -50%) scale(0)';
-            el.pointA.style.opacity = '0';
-            el.pointB.style.transform = 'translate(-50%, -50%) scale(0)';
-            el.pointB.style.opacity = '0';
-            el.abLine.style.height = '0';
-            el.abLine.style.opacity = '0';
-            el.coverage.style.opacity = '0';
-            state.isRunning = false;
-            state.speed = 0;
-            document.getElementById('btn-start').innerHTML = '<i class="fa fa-play"></i>';
-            updateUI();
+            el.linhaCentro.classList.remove('ativa');
+            atualizarLEDs(0);
+            atualizarTela();
         });
 
-        // Zoom
-        document.getElementById('btn-zoom-in').addEventListener('click', () => {
-            state.zoom = Math.min(3, state.zoom * 1.2);
-            document.body.style.backgroundSize = (70 / state.zoom) + 'px ' + (70 / state.zoom) + 'px';
-        });
-        document.getElementById('btn-zoom-out').addEventListener('click', () => {
-            state.zoom = Math.max(0.5, state.zoom / 1.2);
-            document.body.style.backgroundSize = (70 / state.zoom) + 'px ' + (70 / state.zoom) + 'px';
-        });
-
-        // ========== CONEXIÓN CON GPS REAL (API Nativa) ==========
-        if ('geolocation' in navigator) {
-            const geoOptions = {
-                enableHighAccuracy: true,  // ⚠️ Requiere antena externa
-                maximumAge: 0,
-                timeout: 1000
-            };
-
-            navigator.geolocation.watchPosition(
-                (pos) => {
-                    state.lat = pos.coords.latitude;
-                    state.lon = pos.coords.longitude;
-                    state.accuracy = Math.max(0.01, pos.coords.accuracy / 100 || 0.02);
-                    state.antennaConnected = true;
-                    
-                    // Si hay datos de rumbo y velocidad
-                    if (pos.coords.heading !== null) state.heading = pos.coords.heading;
-                    if (pos.coords.speed !== null) state.speed = (pos.coords.speed * 3.6); // m/s → km/h
-                    
-                    // Determinar tipo de corrección según precisión
-                    if (state.accuracy <= 0.03) state.fixType = 'RTK-FIX';
-                    else if (state.accuracy <= 1.0) state.fixType = 'DGPS';
-                    else state.fixType = 'GPS';
-                    
-                    updateUI();
-                },
-                (err) => {
-                    console.warn('GPS Error:', err);
-                    state.antennaConnected = false;
-                    state.fixType = err.code === 1 ? 'NO_PERM' : 'NO_FIX';
-                    updateUI();
-                },
-                geoOptions
-            );
+        // ==============================================
+        // 📡 GPS — RECEBIMENTO DE DADOS
+        // ==============================================
+        if (!navigator.geolocation) {
+            alert('❌ GPS não suportado! Use Chrome ou Safari.');
         } else {
-            state.fixType = 'NO_FIX';
-            state.antennaConnected = false;
-            updateUI();
+            navigator.geolocation.watchPosition(
+                (posicao) => {
+                    lat = posicao.coords.latitude;
+                    lon = posicao.coords.longitude;
+                    precisao = posicao.coords.accuracy;
+                    if (posicao.coords.heading !== null) rumo = posicao.coords.heading;
+                    if (posicao.coords.speed !== null) {
+                        velocidade = Math.round((posicao.coords.speed * (unidadesMetricas ? 3.6 : 2.237)) * 10) / 10;
+                    }
+
+                    // Status do sinal
+                    el.statusSinal.classList.remove('sem-sinal', 'gps', 'dgps', 'rtk');
+                    if (precisao <= 0.3) {
+                        el.statusSinal.textContent = 'RTK-FIX';
+                        el.statusSinal.classList.add('rtk');
+                    } else if (precisao <= 1) {
+                        el.statusSinal.textContent = 'DGPS';
+                        el.statusSinal.classList.add('dgps');
+                    } else {
+                        el.statusSinal.textContent = 'GPS';
+                        el.statusSinal.classList.add('gps');
+                    }
+
+                    // Calcular desvio
+                    if (temA && temB && pontoA && pontoB) {
+                        desvio = calcularDesvio(pontoA.lat, pontoA.lon, pontoB.lat, pontoB.lon, lat, lon);
+                    }
+                    atualizarTela();
+                },
+                (erro) => {
+                    el.statusSinal.classList.remove('rtk', 'dgps', 'gps');
+                    el.statusSinal.classList.add('sem-sinal');
+                    lat = lon = null;
+                    if (erro.code === 1) {
+                        el.statusSinal.textContent = 'PERMISSÃO NEGADA';
+                    } else if (erro.code === 2) {
+                        el.statusSinal.textContent = 'SINAL INDISPONÍVEL';
+                    } else {
+                        el.statusSinal.textContent = 'ERRO GPS';
+                    }
+                    atualizarTela();
+                },
+                { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
+            );
         }
 
-        // ========== BUCLE PRINCIPAL ==========
-        updateClock();
-        updateUI();
-        setInterval(updateClock, 1000);
-        setInterval(simulateGPS, 200);
-    </script>
+        // ==============================================
+        // 🔄 ATUALIZAÇÃO CONTÍNUA
+        // ==============================================
+        setInterval(() => {
+            if (temA && temB && lat && pontoA && pontoB) {
+                desvio = calcularDesvio(pontoA.lat, pontoA.lon, pontoB.lat, pontoB.lon, lat, lon);
+            }
+            atualizarTela();
+        }, 300);
 
+        // ==============================================
+        // 🚀 CARREGAR CONFIGURAÇÕES SALVAS
+        // ==============================================
+        const largSalva = localStorage.getItem('larguraPadrao');
+        if (largSalva) larguraFaixa = parseFloat(largSalva);
+        const tipoSalvo = localStorage.getItem('tipoLinha');
+        if (tipoSalvo) tipoLinha = tipoSalvo;
+        const unidSalva = localStorage.getItem('unidadesMetricas');
+        if (unidSalva !== null) unidadesMetricas = unidSalva === 'true';
+        carregarTalhoesSalvos();
+        atualizarTela();
+    </script>
 </body>
 </html>
