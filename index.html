@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Sat GPS 🛰️ | Navegación Agrícola de Precisión</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Portal Sat GPS 🛰️ | Navegación Agrícola</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
@@ -13,16 +13,18 @@
                 extend: {
                     colors: {
                         jdgreen: '#00693E',
+                        jdgreenlight: '#339966',
                         jdyellow: '#FFCC00',
-                        jdblue: '#0066FF',
-                        jdred: '#E53935',
-                        jdgray: '#F5F5F0',
-                        jddark: '#222222',
+                        jdred: '#CC0000',
+                        jdblue: '#0066CC',
+                        jdgray: '#333333',
+                        jdlight: '#F5F5F5',
                         portal: '#0099CC',
-                        beige: '#F2EEDF',
+                        darkbg: '#1A1A1A',
                     },
                     fontFamily: {
-                        sans: ['Roboto', 'Segoe UI', 'sans-serif'],
+                        sans: ['Roboto', 'sans-serif'],
+                        mono: ['Courier New', 'monospace'],
                     },
                 }
             }
@@ -30,353 +32,658 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .grid-ground {
+            .content-auto { content-visibility: auto; }
+            .shadow-panel { box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+            .grid-field {
                 background-image: 
-                    linear-gradient(rgba(0, 0, 0, 0.12) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 0, 0, 0.12) 1px, transparent 1px);
-                background-size: 40px 40px;
-                perspective: 800px;
+                    linear-gradient(rgba(0, 105, 62, 0.2) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 105, 62, 0.2) 1px, transparent 1px);
+                background-size: 30px 30px;
             }
-            .perspective-3d {
-                transform: rotateX(60deg);
-                transform-origin: center top;
+            .light-bar {
+                background: linear-gradient(90deg, 
+                    #cc0000 0%, #ff6600 15%, #ffcc00 30%, 
+                    #009933 45%, #00cc00 50%, 
+                    #009933 55%, #ffcc00 70%, #ff6600 85%, #cc0000 100%);
             }
-            .guide-arrow {
-                clip-path: polygon(50% 0%, 0% 100%, 20% 80%, 80% 80%, 100% 100%);
+            .ab-line {
+                background: linear-gradient(90deg, transparent, #0066CC, transparent);
+                height: 3px;
             }
-            .shadow-panel {
-                box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            .btn-nav {
+                @apply w-10 h-10 rounded-full flex items-center justify-center text-white bg-jdgray hover:bg-jdgreen transition-all active:scale-95;
             }
-            .status-poor {
-                box-shadow: 0 0 0 2px #E53935;
+            .btn-panel {
+                @apply px-3 py-1.5 rounded bg-jdgreen text-white font-semibold hover:bg-jdgreenlight transition text-sm;
             }
-            .status-good {
-                box-shadow: 0 0 0 2px #00693E;
+            .input-field {
+                @apply bg-darkbg border border-jdgreen/50 rounded px-2 py-1 text-white focus:border-jdyellow focus:outline-none;
             }
-            .btn-3d {
-                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            .tab-active {
+                @apply bg-jdgreen text-white border-b-2 border-jdyellow;
             }
+            .hide-shortcuts .shortcut { display: none !important; }
         }
     </style>
 </head>
-<body class="bg-beige text-jddark font-sans antialiased overflow-hidden">
-    <!-- Layout Principal: Barra Lateral + Conteúdo -->
-    <div class="flex h-screen w-full">
-        <!-- Barra Lateral Esquerda -->
-        <aside class="w-16 bg-white shadow-md flex flex-col items-center py-4 gap-8 z-20">
-            <button class="text-xl text-jddark hover:text-jdblue transition">
-                <i class="fa fa-bars"></i>
+<body class="bg-darkbg text-white font-sans antialiased overflow-hidden" id="main-body">
+    <!-- ==== BARRA SUPERIOR DE ESTADO ==== -->
+    <header class="bg-jdgreen px-3 py-2 flex items-center justify-between shadow-md z-50 relative">
+        <div class="flex items-center gap-2">
+            <span class="text-xl font-bold">🛰️ PORTAL SAT GPS</span>
+            <span class="bg-jdyellow text-black px-2 py-0.5 rounded text-xs font-bold">AG PRECISIÓN</span>
+        </div>
+        <div class="flex items-center gap-4 text-sm">
+            <div class="flex items-center gap-1">
+                <i class="fa fa-clock-o"></i>
+                <span id="current-time">10:21:38</span>
+            </div>
+            <div class="flex items-center gap-1 text-jdyellow">
+                <i class="fa fa-satellite-dish"></i>
+                <span id="sat-count">14/14</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <i class="fa fa-crosshairs"></i>
+                <span id="fix-status" class="text-green-300">RTK-FIX</span>
+            </div>
+            <div class="flex items-center gap-1">
+                <i class="fa fa-battery-full"></i>
+                <span>100%</span>
+            </div>
+            <button id="toggle-shortcuts" class="bg-jdgray/50 px-2 py-0.5 rounded text-xs hover:bg-jdgray">
+                <i class="fa fa-eye-slash"></i> Atajos
             </button>
-            <button id="btn-gps" class="text-xl text-jdblue hover:scale-110 transition">
-                <i class="fa fa-map-marker"></i>
-            </button>
-            <button id="btn-trabajos" class="text-xl text-gray-600 hover:text-jdblue transition">
-                <i class="fa fa-file-text-o"></i>
-            </button>
-            <div class="flex-1"></div>
-            <button id="btn-salir" class="text-xl text-jdred hover:scale-110 transition mt-auto mb-4">
-                <i class="fa fa-sign-out"></i>
-            </button>
-        </aside>
+        </div>
+    </header>
 
-        <!-- Conteúdo Principal -->
-        <main class="flex-1 relative overflow-hidden">
-            <!-- Área de Navegação / Mapa 3D -->
-            <div class="absolute inset-0 grid-ground bg-beige">
-                <!-- Seta Guia Central -->
-                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div class="w-64 h-40 bg-jdblue guide-arrow"></div>
-                </div>
-
-                <!-- Marcadores de Linha (visuais paralelos) -->
-                <div class="absolute top-0 left-0 w-full h-full pointer-events-none">
-                    <div class="absolute top-1/2 left-1/2 w-[200%] h-0.5 bg-jdblue/40 transform -translate-x-1/2 -translate-y-1/2"></div>
-                    <div class="absolute top-[calc(50%-80px)] left-1/2 w-[200%] h-0.5 bg-gray-400/30 transform -translate-x-1/2 -translate-y-1/2"></div>
-                    <div class="absolute top-[calc(50%+80px)] left-1/2 w-[200%] h-0.5 bg-gray-400/30 transform -translate-x-1/2 -translate-y-1/2"></div>
+    <!-- ==== CONTENIDO PRINCIPAL ==== -->
+    <main class="flex h-[calc(100vh-56px)]">
+        <!-- ==== PANEL IZQUIERDO ==== -->
+        <div class="w-64 bg-jdgray/80 p-3 space-y-3 overflow-y-auto border-r border-jdgreen/30">
+            <!-- Ubicación -->
+            <div class="bg-darkbg rounded-lg p-3 shadow-panel">
+                <h3 class="text-jdyellow font-semibold mb-2 text-sm">UBICACIÓN</h3>
+                <div class="space-y-1 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Parcela:</span>
+                        <span id="field-name" class="font-bold text-jdyellow">Sin nombre</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Latitud:</span>
+                        <span id="lat-value" class="font-mono text-xs">-24.489275</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Longitud:</span>
+                        <span id="lon-value" class="font-mono text-xs">-54.614722</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Altitud:</span>
+                        <span id="alt-value" class="font-mono text-xs">248.5 m</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Painel Superior Esquerdo: Configurações -->
-            <div class="absolute top-4 left-4 bg-white/95 backdrop-blur rounded-lg shadow-panel p-4 w-64 z-10">
-                <div class="space-y-2 text-base">
+            <!-- Contadores -->
+            <div class="bg-darkbg rounded-lg p-3 shadow-panel">
+                <h3 class="text-jdyellow font-semibold mb-2 text-sm">CONTADORES</h3>
+                <div class="space-y-2">
                     <div class="flex justify-between items-center">
-                        <span class="font-medium">Ancho</span>
-                        <div class="flex items-center gap-2">
-                            <input type="number" id="ancho" value="20.00" step="0.1" class="w-20 text-right border-b border-gray-300 focus:outline-none focus:border-jdblue">
-                            <span>m</span>
+                        <span class="text-gray-400 text-sm">Área total:</span>
+                        <span id="area-value" class="font-bold text-lg">0.00 ha</span>
+                    </div>
+                    <div class="w-full bg-jdgray rounded-full h-2">
+                        <div id="area-bar" class="bg-jdgreen h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Cobertura:</span>
+                        <span id="coverage-value">0%</span>
+                    </div>
+                    <div class="flex justify-between text-sm mt-1">
+                        <span class="text-gray-400">Líneas:</span>
+                        <span id="lines-value" class="font-mono">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Tiempo:</span>
+                        <span id="time-value" class="font-mono">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Punto AB -->
+            <div class="bg-darkbg rounded-lg p-3 shadow-panel">
+                <h3 class="text-jdyellow font-semibold mb-2 text-sm">LÍNEA AB</h3>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <button id="btn-set-a" class="btn-panel bg-jdblue">
+                        <i class="fa fa-map-pin mr-1"></i> Punto A
+                    </button>
+                    <button id="btn-set-b" class="btn-panel bg-jdblue opacity-50" disabled>
+                        <i class="fa fa-map-pin mr-1"></i> Punto B
+                    </button>
+                </div>
+                <div class="text-xs space-y-1 mb-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">A:</span>
+                        <span id="point-a-coord" class="font-mono">—</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">B:</span>
+                        <span id="point-b-coord" class="font-mono">—</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Rumbo AB:</span>
+                        <span id="ab-heading" class="font-mono">—</span>
+                    </div>
+                </div>
+                <button id="btn-clear-ab" class="w-full bg-jdred/80 hover:bg-jdred text-white py-1 rounded text-sm mt-1">
+                    <i class="fa fa-trash mr-1"></i> Borrar Línea AB
+                </button>
+            </div>
+
+            <!-- Implemento -->
+            <div class="bg-darkbg rounded-lg p-3 shadow-panel">
+                <h3 class="text-jdyellow font-semibold mb-2 text-sm">IMPLEMENTO</h3>
+                <div class="space-y-2 text-sm">
+                    <div>
+                        <label class="text-gray-400 block mb-1">Ancho de trabajo (m)</label>
+                        <input type="number" id="implement-width" value="12.00" step="0.1" class="input-field w-full">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">Solapamiento (%)</label>
+                        <input type="number" id="overlap" value="0" min="0" max="30" class="input-field w-full">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">Desplazamiento (m)</label>
+                        <input type="number" id="offset" value="0.00" step="0.1" class="input-field w-full">
+                    </div>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-gray-400">Auto-Steer</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="autosteer-toggle" class="sr-only peer" checked>
+                            <div class="relative w-12 h-6 bg-jdgray rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-jdgreen"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestión de Parcelas -->
+            <div class="bg-darkbg rounded-lg p-3 shadow-panel">
+                <h3 class="text-jdyellow font-semibold mb-2 text-sm">PARCELAS</h3>
+                <div class="space-y-2">
+                    <input type="text" id="new-field-name" placeholder="Nombre de parcela" class="input-field w-full text-sm">
+                    <button id="btn-save-field" class="w-full btn-panel">
+                        <i class="fa fa-save mr-1"></i> Guardar Parcela
+                    </button>
+                    <div class="mt-2 max-h-32 overflow-y-auto text-sm" id="fields-list">
+                        <div class="p-2 bg-jdgray/50 rounded mb-1 cursor-pointer hover:bg-jdgreen/30" data-field="1">
+                            <div class="font-semibold">Parcela Norte</div>
+                            <div class="text-xs text-gray-400">15.4 ha · Creada: 19/09</div>
+                        </div>
+                        <div class="p-2 bg-jdgray/50 rounded mb-1 cursor-pointer hover:bg-jdgreen/30" data-field="2">
+                            <div class="font-semibold">Parcela Sur</div>
+                            <div class="text-xs text-gray-400">22.8 ha · Creada: 18/09</div>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium">Desplaz.</span>
-                        <span class="text-gray-500">– / – m</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium">Solapam.</span>
-                        <span class="text-gray-500">– m</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium">Modo</span>
-                        <span id="modo" class="font-semibold text-jdblue">Modo libre</span>
-                    </div>
                 </div>
-                <button id="btn-config" class="w-full bg-jdblue text-white font-semibold py-2 rounded mt-4 hover:bg-jdblue/90 transition">
-                    Cambiar configuración
+            </div>
+        </div>
+
+        <!-- ==== ÁREA DE NAVEGACIÓN PRINCIPAL ==== -->
+        <div class="flex-1 relative bg-darkbg grid-field overflow-hidden">
+            <!-- Barra de Luces (Guía de Desvío) -->
+            <div class="absolute top-4 left-1/2 transform -translate-x-1/2 w-80 h-6 rounded-full overflow-hidden shadow-panel z-20">
+                <div class="light-bar w-full h-full relative">
+                    <div class="absolute top-0 left-1/2 w-0.5 h-full bg-white transform -translate-x-1/2"></div>
+                    <div id="light-indicator" class="absolute top-0 w-3 h-6 bg-white rounded-full transform -translate-x-1/2 shadow-lg" style="left: 50%;"></div>
+                </div>
+            </div>
+
+            <!-- Datos de Navegación Superiores -->
+            <div class="absolute top-12 left-1/2 transform -translate-x-1/2 flex items-center gap-6 z-10">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-white" id="heading-display">180°</div>
+                    <div class="text-xs text-gray-400">Rumbo</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-jdyellow" id="deviation-display">±0.00 m</div>
+                    <div class="text-xs text-gray-400">Desvío</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-white" id="speed-display">0.0 km/h</div>
+                    <div class="text-xs text-gray-400">Velocidad</div>
+                </div>
+            </div>
+
+            <!-- Línea AB Guía -->
+            <div id="ab-guide-line" class="absolute top-1/2 left-0 w-full ab-line transform -translate-y-1/2 opacity-0 transition-opacity duration-300"></div>
+            
+            <!-- Puntos A y B -->
+            <div id="point-a-marker" class="absolute w-6 h-6 bg-jdblue rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg opacity-0 transition-opacity" style="top: 50%; left: 20%; transform: translate(-50%, -50%);">A</div>
+            <div id="point-b-marker" class="absolute w-6 h-6 bg-jdblue rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg opacity-0 transition-opacity" style="top: 50%; left: 80%; transform: translate(-50%, -50%);">B</div>
+
+            <!-- Vehículo / Tractor -->
+            <div id="vehicle" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                <div class="relative">
+                    <div class="w-14 h-14 bg-jdyellow rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+                        <i class="fa fa-tractor text-black text-2xl"></i>
+                    </div>
+                    <div class="absolute -bottom-3 left-1/2 w-1 h-10 bg-jdyellow transform -translate-x-1/2 origin-top" id="vehicle-heading-indicator"></div>
+                </div>
+            </div>
+
+            <!-- Área Cubierta (Capa de Cobertura) -->
+            <canvas id="coverage-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+            <!-- Botones de Navegación (Atajos) -->
+            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-20 shortcut">
+                <button class="btn-nav" title="Zoom +" id="zoom-in">
+                    <i class="fa fa-search-plus"></i>
                 </button>
-            </div>
-
-            <!-- Barra de Progreso / Desvio -->
-            <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur rounded-full shadow-panel px-4 py-2 flex items-center gap-2 z-10">
-                <div class="flex gap-1">
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-1"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-2"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-3"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-4"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-5"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-6"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-7"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-8"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-9"></div>
-                    <div class="w-4 h-4 rounded-full bg-gray-200" id="bar-10"></div>
-                </div>
-                <span class="text-gray-500 text-sm">– m</span>
-            </div>
-
-            <!-- Painel Superior Direito: Precisão GPS -->
-            <div class="absolute top-4 right-4 bg-white/95 backdrop-blur rounded-lg status-poor p-4 w-52 z-10">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-jdred font-semibold">Precisión baja</span>
-                    <i class="fa fa-signal text-jdred"></i>
-                </div>
-                <div class="text-2xl font-bold text-jdred mb-1" id="precision">±9.43 m</div>
-                <div class="text-sm text-gray-500">GPS del teléfono</div>
-                <div class="mt-3 flex items-center justify-between">
-                    <span class="text-sm">Nube</span>
-                    <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="cloud-sync" class="sr-only peer">
-                        <div class="relative w-10 h-5 bg-gray-300 rounded-full peer peer-checked:bg-jdgreen after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Botões Laterais Direitos -->
-            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 z-10">
-                <button id="btn-night" class="w-12 h-12 bg-white rounded-full shadow-panel flex items-center justify-center text-xl hover:bg-gray-100 transition">
-                    <i class="fa fa-moon-o"></i>
+                <button class="btn-nav" title="Zoom -" id="zoom-out">
+                    <i class="fa fa-search-minus"></i>
                 </button>
-                <button id="btn-center" class="w-12 h-12 bg-white rounded-full shadow-panel flex items-center justify-center text-xl hover:bg-gray-100 transition">
+                <button class="btn-nav" title="Centrar" id="center-btn">
                     <i class="fa fa-crosshairs"></i>
                 </button>
-                <button id="btn-3d" class="w-12 h-12 bg-jdblue rounded-full btn-3d flex items-center justify-center text-white font-bold hover:bg-jdblue/90 transition">
-                    3D
+                <button class="btn-nav" title="Vista" id="view-btn">
+                    <i class="fa fa-eye"></i>
+                </button>
+                <button class="btn-nav" title="Pantalla completa" id="fullscreen-btn">
+                    <i class="fa fa-expand"></i>
                 </button>
             </div>
 
-            <!-- Barra Inferior: Ação Principal -->
-            <div class="absolute bottom-0 left-0 right-0 bg-jdgreen text-white py-4 flex items-center justify-center gap-3 text-xl font-semibold cursor-pointer hover:bg-jdgreen/90 transition z-10" id="btn-start">
-                <i class="fa fa-play-circle text-2xl"></i>
-                <span>Comenzar trabajo</span>
-            </div>
-
-            <!-- Marca Portal Sat GPS -->
-            <div class="absolute top-4 left-1/2 transform -translate-x-1/2 mt-16 z-10">
-                <div class="bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-panel flex items-center gap-2">
-                    <span class="text-xl">🛰️</span>
-                    <span class="font-bold text-jddark">PORTAL SAT GPS</span>
-                    <span class="text-xs bg-jdgreen text-white px-2 py-0.5 rounded">AG PRECISIÓN</span>
+            <!-- Barra de Estado Inferior -->
+            <div class="absolute bottom-0 left-0 right-0 bg-black/70 px-4 py-2 flex justify-between items-center z-20">
+                <div class="flex gap-4 text-sm shortcut">
+                    <span id="autosteer-status" class="text-green-400 font-semibold">
+                        <i class="fa fa-check-circle mr-1"></i> AUTO-STEER ACTIVO
+                    </span>
+                    <span>Modo: <span id="mode-display">Línea AB</span></span>
+                    <span>Ancho: <span id="disp-width">12.00 m</span></span>
+                </div>
+                <div class="flex gap-2 shortcut">
+                    <button class="bg-jdgreen px-3 py-1 rounded text-sm hover:bg-jdgreenlight" id="btn-work">
+                        <i class="fa fa-play mr-1"></i> Trabajar
+                    </button>
+                    <button class="bg-jdgray px-3 py-1 rounded text-sm hover:bg-jdgreen" id="btn-reset">
+                        <i class="fa fa-refresh mr-1"></i> Reiniciar
+                    </button>
                 </div>
             </div>
-        </main>
-    </div>
+        </div>
 
-    <!-- Painel de Dados e Gráficos (Modal/Expandível) -->
-    <div id="data-panel" class="fixed bottom-20 left-4 w-80 bg-white/95 backdrop-blur rounded-lg shadow-panel p-4 z-30 hidden">
-        <h3 class="font-bold text-jdblue mb-3 flex items-center gap-2">
-            <i class="fa fa-dashboard"></i> Datos de Navegación
-        </h3>
-        <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span>Latitud:</span><span id="lat">-24.489275</span></div>
-            <div class="flex justify-between"><span>Longitud:</span><span id="lon">-54.614722</span></div>
-            <div class="flex justify-between"><span>Velocidad:</span><span id="vel">0.0 km/h</span></div>
-            <div class="flex justify-between"><span>Rumbo:</span><span id="rumbo">0.0°</span></div>
-            <div class="flex justify-between"><span>Área cubierta:</span><span id="area">0.00 ha</span></div>
-            <div class="flex justify-between"><span>Líneas:</span><span id="lineas">0</span></div>
+        <!-- ==== PANEL DERECHO: GRÁFICOS Y SATÉLITES ==== -->
+        <div class="w-60 bg-jdgray/80 p-3 space-y-3 overflow-y-auto border-l border-jdgreen/30">
+            <div class="bg-darkbg rounded-lg p-3 shadow-panel">
+                <h3 class="text-jdyellow font-semibold mb-2 text-sm">SEÑAL SATELITAL</h3>
+                <div class="h-28 mb-2">
+                    <canvas id="signal-chart"></canvas>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-jdgray/50 p-2 rounded">
+                        <div class="text-gray-400">GNSS</div>
+                        <div class="font-semibold">GPS+GLO+GAL</div>
+                    </div>
+                    <div class="bg-jdgray/50 p-2 rounded">
+                        <div class="text-gray-400">Corrección</div>
+                        <div class="font-semibold text-green-400">RTK 2cm</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-darkbg rounded-lg p-3 shadow-panel">
+                <h3 class="text-jdyellow font-semibold mb-2 text-sm">VELOCIDAD</h3>
+                <div class="h-24">
+                    <canvas id="speed-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-darkbg rounded-lg p-3 shadow-panel">
+                <h3 class="text-jdyellow font-semibold mb-2 text-sm">MENÚ RÁPIDO</h3>
+                <div class="space-y-2 text-sm">
+                    <button class="w-full text-left px-2 py-1.5 rounded hover:bg-jdgreen/30 flex items-center gap-2">
+                        <i class="fa fa-cog w-4 text-center"></i> Configuración
+                    </button>
+                    <button class="w-full text-left px-2 py-1.5 rounded hover:bg-jdgreen/30 flex items-center gap-2">
+                        <i class="fa fa-map w-4 text-center"></i> Mapa
+                    </button>
+                    <button class="w-full text-left px-2 py-1.5 rounded hover:bg-jdgreen/30 flex items-center gap-2">
+                        <i class="fa fa-file-text w-4 text-center"></i> Reportes
+                    </button>
+                    <button class="w-full text-left px-2 py-1.5 rounded hover:bg-jdgreen/30 flex items-center gap-2">
+                        <i class="fa fa-cloud-upload w-4 text-center"></i> Sincronizar
+                    </button>
+                    <button class="w-full text-left px-2 py-1.5 rounded hover:bg-jdgreen/30 flex items-center gap-2">
+                        <i class="fa fa-question-circle w-4 text-center"></i> Ayuda
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="mt-3 h-28">
-            <canvas id="signalChart"></canvas>
-        </div>
-    </div>
+    </main>
 
     <script>
         // ==== ESTADO GLOBAL ====
-        let isWorking = false;
-        let width = 20.00;
-        let precision = 9.43;
-        let lat = -24.489275;
-        let lon = -54.614722;
-        let speed = 0;
-        let heading = 0;
-        let area = 0;
-        let lineCount = 0;
-        let devMode = 'free';
-        let signalChart;
+        const state = {
+            lat: -24.489275,
+            lon: -54.614722,
+            heading: 180,
+            speed: 0,
+            deviation: 0,
+            area: 0,
+            lines: 0,
+            workTime: 0,
+            isWorking: false,
+            pointA: null,
+            pointB: null,
+            abHeading: null,
+            implementWidth: 12.00,
+            overlap: 0,
+            offset: 0,
+            autoSteer: true,
+            currentField: null,
+            fields: [
+                { id: 1, name: 'Parcela Norte', area: 15.4, date: '19/09/2026' },
+                { id: 2, name: 'Parcela Sur', area: 22.8, date: '18/09/2026' }
+            ],
+            coveragePoints: [],
+            zoom: 1,
+            hideShortcuts: false
+        };
 
-        // ==== INICIALIZAÇÃO ====
+        let signalChart, speedChart, coverageCanvas, coverageCtx;
+
+        // ==== INICIALIZACIÓN ====
         document.addEventListener('DOMContentLoaded', () => {
-            initEvents();
+            initCanvas();
             initCharts();
+            initEvents();
+            updateTime();
+            setInterval(updateTime, 1000);
             setInterval(updateData, 500);
+            setInterval(updateWorkTime, 1000);
         });
 
-        // ==== EVENTOS ====
-        function initEvents() {
-            // Botão Iniciar/Parar Trabalho
-            document.getElementById('btn-start').addEventListener('click', () => {
-                isWorking = !isWorking;
-                const btn = document.getElementById('btn-start');
-                if (isWorking) {
-                    btn.innerHTML = '<i class="fa fa-pause-circle text-2xl"></i><span>Pausar trabajo</span>';
-                    btn.classList.add('bg-jdred', 'hover:bg-jdred/90');
-                    btn.classList.remove('bg-jdgreen', 'hover:bg-jdgreen/90');
-                } else {
-                    btn.innerHTML = '<i class="fa fa-play-circle text-2xl"></i><span>Comenzar trabajo</span>';
-                    btn.classList.remove('bg-jdred', 'hover:bg-jdred/90');
-                    btn.classList.add('bg-jdgreen', 'hover:bg-jdgreen/90');
-                }
-            });
+        function initCanvas() {
+            coverageCanvas = document.getElementById('coverage-canvas');
+            coverageCtx = coverageCanvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
 
-            // Largura de trabalho
-            document.getElementById('ancho').addEventListener('change', e => {
-                width = parseFloat(e.target.value) || 20.00;
-            });
-
-            // Botão Configurações
-            document.getElementById('btn-config').addEventListener('click', () => {
-                alert('⚙️ Panel de Configuración:\n• Ancho de trabajo: ' + width + ' m\n• Modo: Libre\n• Solapamiento: 0 m\n• Desplazamiento: 0 m\n\n[Opciones avanzadas: RTK, NTRIP, Línea AB, Curvatura]');
-            });
-
-            // GPS → Mostrar/ocultar painel de dados
-            document.getElementById('btn-gps').addEventListener('click', () => {
-                const panel = document.getElementById('data-panel');
-                panel.classList.toggle('hidden');
-            });
-
-            // Modo de linha
-            document.getElementById('modo').addEventListener('click', () => {
-                const modes = ['Modo libre', 'Línea AB', 'Contorno', 'Curva paralela'];
-                const idx = modes.indexOf(devMode);
-                devMode = modes[(idx + 1) % modes.length];
-                document.getElementById('modo').textContent = devMode;
-            });
-
-            // 3D Toggle
-            document.getElementById('btn-3d').addEventListener('click', () => {
-                alert('🔄 Vista 3D activada/desactivada');
-            });
-
-            // Centrar
-            document.getElementById('btn-center').addEventListener('click', () => {
-                precision = 2.5;
-                updatePrecisionDisplay();
-            });
-
-            // Salir
-            document.getElementById('btn-salir').addEventListener('click', () => {
-                if (confirm('¿Salir de Portal Sat GPS?')) {
-                    // Acción de salida
-                }
-            });
+        function resizeCanvas() {
+            const rect = coverageCanvas.parentElement.getBoundingClientRect();
+            coverageCanvas.width = rect.width;
+            coverageCanvas.height = rect.height;
+            drawCoverage();
         }
 
         // ==== GRÁFICOS ====
         function initCharts() {
-            const ctx = document.getElementById('signalChart').getContext('2d');
-            signalChart = new Chart(ctx, {
+            // Gráfico de Señal Satelital
+            signalChart = new Chart(document.getElementById('signal-chart'), {
                 type: 'bar',
                 data: {
-                    labels: ['S1','S2','S3','S4','S5','S6','S7','S8'],
+                    labels: ['G1','G2','G3','G4','G5','R1','R2','E1','E2'],
                     datasets: [{
-                        label: 'Señal',
-                        data: [35, 42, 28, 45, 38, 30, 40, 32],
+                        data: [42, 45, 38, 47, 41, 40, 36, 44, 39],
                         backgroundColor: '#00693E',
                         borderRadius: 3
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, max: 50, ticks: { display: false }, grid: { color: 'rgba(0,0,0,0.05)' } },
-                        x: { grid: { display: false }, ticks: { font: { size: 9 } } }
-                    }
+                    scales: { y: { max: 50, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false } }, x: { grid: { display: false }, ticks: { fontSize: 8 } } }
+                }
+            });
+
+            // Gráfico de Velocidad
+            speedChart = new Chart(document.getElementById('speed-chart'), {
+                type: 'line',
+                data: {
+                    labels: Array(15).fill(''),
+                    datasets: [{
+                        data: Array(15).fill(0),
+                        borderColor: '#FFCC00',
+                        backgroundColor: 'rgba(255,204,0,0.2)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: true, tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { min: 0, max: 15, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { fontSize: 9 } }, x: { display: false } }
                 }
             });
         }
 
-        // ==== ATUALIZAÇÃO DE DADOS EM TEMPO REAL ====
-        function updateData() {
-            if (isWorking) {
-                // Simulação de movimento
-                speed = Math.max(0, Math.min(15, speed + (Math.random() - 0.5) * 0.3));
-                heading = (heading + (Math.random() - 0.5) * 2 + 360) % 360;
-                lat += 0.000005 * Math.cos(heading * Math.PI / 180);
-                lon += 0.000005 * Math.sin(heading * Math.PI / 180);
-                area += (speed / 3.6) * width * 0.5 / 10000;
-                precision = Math.max(0.5, precision + (Math.random() - 0.5) * 0.5);
-            } else {
-                speed = Math.max(0, speed - 0.1);
-            }
+        // ==== EVENTOS ====
+        function initEvents() {
+            // Toggle Atajos
+            document.getElementById('toggle-shortcuts').addEventListener('click', () => {
+                state.hideShortcuts = !state.hideShortcuts;
+                document.getElementById('main-body').classList.toggle('hide-shortcuts', state.hideShortcuts);
+            });
 
-            // Atualizar exibição
-            document.getElementById('lat').textContent = lat.toFixed(6);
-            document.getElementById('lon').textContent = lon.toFixed(6);
-            document.getElementById('vel').textContent = speed.toFixed(1) + ' km/h';
-            document.getElementById('rumbo').textContent = heading.toFixed(1) + '°';
-            document.getElementById('area').textContent = area.toFixed(2) + ' ha';
-            document.getElementById('lineas').textContent = lineCount;
+            // Punto A y B
+            document.getElementById('btn-set-a').addEventListener('click', setPointA);
+            document.getElementById('btn-set-b').addEventListener('click', setPointB);
+            document.getElementById('btn-clear-ab').addEventListener('click', clearAB);
+
+            // Implemento
+            document.getElementById('implement-width').addEventListener('change', e => {
+                state.implementWidth = parseFloat(e.target.value) || 12;
+                document.getElementById('disp-width').textContent = state.implementWidth.toFixed(2) + ' m';
+            });
+
+            // Auto-Steer
+            document.getElementById('autosteer-toggle').addEventListener('change', e => {
+                state.autoSteer = e.target.checked;
+                const status = document.getElementById('autosteer-status');
+                if (state.autoSteer) {
+                    status.innerHTML = '<i class="fa fa-check-circle mr-1"></i> AUTO-STEER ACTIVO';
+                    status.className = 'text-green-400 font-semibold';
+                } else {
+                    status.innerHTML = '<i class="fa fa-pause-circle mr-1"></i> MANUAL';
+                    status.className = 'text-jdyellow font-semibold';
+                }
+            });
+
+            // Trabajar / Pausar
+            document.getElementById('btn-work').addEventListener('click', () => {
+                state.isWorking = !state.isWorking;
+                const btn = document.getElementById('btn-work');
+                if (state.isWorking) {
+                    btn.innerHTML = '<i class="fa fa-pause mr-1"></i> Pausar';
+                    btn.classList.add('bg-jdred');
+                    btn.classList.remove('bg-jdgreen');
+                    addCoveragePoint();
+                } else {
+                    btn.innerHTML = '<i class="fa fa-play mr-1"></i> Trabajar';
+                    btn.classList.remove('bg-jdred');
+                    btn.classList.add('bg-jdgreen');
+                }
+            });
+
+            // Guardar Parcela
+            document.getElementById('btn-save-field').addEventListener('click', saveField);
+
+            // Zoom
+            document.getElementById('zoom-in').addEventListener('click', () => { state.zoom *= 1.2; });
+            document.getElementById('zoom-out').addEventListener('click', () => { state.zoom /= 1.2; });
+            document.getElementById('center-btn').addEventListener('click', () => {});
+
+            // Reiniciar
+            document.getElementById('btn-reset').addEventListener('click', () => {
+                if (confirm('¿Reiniciar todos los datos de trabajo?')) {
+                    state.area = 0; state.lines = 0; state.workTime = 0;
+                    state.coveragePoints = [];
+                    document.getElementById('area-value').textContent = '0.00 ha';
+                    document.getElementById('lines-value').textContent = '0';
+                    document.getElementById('time-value').textContent = '00:00:00';
+                    document.getElementById('coverage-value').textContent = '0%';
+                    document.getElementById('area-bar').style.width = '0%';
+                    drawCoverage();
+                }
+            });
+
+            // Seleccionar parcela guardada
+            document.querySelectorAll('#fields-list > div').forEach(el => {
+                el.addEventListener('click', () => {
+                    state.currentField = el.dataset.field;
+                    document.getElementById('field-name').textContent = el.querySelector('.font-semibold').textContent;
+                });
+            });
+        }
+
+        // ==== FUNCIONES PUNTO AB ====
+        function setPointA() {
+            state.pointA = { lat: state.lat, lon: state.lon };
+            document.getElementById('point-a-coord').textContent = state.lat.toFixed(6) + ', ' + state.lon.toFixed(6);
+            document.getElementById('point-a-marker').classList.remove('opacity-0');
+            document.getElementById('btn-set-b').disabled = false;
+            document.getElementById('btn-set-b').classList.remove('opacity-50');
+            updateABLine();
+        }
+
+        function setPointB() {
+            state.pointB = { lat: state.lat, lon: state.lon };
+            document.getElementById('point-b-coord').textContent = state.lat.toFixed(6) + ', ' + state.lon.toFixed(6);
+            document.getElementById('point-b-marker').classList.remove('opacity-0');
+            calculateABHeading();
+            document.getElementById('ab-guide-line').classList.remove('opacity-0');
+            updateABLine();
+        }
+
+        function clearAB() {
+            state.pointA = state.pointB = null;
+            document.getElementById('point-a-coord').textContent = '—';
+            document.getElementById('point-b-coord').textContent = '—';
+            document.getElementById('ab-heading').textContent = '—';
+            document.getElementById('point-a-marker').classList.add('opacity-0');
+            document.getElementById('point-b-marker').classList.add('opacity-0');
+            document.getElementById('ab-guide-line').classList.add('opacity-0');
+            document.getElementById('btn-set-b').disabled = true;
+            document.getElementById('btn-set-b').classList.add('opacity-50');
+        }
+
+        function calculateABHeading() {
+            if (!state.pointA || !state.pointB) return;
+            const dLat = state.pointB.lat - state.pointA.lat;
+            const dLon = state.pointB.lon - state.pointA.lon;
+            state.abHeading = (Math.atan2(dLon, dLat) * 180 / Math.PI + 360) % 360;
+            document.getElementById('ab-heading').textContent = state.abHeading.toFixed(1) + '°';
+            state.heading = state.abHeading;
+        }
+
+        function updateABLine() {
+            if (!state.pointA || !state.pointB) return;
+            const angle = state.abHeading || 0;
+            document.getElementById('ab-guide-line').style.transform = `translateY(-50%) rotate(${angle}deg)`;
+        }
+
+        // ==== COBERTURA ====
+        function addCoveragePoint() {
+            if (!state.isWorking) return;
+            state.coveragePoints.push({
+                x: coverageCanvas.width / 2 + (Math.random() - 0.5) * 20,
+                y: coverageCanvas.height / 2 + (Math.random() - 0.5) * 20,
+                width: state.implementWidth * 2,
+                heading: state.heading
+            });
+            drawCoverage();
+        }
+
+        function drawCoverage() {
+            coverageCtx.clearRect(0, 0, coverageCanvas.width, coverageCanvas.height);
+            coverageCtx.fillStyle = 'rgba(0, 105, 62, 0.15)';
+            coverageCtx.strokeStyle = 'rgba(0, 105, 62, 0.4)';
+            coverageCtx.lineWidth = 1;
             
-            updatePrecisionDisplay();
-            updateSignalBars();
+            state.coveragePoints.forEach(p => {
+                coverageCtx.beginPath();
+                coverageCtx.arc(p.x, p.y, p.width / 4, 0, Math.PI * 2);
+                coverageCtx.fill();
+                coverageCtx.stroke();
+            });
+
+            const coveragePct = Math.min(100, state.coveragePoints.length * 2);
+            document.getElementById('coverage-value').textContent = coveragePct + '%';
+            document.getElementById('area-bar').style.width = coveragePct + '%';
         }
 
-        function updatePrecisionDisplay() {
-            document.getElementById('precision').textContent = '±' + precision.toFixed(2) + ' m';
-            const panel = document.querySelector('.status-poor')?.parentElement?.querySelector('.status-poor')?.parentElement;
-            const precisionBox = document.querySelector('.status-poor') || document.querySelector('.status-good');
-            if (precisionBox) {
-                if (precision > 5) {
-                    precisionBox.classList.add('status-poor');
-                    precisionBox.classList.remove('status-good');
-                    precisionBox.querySelector('span').textContent = 'Precisión baja';
-                    precisionBox.querySelector('span').classList.add('text-jdred');
-                    precisionBox.querySelector('span').classList.remove('text-jdgreen');
-                } else if (precision > 1) {
-                    precisionBox.classList.remove('status-poor', 'status-good');
-                    precisionBox.querySelector('span').textContent = 'Precisión media';
-                    precisionBox.querySelector('span').classList.remove('text-jdred', 'text-jdgreen');
-                    precisionBox.querySelector('span').classList.add('text-jdyellow');
-                } else {
-                    precisionBox.classList.add('status-good');
-                    precisionBox.classList.remove('status-poor');
-                    precisionBox.querySelector('span').textContent = 'Precisión alta';
-                    precisionBox.querySelector('span').classList.remove('text-jdred', 'text-jdyellow');
-                    precisionBox.querySelector('span').classList.add('text-jdgreen');
-                }
-            }
+        // ==== GUARDAR PARCELA ====
+        function saveField() {
+            const name = document.getElementById('new-field-name').value.trim();
+            if (!name) { alert('Ingrese un nombre para la parcela'); return; }
+            const newField = {
+                id: Date.now(),
+                name: name,
+                area: state.area,
+                date: new Date().toLocaleDateString('es-ES')
+            };
+            state.fields.push(newField);
+            const list = document.getElementById('fields-list');
+            const el = document.createElement('div');
+            el.className = 'p-2 bg-jdgreen/30 rounded mb-1 cursor-pointer hover:bg-jdgreen/50';
+            el.dataset.field = newField.id;
+            el.innerHTML = `<div class="font-semibold">${name}</div><div class="text-xs text-gray-400">${state.area.toFixed(2)} ha · Creada: ${newField.date}</div>`;
+            list.insertBefore(el, list.firstChild);
+            document.getElementById('field-name').textContent = name;
+            document.getElementById('new-field-name').value = '';
+            alert('✅ Parcela guardada: ' + name);
         }
 
-        function updateSignalBars() {
-            const level = Math.max(1, Math.min(10, Math.round(10 - precision / 1.5)));
-            for (let i = 1; i <= 10; i++) {
-                const bar = document.getElementById('bar-' + i);
-                if (i <= level) {
-                    bar.classList.add('bg-jdgreen');
-                    bar.classList.remove('bg-gray-200', 'bg-jdred');
-                } else {
-                    bar.classList.add('bg-gray-200');
-                    bar.classList.remove('bg-jdgreen', 'bg-jdred');
-                }
+        // ==== ACTUALIZACIÓN DE DATOS ====
+        function updateData() {
+            if (state.isWorking) {
+                state.speed = Math.max(0, Math.min(15, state.speed + (Math.random() - 0.5) * 0.2));
+                state.deviation = Math.max(-0.5, Math.min(0.5, state.deviation + (Math.random() - 0.5) * 0.05));
+                if (state.abHeading) state.heading = state.abHeading + (Math.random() - 0.5) * 0.5;
+                state.lat += 0.000003 * Math.cos(state.heading * Math.PI / 180) * (state.speed / 5);
+                state.lon += 0.000003 * Math.sin(state.heading * Math.PI / 180) * (state.speed / 5);
+                state.area += (state.speed / 3.6) * state.implementWidth * (1 - state.overlap / 100) * 0.5 / 10000;
+                if (Math.random() < 0.02) state.lines++;
+                addCoveragePoint();
+            } else {
+                state.speed = Math.max(0, state.speed - 0.1);
             }
+
+            // Actualizar UI
+            document.getElementById('lat-value').textContent = state.lat.toFixed(6);
+            document.getElementById('lon-value').textContent = state.lon.toFixed(6);
+            document.getElementById('heading-display').textContent = Math.round(state.heading) + '°';
+            document.getElementById('deviation-display').textContent = (state.deviation >= 0 ? '+' : '') + state.deviation.toFixed(2) + ' m';
+            document.getElementById('speed-display').textContent = state.speed.toFixed(1) + ' km/h';
+            document.getElementById('area-value').textContent = state.area.toFixed(2) + ' ha';
+            document.getElementById('lines-value').textContent = state.lines;
+            
+            // Barra de luces
+            const lightPos = 50 + state.deviation * 100;
+            document.getElementById('light-indicator').style.left = `${Math.max(5, Math.min(95, lightPos))}%`;
+
+            // Rotar indicador de rumbo
+            document.getElementById('vehicle-heading-indicator').style.transform = `translateX(-50%) rotate(${state.heading}deg)`;
+
+            // Gráfico de velocidad
+            speedChart.data.datasets[0].data.shift();
+            speedChart.data.datasets[0].data.push(state.speed);
+            speedChart.update('none');
+        }
+
+        function updateTime() {
+            document.getElementById('current-time').textContent = new Date().toLocaleTimeString('es-ES', { hour12: false });
+        }
+
+        function updateWorkTime() {
+            if (state.isWorking) state.workTime++;
+            const h = Math.floor(state.workTime / 3600);
+            const m = Math.floor((state.workTime % 3600) / 60);
+            const s = state.workTime % 60;
+            document.getElementById('time-value').textContent = 
+                `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
     </script>
 </body>
