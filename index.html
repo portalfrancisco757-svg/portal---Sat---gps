@@ -6,21 +6,20 @@
     <title>Portal Sat GPS 🛰️ | Navegación Agrícola</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        jdgreen: '#00693E',
-                        jdgreendark: '#003d26',
+                        jdgreen: '#008000',
+                        jdgreendark: '#004d00',
                         jdgreenlight: '#339966',
                         jdyellow: '#FFCC00',
                         jdyelight: '#FFE044',
-                        jdblue: '#0066CC',
+                        jdblue: '#0066FF',
                         jdred: '#CC0000',
                         jdgray: '#2A2A2A',
-                        darkbg: '#0F0F0F',
+                        darkbg: '#0A0A0A',
                     },
                     fontFamily: {
                         sans: ['Roboto', 'sans-serif'],
@@ -34,20 +33,11 @@
             .content-auto { content-visibility: auto; }
             .shadow-panel { box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
 
-            .grid-field-2d {
+            .grid-field {
                 background-image: 
-                    linear-gradient(rgba(0, 105, 62, 0.12) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 105, 62, 0.12) 1px, transparent 1px);
-                background-size: 50px 50px;
-            }
-
-            .grid-field-3d {
-                background-image: 
-                    linear-gradient(rgba(0, 105, 62, 0.15) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 105, 62, 0.15) 1px, transparent 1px);
-                background-size: 70px 70px;
-                transform: perspective(900px) rotateX(65deg) scale(1.5);
-                transform-origin: center top;
+                    linear-gradient(rgba(0, 128, 0, 0.15) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 128, 0, 0.15) 1px, transparent 1px);
+                background-size: 60px 60px;
             }
 
             .light-bar {
@@ -59,13 +49,13 @@
             }
 
             .ab-line-vertical {
-                background: linear-gradient(180deg, transparent, #0088FF, transparent);
+                background: linear-gradient(180deg, transparent, #0066FF, transparent);
                 width: 5px;
                 height: 100%;
             }
 
             .btn-float {
-                @apply w-11 h-11 rounded-full flex items-center justify-center text-white bg-jdgray/85 backdrop-blur-sm hover:bg-jdgreen transition-all active:scale-95 shadow-lg border border-white/10;
+                @apply w-14 h-14 rounded-full flex items-center justify-center text-white bg-jdgray/85 backdrop-blur-sm hover:bg-jdgreen transition-all active:scale-95 shadow-lg border border-white/10 text-xl font-bold;
             }
 
             .btn-panel {
@@ -89,22 +79,17 @@
                 overflow: hidden;
                 position: fixed;
                 inset: 0;
+                padding-top: 0 !important;
             }
 
-            .view-2d { transform: none !important; }
-            .view-3d {
-                transform: perspective(900px) rotateX(65deg) scale(1.5) !important;
-                transform-origin: center top;
-            }
-
-            /* Triângulo amarelo apontando para frente (vertical) */
+            /* Triângulo amarelo apontando para cima */
             .center-triangle {
                 width: 0;
                 height: 0;
-                border-left: 28px solid transparent;
-                border-right: 28px solid transparent;
-                border-top: 48px solid #FFCC00;
-                filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.8));
+                border-left: 35px solid transparent;
+                border-right: 35px solid transparent;
+                border-bottom: 55px solid #FFCC00;
+                filter: drop-shadow(0 0 12px rgba(255, 204, 0, 0.8));
                 transition: transform 0.2s ease;
                 transform-origin: center center;
             }
@@ -113,6 +98,7 @@
                 .safe-area {
                     padding-left: env(safe-area-inset-left);
                     padding-right: env(safe-area-inset-right);
+                    padding-top: 0 !important;
                 }
             }
         }
@@ -120,101 +106,101 @@
 </head>
 <body class="bg-darkbg text-white font-sans antialiased no-system-bar safe-area" id="main-body">
 
-    <!-- ==== BARRA SUPERIOR - ÍCONE DE CONFIGURAÇÃO VISÍVEL ==== -->
-    <header class="absolute top-0 left-0 right-0 bg-jdgreen/90 backdrop-blur-sm px-3 py-2 flex items-center justify-between z-40 shadow-md">
-        <div class="flex items-center gap-2">
-            <button id="toggle-left-panel" class="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center hover:bg-black/40 flex-shrink-0">
-                <i class="fa fa-bars text-lg"></i>
+    <!-- ==== BARRA SUPERIOR ==== -->
+    <header class="absolute top-0 left-0 right-0 bg-jdgreen/95 backdrop-blur-sm px-4 py-3 flex items-center justify-between z-40 shadow-md">
+        <div class="flex items-center gap-3">
+            <button id="toggle-left-panel" class="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center hover:bg-black/40 flex-shrink-0">
+                <i class="fa fa-bars text-xl"></i>
             </button>
-            <span class="text-base font-bold whitespace-nowrap">🛰️ PORTAL SAT GPS</span>
-            <span class="bg-jdyellow text-black px-2 py-0.5 rounded text-xs font-bold whitespace-nowrap">AG PRECISIÓN</span>
+            <span class="text-lg font-bold whitespace-nowrap">🛰️ PORTAL SAT GPS</span>
+            <span class="bg-jdyellow text-black px-3 py-1 rounded text-sm font-bold whitespace-nowrap">AG PRECISIÓN</span>
         </div>
-        <div class="flex items-center gap-3 text-sm flex-shrink-0">
-            <span id="current-time" class="whitespace-nowrap">12:45:16</span>
-            <span class="text-jdyellow whitespace-nowrap"><i class="fa fa-satellite-dish mr-1"></i><span id="sat-count">14/14</span></span>
-            <span class="text-green-300 font-semibold whitespace-nowrap">RTK-FIX</span>
-            <!-- ✅ ÍCONE DE CONFIGURAÇÃO VISÍVEL - não escondido -->
-            <button id="toggle-right-panel" class="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center hover:bg-jdgreen flex-shrink-0 ml-1">
-                <i class="fa fa-cog text-lg"></i>
+        <div class="flex items-center gap-4 text-base flex-shrink-0">
+            <span id="current-time" class="whitespace-nowrap font-mono">13:13:00</span>
+            <span class="text-jdyellow font-semibold whitespace-nowrap">14/14</span>
+            <span class="text-green-300 font-bold whitespace-nowrap">RTK-FIX</span>
+            <button id="toggle-right-panel" class="w-10 h-10 rounded-full bg-black/20 flex items-center justify-center hover:bg-jdgreen flex-shrink-0">
+                <i class="fa fa-cog text-xl"></i>
             </button>
         </div>
     </header>
 
     <!-- ==== ÁREA DE TRABALHO ==== -->
-    <main class="absolute inset-0 pt-11 bg-darkbg overflow-hidden">
+    <main class="absolute inset-0 pt-20 bg-darkbg overflow-hidden">
 
-        <div id="field-bg" class="absolute inset-0 grid-field-2d transition-transform duration-700 ease-out z-0"></div>
+        <!-- Fundo de grade -->
+        <div id="field-bg" class="absolute inset-0 grid-field z-0"></div>
 
-        <!-- BARRA DE LUZ -->
-        <div class="absolute top-3 left-1/2 -translate-x-1/2 w-[85%] max-w-[32rem] h-5 rounded-full overflow-hidden shadow-xl z-20">
+        <!-- ✅ BARRA DE LUZ EM CIMA -->
+        <div class="absolute top-2 left-1/2 -translate-x-1/2 w-[90%] max-w-[40rem] h-6 rounded-full overflow-hidden shadow-xl z-30">
             <div class="light-bar w-full h-full relative">
-                <div class="absolute top-0 left-1/2 w-0.5 h-full bg-white -translate-x-1/2"></div>
-                <div id="light-indicator" class="absolute top-0 w-3 h-5 bg-white rounded-full -translate-x-1/2 shadow-lg transition-all duration-150" style="left: 50%;"></div>
+                <div class="absolute top-0 left-1/2 w-0.5 h-full bg-white -translate-x-1/2 shadow-md"></div>
+                <div id="light-indicator" class="absolute top-0 w-4 h-6 bg-white rounded-full -translate-x-1/2 shadow-lg transition-all duration-150" style="left: 50%;"></div>
             </div>
         </div>
 
         <!-- DADOS CENTRAIS -->
-        <div class="absolute top-20 left-1/2 -translate-x-1/2 flex items-center justify-center gap-4 md:gap-8 z-10 w-full px-4">
-            <div class="text-center flex-1 min-w-[80px]">
-                <div class="text-3xl md:text-5xl font-bold text-white" id="heading-display">5°</div>
-                <div class="text-xs md:text-sm text-gray-400">Rumbo</div>
+        <div class="absolute top-16 left-1/2 -translate-x-1/2 flex items-center justify-center gap-6 md:gap-12 z-10 w-full px-6">
+            <div class="text-center">
+                <div class="text-5xl md:text-7xl font-bold text-white" id="heading-display">359°</div>
+                <div class="text-base text-gray-400">Rumbo</div>
             </div>
-            <div class="text-center flex-1 min-w-[100px]">
-                <div class="text-3xl md:text-5xl font-bold text-jdyellow" id="deviation-display">-0.05 m</div>
-                <div class="text-xs md:text-sm text-gray-400">Desvío</div>
+            <div class="text-center">
+                <div class="text-5xl md:text-7xl font-bold text-jdyellow" id="deviation-display">-0.05 m</div>
+                <div class="text-base text-gray-400">Desvío</div>
             </div>
-            <div class="text-center flex-1 min-w-[80px]">
-                <div class="text-3xl md:text-5xl font-bold text-white" id="speed-display">0.5 km/h</div>
-                <div class="text-xs md:text-sm text-gray-400">Velocidad</div>
+            <div class="text-center">
+                <div class="text-5xl md:text-7xl font-bold text-white" id="speed-display">7.1 km/h</div>
+                <div class="text-base text-gray-400">Velocidad</div>
             </div>
         </div>
 
-        <!-- ✅ LINHA AB VERTICAL - A EM CIMA, B EM BAIXO -->
+        <!-- ✅ LINHA AZUL VERTICAL -->
         <div id="ab-guide-line" class="absolute top-0 bottom-0 left-1/2 ab-line-vertical -translate-x-1/2 opacity-0 transition-opacity duration-500 z-10"></div>
 
-        <!-- ✅ PONTO A = CIMA | PONTO B = BAIXO -->
-        <div id="point-a-marker" class="absolute w-12 h-12 bg-jdblue rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg opacity-0 transition-opacity z-10" style="top: 22%; left: 50%; transform: translate(-50%, -50%);">A</div>
-        <div id="point-b-marker" class="absolute w-12 h-12 bg-jdblue rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg opacity-0 transition-opacity z-10" style="top: 82%; left: 50%; transform: translate(-50%, -50%);">B</div>
+        <!-- ✅ PONTO A EM BAIXO, PONTO B EM CIMA -->
+        <div id="point-a-marker" class="absolute w-16 h-16 bg-jdblue rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-lg opacity-0 transition-opacity z-15" style="bottom: 12%; left: 50%; transform: translate(-50%, 50%);">A</div>
+        <div id="point-b-marker" class="absolute w-16 h-16 bg-jdblue rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-lg opacity-0 transition-opacity z-15" style="top: 20%; left: 50%; transform: translate(-50%, -50%);">B</div>
 
-        <!-- ✅ TRIÂNGULO CENTRAL - Aponta para frente ao longo da linha AB -->
-        <div id="vehicle" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 center-triangle z-20" style="transform: rotate(0deg);"></div>
+        <!-- ✅ SETA AMARELA - SEGUE A LINHA AZUL VERTICAL -->
+        <div id="vehicle" class="absolute left-1/2 -translate-x-1/2 center-triangle z-20" style="top: 50%; transform: translateY(-50%) rotate(0deg);"></div>
 
-        <!-- ✅ COBERTURA - Segue o triângulo verticalmente -->
-        <canvas id="coverage-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-15"></canvas>
+        <!-- ✅ COBERTURA HORIZONTAL - PERPENDICULAR À LINHA AZUL -->
+        <canvas id="coverage-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-12"></canvas>
 
-        <!-- BOTÕES ESQUERDA -->
-        <div class="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-30">
-            <button id="btn-set-a" class="btn-float bg-jdblue" title="Ponto A (Cima)">
-                <span class="font-bold text-lg">A</span>
+        <!-- ✅ BOTÕES ESQUERDA - A VERDE ATIVO, B BLOQUEADO -->
+        <div class="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-30">
+            <button id="btn-set-a" class="btn-float bg-green-600 border-2 border-green-400" title="Ponto A (Abaixo)">
+                A
             </button>
-            <button id="btn-set-b" class="btn-float bg-jdblue opacity-50" title="Ponto B (Baixo)" disabled>
-                <span class="font-bold text-lg">B</span>
+            <button id="btn-set-b" class="btn-float bg-jdgray opacity-30 cursor-not-allowed" title="Ponto B - Recorra 5m primeiro" disabled>
+                B
             </button>
-            <div class="w-0.5 h-4 bg-white/20 mx-auto my-1"></div>
+            <div class="w-0.5 h-5 bg-white/25 mx-auto my-1"></div>
             <button id="zoom-in" class="btn-float" title="Zoom +">
-                <i class="fa fa-search-plus text-lg"></i>
+                <i class="fa fa-search-plus"></i>
             </button>
             <button id="zoom-out" class="btn-float" title="Zoom -">
-                <i class="fa fa-search-minus text-lg"></i>
+                <i class="fa fa-search-minus"></i>
             </button>
             <button class="btn-float" title="Centrar" id="center-btn">
-                <i class="fa fa-crosshairs text-lg"></i>
+                <i class="fa fa-crosshairs"></i>
             </button>
             <button id="btn-view-toggle" class="btn-float mt-1" title="Vista 2D / 3D">
-                <i class="fa fa-cubes text-lg"></i>
+                <i class="fa fa-cubes"></i>
             </button>
         </div>
 
-        <!-- BOTÕES DIREITA -->
-        <div class="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-30">
-            <button id="btn-work" class="btn-float bg-jdgreen w-13 h-13" title="Trabajar">
-                <i class="fa fa-play text-xl"></i>
+        <!-- ✅ BOTÕES DIREITA -->
+        <div class="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-30">
+            <button id="btn-work" class="btn-float bg-jdgreen w-16 h-16" title="Iniciar trabalho">
+                <i class="fa fa-play text-2xl"></i>
             </button>
-            <button id="btn-clear-ab" class="btn-float bg-jdred" title="Borrar AB">
-                <i class="fa fa-times text-lg"></i>
+            <button id="btn-clear-ab" class="btn-float bg-jdred" title="Apagar linha AB">
+                <i class="fa fa-times"></i>
             </button>
             <button id="btn-reset" class="btn-float" title="Reiniciar">
-                <i class="fa fa-refresh text-lg"></i>
+                <i class="fa fa-refresh"></i>
             </button>
         </div>
 
@@ -222,70 +208,58 @@
 
     <!-- ==== PAINEL ESQUERDO ==== -->
     <div id="left-panel" class="panel-drawer left-0 panel-closed">
-        <div class="p-4 h-full overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-jdyellow">📍 Información</h2>
-                <button id="close-left-panel" class="w-8 h-8 rounded-full bg-jdgray flex items-center justify-center hover:bg-jdgreen">
+        <div class="p-5 h-full overflow-y-auto">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-xl font-bold text-jdyellow">📍 Informação</h2>
+                <button id="close-left-panel" class="w-9 h-9 rounded-full bg-jdgray flex items-center justify-center hover:bg-jdgreen">
                     <i class="fa fa-times"></i>
                 </button>
             </div>
 
             <div class="bg-darkbg/50 rounded-xl p-4 mb-4">
-                <h3 class="text-jdyellow font-semibold mb-3">UBICACIÓN GPS</h3>
+                <h3 class="text-jdyellow font-semibold mb-3">📡 GPS EXTERNO</h3>
                 <div class="space-y-2 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Parcela:</span>
-                        <span id="field-name" class="font-bold text-jdyellow">Sin nombre</span>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400">Estado:</span>
+                        <span id="gps-status" class="font-bold text-green-400">Conectado</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-400">Latitud:</span>
+                        <span class="text-gray-400">Latitude:</span>
                         <span id="lat-value" class="font-mono">-24.489275</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-400">Longitud:</span>
+                        <span class="text-gray-400">Longitude:</span>
                         <span id="lon-value" class="font-mono">-54.614722</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-400">Altitud:</span>
+                        <span class="text-gray-400">Altitude:</span>
                         <span id="alt-value" class="font-mono">248.5 m</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Precisão:</span>
+                        <span class="font-mono text-green-400">±0.02 m (RTK)</span>
                     </div>
                 </div>
             </div>
 
             <div class="bg-darkbg/50 rounded-xl p-4 mb-4">
-                <h3 class="text-jdyellow font-semibold mb-3">LÍNEA AB</h3>
+                <h3 class="text-jdyellow font-semibold mb-3">📏 LINHA AB</h3>
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between">
-                        <span class="text-gray-400">Punto A (Cima):</span>
+                        <span class="text-gray-400">Ponto A (Abaixo):</span>
                         <span id="point-a-coord" class="font-mono">—</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-400">Punto B (Bajo):</span>
+                        <span class="text-gray-400">Distância percorrida:</span>
+                        <span id="distance-from-a" class="font-bold text-jdyellow">0.00 m / 5.00 m</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Ponto B (Cima):</span>
                         <span id="point-b-coord" class="font-mono">—</span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-400">Rumbo AB:</span>
+                        <span class="text-gray-400">Rumo AB:</span>
                         <span id="ab-heading" class="font-mono">—</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-darkbg/50 rounded-xl p-4">
-                <h3 class="text-jdyellow font-semibold mb-3">GESTIÓN DE PARCELAS</h3>
-                <div class="space-y-3">
-                    <input type="text" id="new-field-name" placeholder="Nombre de parcela" class="input-field w-full">
-                    <button id="btn-save-field" class="w-full btn-panel">
-                        <i class="fa fa-save mr-2"></i> Guardar Parcela
-                    </button>
-                    <div class="mt-3 max-h-60 overflow-y-auto space-y-2" id="fields-list">
-                        <div class="p-3 bg-jdgreen/20 rounded-lg cursor-pointer hover:bg-jdgreen/40 transition" data-field="1">
-                            <div class="font-semibold">Parcela Norte</div>
-                            <div class="text-xs text-gray-400">15.4 ha · Creada: 19/09/2026</div>
-                        </div>
-                        <div class="p-3 bg-jdgreen/20 rounded-lg cursor-pointer hover:bg-jdgreen/40 transition" data-field="2">
-                            <div class="font-semibold">Parcela Sur</div>
-                            <div class="text-xs text-gray-400">22.8 ha · Creada: 18/09/2026</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -294,10 +268,10 @@
 
     <!-- ==== PAINEL DIREITO ==== -->
     <div id="right-panel" class="panel-drawer right-0 panel-closed-right">
-        <div class="p-4 h-full overflow-y-auto">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-jdyellow">⚙️ Configuración</h2>
-                <button id="close-right-panel" class="w-8 h-8 rounded-full bg-jdgray flex items-center justify-center hover:bg-jdgreen">
+        <div class="p-5 h-full overflow-y-auto">
+            <div class="flex justify-between items-center mb-5">
+                <h2 class="text-xl font-bold text-jdyellow">⚙️ Configuração</h2>
+                <button id="close-right-panel" class="w-9 h-9 rounded-full bg-jdgray flex items-center justify-center hover:bg-jdgreen">
                     <i class="fa fa-times"></i>
                 </button>
             </div>
@@ -306,63 +280,26 @@
                 <h3 class="text-jdyellow font-semibold mb-3">📏 IMPLEMENTO</h3>
                 <div class="space-y-4">
                     <div>
-                        <label class="text-gray-400 block mb-2">Ancho de trabajo (m)</label>
+                        <label class="text-gray-400 block mb-2">Largura de trabalho (m)</label>
                         <input type="number" id="implement-width" value="12.00" step="0.1" class="input-field w-full">
                     </div>
                     <div>
-                        <label class="text-gray-400 block mb-2">Solapamiento (%)</label>
+                        <label class="text-gray-400 block mb-2">Sobreposição (%)</label>
                         <input type="number" id="overlap" value="0" min="0" max="30" class="input-field w-full">
-                    </div>
-                    <div>
-                        <label class="text-gray-400 block mb-2">Desplazamiento lateral (m)</label>
-                        <input type="number" id="offset" value="0.00" step="0.1" class="input-field w-full">
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-darkbg/50 rounded-xl p-4 mb-4">
-                <h3 class="text-jdyellow font-semibold mb-3">🎯 NAVEGACIÓN</h3>
-                <div class="flex items-center justify-between">
-                    <span class="text-lg">Auto-Steer</span>
-                    <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="autosteer-toggle" class="sr-only peer" checked>
-                        <div class="relative w-14 h-7 bg-jdgray rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-jdgreen"></div>
-                    </label>
-                </div>
-            </div>
-
-            <div class="bg-darkbg/50 rounded-xl p-4 mb-4">
-                <h3 class="text-jdyellow font-semibold mb-3">🎨 VISTA</h3>
-                <div class="flex items-center justify-between">
-                    <span class="text-lg">Vista 3D</span>
-                    <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="view-3d-toggle" class="sr-only peer">
-                        <div class="relative w-14 h-7 bg-jdgray rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-jdgreen"></div>
-                    </label>
-                </div>
-            </div>
-
-            <div class="bg-darkbg/50 rounded-xl p-4 mb-4">
-                <h3 class="text-jdyellow font-semibold mb-3">📡 SEÑAL SATELITAL</h3>
-                <div class="h-32 mb-3">
-                    <canvas id="signal-chart"></canvas>
-                </div>
-                <div class="grid grid-cols-2 gap-3 text-sm">
-                    <div class="bg-jdgray/50 p-3 rounded-lg">
-                        <div class="text-gray-400 text-xs">GNSS</div>
-                        <div class="font-semibold">GPS+GLO+GAL</div>
-                    </div>
-                    <div class="bg-jdgray/50 p-3 rounded-lg">
-                        <div class="text-gray-400 text-xs">Corrección</div>
-                        <div class="font-semibold text-green-400">RTK 2cm</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-darkbg/50 rounded-xl p-4">
-                <h3 class="text-jdyellow font-semibold mb-3">📊 VELOCIDAD</h3>
-                <div class="h-28">
-                    <canvas id="speed-chart"></canvas>
+                <h3 class="text-jdyellow font-semibold mb-3">📡 GPS EXTERNO</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span>Usar antena externa</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="external-gps-toggle" class="sr-only peer" checked>
+                            <div class="relative w-12 h-6 bg-jdgray rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[3px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-jdgreen"></div>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -371,112 +308,121 @@
     <div id="overlay" class="fixed inset-0 bg-black/60 z-40 hidden transition-opacity duration-300"></div>
 
     <script>
+        // ==== ESTADO GLOBAL ====
         const state = {
             lat: -24.489275,
             lon: -54.614722,
-            heading: 0,
-            speed: 0.5,
+            heading: 359,
+            speed: 7.1,
             deviation: -0.05,
             area: 0,
-            lines: 0,
-            workTime: 0,
             isWorking: false,
             pointA: null,
             pointB: null,
             abHeading: 0,
+            distanceFromA: 0,
+            minDistanceForB: 5.0,
             implementWidth: 12.00,
             overlapPercent: 0,
-            offset: 0,
-            autoSteer: true,
-            currentField: null,
-            fields: [
-                { id: 1, name: 'Parcela Norte', area: 15.4, date: '19/09/2026' },
-                { id: 2, name: 'Parcela Sur', area: 22.8, date: '18/09/2026' }
-            ],
             coveragePoints: [],
             zoom: 1,
-            externalGpsAvailable: false,
-            view3D: false,
-            vehicleY: 0
+            externalGpsEnabled: true
         };
 
-        let signalChart, speedChart, coverageCanvas, coverageCtx;
+        let coverageCanvas, coverageCtx;
 
+        // ==== INICIALIZAÇÃO ====
         document.addEventListener('DOMContentLoaded', () => {
             initCanvas();
-            initCharts();
             initEvents();
             updateTime();
             setInterval(updateTime, 1000);
-            setInterval(updateData, 500);
-            setInterval(updateWorkTime, 1000);
-
-            updateTriangleRotation();
+            setInterval(updateData, 200);
 
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
             }
-
             if (screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('landscape').catch(() => {});
             }
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        state.externalGpsAvailable = true;
-                        state.lat = position.coords.latitude;
-                        state.lon = position.coords.longitude;
-                    },
-                    error => console.warn('GPS no disponible:', error),
-                    { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
-                );
-
-                navigator.geolocation.watchPosition(
-                    position => {
-                        if (state.externalGpsAvailable) {
-                            state.lat = position.coords.latitude;
-                            state.lon = position.coords.longitude;
-                            if (position.coords.speed) state.speed = parseFloat((position.coords.speed * 3.6).toFixed(1));
-                            if (position.coords.heading) state.heading = parseFloat(position.coords.heading.toFixed(1));
-                            updateTriangleRotation();
-                        }
-                    },
-                    () => {},
-                    { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
-                );
-            }
+            initExternalGPS();
         });
 
-        // ✅ TRIÂNGULO ALINHADO COM LINHA AB VERTICAL
-        function updateTriangleRotation() {
-            const targetHeading = state.abHeading !== null ? state.abHeading : state.heading;
-            const triangle = document.getElementById('vehicle');
-            triangle.style.transform = `rotate(${targetHeading}deg)`;
+        // ==== GPS EXTERNO ====
+        function initExternalGPS() {
+            if (!navigator.geolocation) {
+                document.getElementById('gps-status').textContent = 'Indisponível';
+                document.getElementById('gps-status').classList.remove('text-green-400');
+                document.getElementById('gps-status').classList.add('text-red-400');
+                return;
+            }
+
+            const options = { enableHighAccuracy: true, maximumAge: 500, timeout: 3000 };
+
+            navigator.geolocation.watchPosition(
+                (position) => {
+                    if (state.externalGpsEnabled) {
+                        state.lat = position.coords.latitude;
+                        state.lon = position.coords.longitude;
+                        if (position.coords.heading !== null) {
+                            state.heading = parseFloat(position.coords.heading.toFixed(0));
+                        }
+                        if (position.coords.speed !== null) {
+                            state.speed = parseFloat((position.coords.speed * 3.6).toFixed(1));
+                        }
+                        
+                        if (state.pointA) {
+                            const dist = calculateDistance(
+                                state.pointA.lat, state.pointA.lon,
+                                state.lat, state.lon
+                            );
+                            state.distanceFromA = dist;
+                            updateDistanceIndicator();
+                        }
+                    }
+                    document.getElementById('gps-status').textContent = 'Conectado';
+                    document.getElementById('gps-status').classList.add('text-green-400');
+                    document.getElementById('gps-status').classList.remove('text-red-400');
+                },
+                (error) => {
+                    document.getElementById('gps-status').textContent = 'Sem sinal';
+                    document.getElementById('gps-status').classList.remove('text-green-400');
+                    document.getElementById('gps-status').classList.add('text-red-400');
+                },
+                options
+            );
         }
 
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // ==== EVENTOS ====
         function initEvents() {
             document.getElementById('toggle-left-panel').addEventListener('click', () => togglePanel('left'));
-            document.getElementById('close-left-panel').addEventListener('click', () => togglePanel('left'));
+            document.getElementById('close-left-panel').addEventListener('click', closeAllPanels);
             document.getElementById('toggle-right-panel').addEventListener('click', () => togglePanel('right'));
-            document.getElementById('close-right-panel').addEventListener('click', () => togglePanel('right'));
-
-            document.getElementById('overlay').addEventListener('click', () => {
-                document.getElementById('left-panel').classList.add('panel-closed');
-                document.getElementById('right-panel').classList.add('panel-closed-right');
-                document.getElementById('overlay').classList.add('hidden');
-            });
+            document.getElementById('close-right-panel').addEventListener('click', closeAllPanels);
+            document.getElementById('overlay').addEventListener('click', closeAllPanels);
 
             document.getElementById('btn-set-a').addEventListener('click', setPointA);
             document.getElementById('btn-set-b').addEventListener('click', setPointB);
             document.getElementById('btn-clear-ab').addEventListener('click', clearAB);
 
             document.getElementById('zoom-in').addEventListener('click', () => {
-                state.zoom = Math.min(5, state.zoom * 1.2);
+                state.zoom = Math.min(3, state.zoom * 1.3);
                 applyZoom();
             });
             document.getElementById('zoom-out').addEventListener('click', () => {
-                state.zoom = Math.max(0.3, state.zoom / 1.2);
+                state.zoom = Math.max(0.5, state.zoom / 1.3);
                 applyZoom();
             });
             document.getElementById('center-btn').addEventListener('click', () => {
@@ -493,92 +439,60 @@
                 drawCoverage();
             });
 
-            document.getElementById('autosteer-toggle').addEventListener('change', e => {
-                state.autoSteer = e.target.checked;
-            });
-
-            document.getElementById('view-3d-toggle').addEventListener('change', e => {
-                state.view3D = e.target.checked;
-                const fieldBg = document.getElementById('field-bg');
-                const coverageCanvas = document.getElementById('coverage-canvas');
-                if (state.view3D) {
-                    fieldBg.classList.remove('view-2d');
-                    fieldBg.classList.add('view-3d');
-                    coverageCanvas.classList.add('view-3d');
-                } else {
-                    fieldBg.classList.remove('view-3d');
-                    fieldBg.classList.add('view-2d');
-                    coverageCanvas.classList.remove('view-3d');
-                }
-            });
-
-            document.getElementById('btn-view-toggle').addEventListener('click', () => {
-                const toggle = document.getElementById('view-3d-toggle');
-                toggle.checked = !toggle.checked;
-                toggle.dispatchEvent(new Event('change'));
+            document.getElementById('external-gps-toggle').addEventListener('change', e => {
+                state.externalGpsEnabled = e.target.checked;
             });
 
             document.getElementById('btn-work').addEventListener('click', () => {
                 state.isWorking = !state.isWorking;
                 const btn = document.getElementById('btn-work');
                 if (state.isWorking) {
-                    btn.innerHTML = '<i class="fa fa-pause text-xl"></i>';
+                    btn.innerHTML = '<i class="fa fa-pause text-2xl"></i>';
                     btn.classList.add('bg-jdred');
                     btn.classList.remove('bg-jdgreen');
                     addCoveragePoint();
                 } else {
-                    btn.innerHTML = '<i class="fa fa-play text-xl"></i>';
+                    btn.innerHTML = '<i class="fa fa-play text-2xl"></i>';
                     btn.classList.remove('bg-jdred');
                     btn.classList.add('bg-jdgreen');
                 }
             });
 
-            document.getElementById('btn-save-field').addEventListener('click', saveField);
-
             document.getElementById('btn-reset').addEventListener('click', () => {
-                if (confirm('¿Reiniciar todos los datos?')) {
-                    state.area = 0; state.lines = 0; state.workTime = 0;
+                if (confirm('Reiniciar todos os dados?')) {
                     state.coveragePoints = [];
+                    state.distanceFromA = 0;
                     drawCoverage();
+                    updateDistanceIndicator();
                 }
-            });
-
-            document.querySelectorAll('#fields-list > div').forEach(el => {
-                el.addEventListener('click', () => {
-                    state.currentField = el.dataset.field;
-                    document.getElementById('field-name').textContent = el.querySelector('.font-semibold').textContent;
-                    togglePanel('left');
-                });
             });
         }
 
         function applyZoom() {
             const fieldBg = document.getElementById('field-bg');
             const coverageCanvas = document.getElementById('coverage-canvas');
-            const transformVal = state.view3D 
-                ? `perspective(900px) rotateX(65deg) scale(${1.5 * state.zoom})` 
-                : `scale(${state.zoom})`;
-            fieldBg.style.transform = transformVal;
-            coverageCanvas.style.transform = transformVal;
+            fieldBg.style.transform = `scale(${state.zoom})`;
+            coverageCanvas.style.transform = `scale(${state.zoom})`;
         }
 
         function togglePanel(side) {
-            const leftPanel = document.getElementById('left-panel');
-            const rightPanel = document.getElementById('right-panel');
+            closeAllPanels();
             const overlay = document.getElementById('overlay');
-
             if (side === 'left') {
-                leftPanel.classList.toggle('panel-closed');
-                rightPanel.classList.add('panel-closed-right');
+                document.getElementById('left-panel').classList.remove('panel-closed');
             } else {
-                rightPanel.classList.toggle('panel-closed-right');
-                leftPanel.classList.add('panel-closed');
+                document.getElementById('right-panel').classList.remove('panel-closed-right');
             }
-
-            const isOpen = !leftPanel.classList.contains('panel-closed') || !rightPanel.classList.contains('panel-closed-right');
-            overlay.classList.toggle('hidden', !isOpen);
+            overlay.classList.remove('hidden');
         }
 
+        function closeAllPanels() {
+            document.getElementById('left-panel').classList.add('panel-closed');
+            document.getElementById('right-panel').classList.add('panel-closed-right');
+            document.getElementById('overlay').classList.add('hidden');
+        }
+
+        // ==== CANVAS DE COBERTURA ====
         function initCanvas() {
             coverageCanvas = document.getElementById('coverage-canvas');
             coverageCtx = coverageCanvas.getContext('2d');
@@ -593,28 +507,28 @@
             drawCoverage();
         }
 
-        // ✅ COBERTURA VERTICAL - ACOMPANHA O TRIÂNGULO
+        // ==== ✅ COBERTURA HORIZONTAL - PERPENDICULAR À LINHA AZUL ====
         function drawCoverage() {
             coverageCtx.clearRect(0, 0, coverageCanvas.width, coverageCanvas.height);
             
-            const baseGreen = 'rgba(0, 61, 38, 0.6)';    // Verde escuro
-            const overlapYellow = 'rgba(255, 204, 0, 0.5)'; // Amarelo sobreposição
+            const baseGreen = 'rgba(0, 77, 0, 0.6)';
+            const overlapYellow = 'rgba(255, 204, 0, 0.5)';
 
             state.coveragePoints.forEach((p) => {
                 const effectiveWidth = state.implementWidth * (1 - state.overlapPercent / 100);
-                const drawWidth = effectiveWidth * 2.5;
+                const drawWidth = effectiveWidth * 3;
                 
                 coverageCtx.save();
                 coverageCtx.translate(p.x, p.y);
                 coverageCtx.rotate((p.heading || state.abHeading || state.heading) * Math.PI / 180);
                 
-                // ✅ FAIXA VERTICAL - alinhada com o triângulo
+                // ✅ FAIXA HORIZONTAL - perpendicular à linha azul
                 coverageCtx.fillStyle = baseGreen;
-                coverageCtx.fillRect(-drawWidth/2, -80, drawWidth, 160);
+                coverageCtx.fillRect(-drawWidth/2, -40, drawWidth, 80);
                 
-                coverageCtx.strokeStyle = 'rgba(0, 90, 50, 0.6)';
-                coverageCtx.lineWidth = 1.5;
-                coverageCtx.strokeRect(-drawWidth/2, -80, drawWidth, 160);
+                coverageCtx.strokeStyle = 'rgba(0, 120, 0, 0.7)';
+                coverageCtx.lineWidth = 2;
+                coverageCtx.strokeRect(-drawWidth/2, -40, drawWidth, 80);
                 
                 coverageCtx.restore();
             });
@@ -624,106 +538,83 @@
                 coverageCtx.globalCompositeOperation = 'multiply';
                 state.coveragePoints.forEach((p) => {
                     const effectiveWidth = state.implementWidth * (1 - state.overlapPercent / 100);
-                    const drawWidth = effectiveWidth * 2.5;
+                    const drawWidth = effectiveWidth * 3;
                     
                     coverageCtx.save();
                     coverageCtx.translate(p.x, p.y);
                     coverageCtx.rotate((p.heading || state.abHeading || state.heading) * Math.PI / 180);
                     coverageCtx.fillStyle = overlapYellow;
-                    coverageCtx.fillRect(-drawWidth/2, -80, drawWidth, 160);
+                    coverageCtx.fillRect(-drawWidth/2, -40, drawWidth, 80);
                     coverageCtx.restore();
                 });
                 coverageCtx.globalCompositeOperation = 'source-over';
             }
         }
 
-        function initCharts() {
-            signalChart = new Chart(document.getElementById('signal-chart'), {
-                type: 'bar',
-                data: {
-                    labels: ['G1','G2','G3','G4','G5','R1','R2','E1','E2'],
-                    datasets: [{
-                        data: [42, 45, 38, 47, 41, 40, 36, 44, 39],
-                        backgroundColor: '#00693E',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { max: 50, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false } }, x: { grid: { display: false }, ticks: { fontSize: 10 } } }
-                }
-            });
-
-            speedChart = new Chart(document.getElementById('speed-chart'), {
-                type: 'line',
-                data: {
-                    labels: Array(15).fill(''),
-                    datasets: [{
-                        data: Array(15).fill(0),
-                        borderColor: '#FFCC00',
-                        backgroundColor: 'rgba(255,204,0,0.2)',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        fill: true, tension: 0.2
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { min: 0, max: 15, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { fontSize: 11 } }, x: { display: false } }
-                }
-            });
-        }
-
-        // ✅ PONTO A = CIMA | PONTO B = BAIXO
+        // ==== ✅ PONTO A EM BAIXO, PONTO B EM CIMA (5m) ====
         function setPointA() {
             state.pointA = { lat: state.lat, lon: state.lon };
             document.getElementById('point-a-coord').textContent = state.lat.toFixed(6) + ', ' + state.lon.toFixed(6);
             document.getElementById('point-a-marker').classList.remove('opacity-0');
-            document.getElementById('btn-set-b').disabled = false;
-            document.getElementById('btn-set-b').classList.remove('opacity-50');
-            updateABLine();
+            document.getElementById('ab-guide-line').classList.remove('opacity-0');
+            state.distanceFromA = 0;
+            updateDistanceIndicator();
+            
+            state.pointB = null;
+            document.getElementById('point-b-marker').classList.add('opacity-0');
+            document.getElementById('btn-set-b').disabled = true;
+            document.getElementById('btn-set-b').classList.add('opacity-30', 'cursor-not-allowed');
         }
 
         function setPointB() {
-            state.pointB = { lat: state.lat - 0.0001, lon: state.lon };
-            document.getElementById('point-b-coord').textContent = state.pointB.lat.toFixed(6) + ', ' + state.pointB.lon.toFixed(6);
+            if (!state.pointA || state.distanceFromA < state.minDistanceForB) return;
+            
+            state.pointB = { lat: state.lat, lon: state.lon };
+            document.getElementById('point-b-coord').textContent = state.lat.toFixed(6) + ', ' + state.lon.toFixed(6);
             document.getElementById('point-b-marker').classList.remove('opacity-0');
-            state.abHeading = 180; // ✅ Linha vertical = A para cima, B para baixo = 180°
-            document.getElementById('ab-heading').textContent = state.abHeading.toFixed(1) + '°';
-            document.getElementById('ab-guide-line').classList.remove('opacity-0');
-            updateABLine();
-            updateTriangleRotation();
+            state.abHeading = 0;
+            document.getElementById('ab-heading').textContent = '0.0°';
         }
 
         function clearAB() {
             state.pointA = state.pointB = null;
             state.abHeading = null;
+            state.distanceFromA = 0;
+            
             document.getElementById('point-a-coord').textContent = '—';
             document.getElementById('point-b-coord').textContent = '—';
             document.getElementById('ab-heading').textContent = '—';
             document.getElementById('point-a-marker').classList.add('opacity-0');
             document.getElementById('point-b-marker').classList.add('opacity-0');
             document.getElementById('ab-guide-line').classList.add('opacity-0');
+            
             document.getElementById('btn-set-b').disabled = true;
-            document.getElementById('btn-set-b').classList.add('opacity-50');
-            updateTriangleRotation();
+            document.getElementById('btn-set-b').classList.add('opacity-30', 'cursor-not-allowed');
+            
+            updateDistanceIndicator();
         }
 
-        function updateABLine() {
-            if (!state.pointA || !state.pointB) return;
-            document.getElementById('ab-guide-line').style.transform = `translateX(-50%) rotate(0deg)`; // Linha vertical
+        // ==== ✅ HABILITAR B APÓS 5m ====
+        function updateDistanceIndicator() {
+            const dist = state.distanceFromA;
+            document.getElementById('distance-from-a').textContent = `${dist.toFixed(2)} m / ${state.minDistanceForB.toFixed(2)} m`;
+            
+            if (dist >= state.minDistanceForB && !state.pointB) {
+                document.getElementById('btn-set-b').disabled = false;
+                document.getElementById('btn-set-b').classList.remove('opacity-30', 'cursor-not-allowed');
+                document.getElementById('distance-from-a').classList.add('text-green-400');
+            } else {
+                document.getElementById('distance-from-a').classList.remove('text-green-400');
+            }
         }
 
-        // ✅ COBERTURA ACOMPANHA TRIÂNGULO
+        // ==== ✅ COBERTURA HORIZONTAL ACOMPANHANDO A SETA ====
         function addCoveragePoint() {
             if (!state.isWorking) return;
             const vehicleEl = document.getElementById('vehicle');
             const rect = vehicleEl.getBoundingClientRect();
             const canvasRect = coverageCanvas.getBoundingClientRect();
             
-            // Posição exata do triângulo no canvas
             const centerX = rect.left + rect.width/2 - canvasRect.left;
             const centerY = rect.top + rect.height/2 - canvasRect.top;
 
@@ -735,45 +626,32 @@
             drawCoverage();
         }
 
-        function saveField() {
-            const name = document.getElementById('new-field-name').value.trim();
-            if (!name) { alert('Ingrese un nombre para la parcela'); return; }
-            const newField = {
-                id: Date.now(),
-                name: name,
-                area: state.area,
-                date: new Date().toLocaleDateString('es-ES')
-            };
-            state.fields.push(newField);
-            const list = document.getElementById('fields-list');
-            const el = document.createElement('div');
-            el.className = 'p-3 bg-jdgreen/30 rounded-lg mb-2 cursor-pointer hover:bg-jdgreen/50 transition';
-            el.dataset.field = newField.id;
-            el.innerHTML = `<div class="font-semibold">${name}</div><div class="text-xs text-gray-400">${state.area.toFixed(2)} ha · Creada: ${newField.date}</div>`;
-            list.insertBefore(el, list.firstChild);
-            document.getElementById('field-name').textContent = name;
-            document.getElementById('new-field-name').value = '';
-            alert('✅ Parcela guardada: ' + name);
-        }
-
+        // ==== ATUALIZAÇÃO DE DADOS ====
         function updateData() {
-            if (!state.externalGpsAvailable) {
+            if (!state.externalGpsEnabled || !navigator.geolocation) {
                 if (state.isWorking) {
-                    state.speed = Math.max(0, Math.min(15, state.speed + (Math.random() - 0.5) * 0.3));
-                    state.deviation = Math.max(-0.5, Math.min(0.5, state.deviation + (Math.random() - 0.5) * 0.08));
-                    if (state.abHeading) state.heading = state.abHeading;
-                    state.lat += 0.000003 * Math.cos(state.heading * Math.PI / 180) * (state.speed / 5);
-                    state.lon += 0.000003 * Math.sin(state.heading * Math.PI / 180) * (state.speed / 5);
-                    state.area += (state.speed / 3.6) * state.implementWidth * (1 - state.overlapPercent / 100) * 0.5 / 10000;
-                    if (Math.random() < 0.02) state.lines++;
+                    state.speed = 7.1 + (Math.random() - 0.5) * 0.5;
+                    state.deviation = -0.05 + (Math.random() - 0.5) * 0.1;
+                    
+                    if (state.pointA) {
+                        state.lat += 0.00001 * Math.cos(state.heading * Math.PI / 180) * (state.speed / 3.6);
+                        state.lon += 0.00001 * Math.sin(state.heading * Math.PI / 180) * (state.speed / 3.6);
+                        state.distanceFromA += (state.speed / 3.6) * 0.2;
+                        updateDistanceIndicator();
+                    }
                     addCoveragePoint();
                 } else {
-                    state.speed = Math.max(0, state.speed - 0.15);
-                    state.deviation = state.deviation * 0.95;
+                    state.speed = Math.max(0, state.speed - 0.3);
+                    state.deviation = state.deviation * 0.98;
                 }
             }
 
-            updateTriangleRotation();
+            // Atualizar posição da seta amarela ao longo da linha azul
+            if (state.pointA && state.isWorking) {
+                const progress = Math.min(1, state.distanceFromA / 50);
+                const vehicle = document.getElementById('vehicle');
+                vehicle.style.top = `${50 - progress * 30}%`;
+            }
 
             document.getElementById('lat-value').textContent = state.lat.toFixed(6);
             document.getElementById('lon-value').textContent = state.lon.toFixed(6);
@@ -781,20 +659,12 @@
             document.getElementById('deviation-display').textContent = (state.deviation >= 0 ? '+' : '') + state.deviation.toFixed(2) + ' m';
             document.getElementById('speed-display').textContent = state.speed.toFixed(1) + ' km/h';
 
-            const lightPos = 50 + state.deviation * 120;
+            const lightPos = 50 + state.deviation * 150;
             document.getElementById('light-indicator').style.left = `${Math.max(5, Math.min(95, lightPos))}%`;
-
-            speedChart.data.datasets[0].data.shift();
-            speedChart.data.datasets[0].data.push(state.speed);
-            speedChart.update('none');
         }
 
         function updateTime() {
             document.getElementById('current-time').textContent = new Date().toLocaleTimeString('es-ES', { hour12: false });
-        }
-
-        function updateWorkTime() {
-            if (state.isWorking) state.workTime++;
         }
     </script>
 </body>
