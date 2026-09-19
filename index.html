@@ -1,125 +1,329 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor GPS Agrícola</title>
+    <title>Monitor de Guiado Agrícola - GreenControl</title>
     <style>
-        body {
-            background-color: #1a1a1a;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        :root {
+            --jd-green: #367c2b;
+            --jd-yellow: #ffde00;
+            --dark-bg: #121212;
+            --panel-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --border-color: #333333;
         }
-        .gps-container {
-            width: 700px;
-            background-color: #262626;
-            border: 4px solid #4CAF50;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
-        .gps-header {
-            background-color: #333333;
-            padding: 12px 20px;
+
+        /* Barra Superior / Status */
+        header {
+            background-color: #000000;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #444;
+            padding: 10px 20px;
+            border-bottom: 2px solid var(--jd-green);
+            height: 50px;
         }
-        .status-badge {
-            background-color: #4CAF50;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .gps-body {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            padding: 20px;
+
+        .status-group {
+            display: flex;
             gap: 15px;
-        }
-        .card {
-            background-color: #333333;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 5px solid #4CAF50;
-        }
-        .card h3 {
-            margin: 0 0 8px 0;
+            align-items: center;
             font-size: 14px;
-            color: #b0b0b0;
         }
-        .card .value {
-            font-size: 22px;
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #00ff00;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .brand {
+            color: var(--jd-yellow);
             font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
         }
-        .map-screen {
-            grid-column: span 2;
-            background-color: #122813;
-            height: 150px;
-            border-radius: 8px;
+
+        /* Container Principal */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 50px);
+        }
+
+        /* Área do Mapa / Guiado */
+        .map-display {
+            flex: 1;
+            background-color: #1a261a;
+            position: relative;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            border: 1px dashed #4CAF50;
-            position: relative;
         }
-        .guidance-line {
-            width: 2px;
+
+        /* Grade de Linhas A-B Simulada */
+        .grid-lines {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-size: 80px 80px;
+            background-image: 
+                linear-gradient(to right, rgba(54, 124, 43, 0.3) 1px, transparent 1px);
+            transform: rotate(-15deg);
+            animation: moveGrid 10s linear infinite;
+        }
+
+        /* Linha Guia Central Ativa */
+        .center-line {
+            position: absolute;
+            width: 4px;
             height: 100%;
-            background-color: #ffeb3b;
+            background-color: var(--jd-yellow);
+            box-shadow: 0 0 10px var(--jd-yellow);
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Ícone do Trator (Visão Superior) */
+        .tractor-icon {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background-color: var(--jd-green);
+            border: 3px solid var(--jd-yellow);
+            border-radius: 8px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .tractor-wheel {
+            width: 10px;
+            height: 20px;
+            background-color: #000;
             position: absolute;
         }
-        .tractor-icon {
-            font-size: 24px;
+        .wheel-fl { top: 10px; left: -12px; }
+        .wheel-fr { top: 10px; right: -12px; }
+        .wheel-rl { bottom: 10px; left: -14px; height: 25px; width: 12px; }
+        .wheel-rr { bottom: 10px; right: -14px; height: 25px; width: 12px; }
+
+        .implement-width {
             position: absolute;
+            bottom: -5px;
+            left: -50px;
+            width: 160px;
+            height: 6px;
+            background-color: rgba(0, 255, 0, 0.7);
+            border-radius: 3px;
+        }
+
+        /* Painéis Laterais de Informação */
+        .side-panel {
+            width: 280px;
+            background-color: var(--panel-bg);
+            border-left: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .info-block {
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #aaaaaa;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffffff;
+            font-family: monospace;
+        }
+
+        .info-unit {
+            font-size: 14px;
+            color: var(--jd-yellow);
+            margin-left: 5px;
+        }
+
+        /* Botões de Comando Inferiores */
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 15px;
+            background-color: #151515;
+        }
+
+        .btn {
+            background-color: #2a2a2a;
+            color: white;
+            border: 1px solid #444;
+            padding: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn:active {
+            background-color: var(--jd-green);
+            border-color: var(--jd-yellow);
+        }
+
+        .btn-active {
+            background-color: var(--jd-green);
+            border-color: var(--jd-yellow);
+        }
+
+        /* Indicador de Desvio de Direção (Barra de Luzes) */
+        .lightbar {
+            position: absolute;
+            top: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: flex;
+            gap: 5px;
+            border: 1px solid #444;
+        }
+
+        .light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #333;
+        }
+
+        .light.center { background-color: #00ff00; box-shadow: 0 0 8px #00ff00; }
+
+        /* Animação simulando o movimento do trator no campo */
+        @keyframes moveGrid {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 80px; }
         }
     </style>
 </head>
 <body>
 
-<div class="gps-container">
-    <!-- Encabezado del monitor -->
-    <div class="gps-header">
-        <h2>GuíaSat Pro-X</h2>
-        <span class="status-badge">RTK ACTIVO (Precisión 2cm)</span>
-    </div>
+    <!-- Barra de Status Superior -->
+    <header>
+        <div class="brand">JOHN DEERE SIM</div>
+        <div class="status-group">
+            <div class="status-item">
+                <span class="status-dot"></span>
+                <span>SF-RTK (2.5cm)</span>
+            </div>
+            <div class="status-item">💡 Automotivo ATIVO</div>
+            <div class="status-item">🕒 14:15</div>
+        </div>
+    </header>
 
-    <!-- Pantalla de datos -->
-    <div class="gps-body">
-        <!-- Simulación de mapa de guiado -->
-        <div class="map-screen">
-            <div class="guidance-line"></div>
-            <div class="tractor-icon">🚜</div>
-            <span style="position: absolute; bottom: 10px; font-size: 12px; color: #8bc34a;">Línea A-B Fijada</span>
+    <!-- Corpo Principal -->
+    <div class="main-container">
+        
+        <!-- Tela do Mapa / Piloto -->
+        <div class="map-display">
+            <!-- Barra de Desvio Lateral (Lightbar) -->
+            <div class="lightbar">
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light center"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+                <div class="light"></div>
+            </div>
+
+            <!-- Grade de Linhas de Guiado -->
+            <div class="grid-lines"></div>
+            
+            <!-- Linha A-B central ideal -->
+            <div class="center-line"></div>
+
+            <!-- Veículo (Trator) -->
+            <div class="tractor-icon">
+                <div class="tractor-wheel wheel-fl"></div>
+                <div class="tractor-wheel wheel-fr"></div>
+                <div class="tractor-wheel wheel-rl"></div>
+                <div class="tractor-wheel wheel-rr"></div>
+                <!-- Barra representando a largura do implemento (ex: plantadeira) -->
+                <div class="implement-width"></div>
+            </div>
         </div>
 
-        <!-- Datos en tiempo real -->
-        <div class="card">
-            <h3>Velocidad Actual</h3>
-            <div class="value">8.5 km/h</div>
+        <!-- Painel de Telemetria Direito -->
+        <div class="side-panel">
+            <div>
+                <div class="info-block">
+                    <div class="info-label">Velocidade Atual</div>
+                    <div class="info-value">8.4<span class="info-unit">km/h</span></div>
+                </div>
+
+                <div class="info-block">
+                    <div class="info-label">Área Trabalhada</div>
+                    <div class="info-value">24.65<span class="info-unit">ha</span></div>
+                </div>
+
+                <div class="info-block">
+                    <div class="info-label">Largura do Implemento</div>
+                    <div class="info-value">12.0<span class="info-unit">m</span></div>
+                </div>
+
+                <div class="info-block">
+                    <div class="info-label">Espaçamento de Linha</div>
+                    <div class="info-value">Padrão A-B</div>
+                </div>
+            </div>
+
+            <!-- Botões Rápidos de Operação -->
+            <div class="control-grid">
+                <div class="btn btn-active">PILOTO ON</div>
+                <div class="btn">DEFINIR A</div>
+                <div class="btn">DEFINIR B</div>
+                <div class="btn">MAPEAR</div>
+            </div>
         </div>
-        <div class="card">
-            <h3>Área Trabajada</h3>
-            <div class="value">42.8 Ha</div>
-        </div>
-        <div class="card">
-            <h3>Cobertura / Solape</h3>
-            <div class="value" style="color: #4CAF50;">0.0% (Sin solape)</div>
-        </div>
-        <div class="card">
-            <h3>Satélites Conectados</h3>
-            <div class="value">28 GNSS</div>
-        </div>
+
     </div>
-</div>
 
 </body>
 </html>
