@@ -3,2808 +3,2140 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#061016">
+      content="width=device-width, initial-scale=1.0,
+               maximum-scale=1.0, user-scalable=no">
 
-<title>Portal Sat GPS Agrícola PRO</title>
+<title>Portal Sat GPS Agrícola</title>
 
 <style>
-:root{
- --bg:#061016;
- --panel:#091820;
- --border:#294650;
- --green:#35f13d;
- --green2:#8aff78;
- --cyan:#00eaff;
- --red:#ff3030;
- --yellow:#ffd52e;
-}
-
 *{
- box-sizing:border-box;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
- margin:0;
- width:100%;
- height:100%;
- overflow:hidden;
- background:var(--bg);
- color:#eef7f8;
- font-family:Arial,Helvetica,sans-serif;
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#071008;
+    color:white;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-button,input,select{
- font:inherit;
+body{
+    display:flex;
+    flex-direction:column;
 }
 
-button{
- cursor:pointer;
-}
+/* ================= TOPO ================= */
 
-#app{
- width:100vw;
- height:100vh;
- display:flex;
- flex-direction:column;
-}
-
-/* TOPO */
-
-.top{
- height:66px;
- display:flex;
- align-items:center;
- gap:7px;
- padding:7px 10px;
- background:#061016;
- border-bottom:1px solid #24414b;
- z-index:10;
+#topbar{
+    height:64px;
+    min-height:64px;
+    background:linear-gradient(#152219,#090f0b);
+    border-bottom:2px solid #303b32;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:5px 10px;
+    z-index:50;
 }
 
 .logo{
- font-size:21px;
- font-weight:900;
- min-width:235px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-weight:bold;
 }
 
-.logo span{
- color:var(--green);
+.logoCircle{
+    width:43px;
+    height:43px;
+    border-radius:50%;
+    border:2px solid #45ff72;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:21px;
+    box-shadow:0 0 12px #24ff5b55;
 }
 
-.sub{
- display:block;
- font-size:8px;
- letter-spacing:4px;
- margin-left:39px;
- color:#b9c8cd;
+.logoText{
+    line-height:16px;
 }
 
-.stat{
- height:49px;
- padding:4px 12px;
- border-left:1px solid #213a44;
- min-width:105px;
+.logoText b{
+    color:#40ff6b;
+    font-size:16px;
 }
 
-.stat b{
- font-size:17px;
+.logoText small{
+    color:#b5c1b7;
+    font-size:10px;
 }
 
-.stat small{
- display:block;
- color:#9db0b6;
- font-size:9px;
+.status{
+    display:flex;
+    gap:8px;
+    align-items:center;
 }
 
-.grow{
- flex:1;
+.statusBox{
+    background:#101a13;
+    border:1px solid #37483a;
+    border-radius:7px;
+    padding:5px 9px;
+    text-align:center;
+    min-width:72px;
+}
+
+.statusBox small{
+    display:block;
+    color:#8e9d91;
+    font-size:9px;
+}
+
+.statusBox b{
+    font-size:13px;
+}
+
+.green{
+    color:#46ff6b;
+}
+
+/* ================= ÁREA PRINCIPAL ================= */
+
+#main{
+    position:relative;
+    flex:1;
+    min-height:0;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at center,#18351d 0%,#0c1a10 55%,#071008 100%);
+}
+
+#map{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+}
+
+/* grade */
+.grid{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    opacity:.18;
+    background-image:
+      linear-gradient(rgba(255,255,255,.15) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.15) 1px,transparent 1px);
+    background-size:60px 60px;
+}
+
+/* logo no fundo */
+
+.watermark{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%) rotate(-18deg);
+    color:#48ff6b;
+    opacity:.07;
+    font-size:55px;
+    font-weight:bold;
+    white-space:nowrap;
+    pointer-events:none;
+}
+
+/* ================= TRATOR ================= */
+
+#tractor{
+    position:absolute;
+    width:42px;
+    height:66px;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    z-index:15;
+    pointer-events:none;
+}
+
+.tractorBody{
+    position:absolute;
+    left:8px;
+    top:10px;
+    width:26px;
+    height:42px;
+    background:#e8b900;
+    border:2px solid #191500;
+    border-radius:5px;
+}
+
+.tractorCab{
+    position:absolute;
+    left:11px;
+    top:4px;
+    width:20px;
+    height:22px;
+    background:#76b8d4;
+    border:2px solid #111;
+    border-radius:3px;
+}
+
+.wheel{
+    position:absolute;
+    width:11px;
+    height:24px;
+    background:#111;
+    border:2px solid #444;
+    border-radius:6px;
+}
+
+.w1{left:1px;top:29px}
+.w2{right:1px;top:29px}
+.w3{left:6px;top:0;width:8px;height:16px}
+.w4{right:6px;top:0;width:8px;height:16px}
+
+/* ================= PAINEL DE INFORMAÇÕES ================= */
+
+#infoPanel{
+    position:absolute;
+    top:10px;
+    left:10px;
+    z-index:30;
+    min-width:205px;
+    background:rgba(5,10,6,.88);
+    border:1px solid #455247;
+    border-radius:10px;
+    box-shadow:0 5px 20px #0008;
+    overflow:hidden;
+}
+
+.panelTitle{
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 9px;
+    background:#17221a;
+    font-weight:bold;
+    font-size:13px;
+}
+
+.close{
+    border:0;
+    background:#351313;
+    color:#ff8b8b;
+    width:27px;
+    height:27px;
+    border-radius:5px;
+    font-size:17px;
+    font-weight:bold;
+}
+
+.infoContent{
+    padding:7px 10px;
+}
+
+.infoRow{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    padding:3px 0;
+    font-size:12px;
+    color:#bdc9bf;
+}
+
+.infoRow b{
+    color:white;
+}
+
+/* ================= BARRA DE LUZ ================= */
+
+#lightbar{
+    position:absolute;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:25;
+    display:flex;
+    gap:3px;
+    background:#050805cc;
+    border:1px solid #3a463c;
+    padding:5px;
+    border-radius:8px;
+}
+
+.light{
+    width:17px;
+    height:10px;
+    background:#202820;
+    border-radius:2px;
+}
+
+.light.on{
+    background:#48ff6b;
+    box-shadow:0 0 7px #48ff6b;
+}
+
+.light.center{
+    background:#ffd52a;
+}
+
+/* ================= COMPASS ================= */
+
+#compass{
+    position:absolute;
+    right:15px;
+    top:10px;
+    z-index:25;
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    background:#08100bdf;
+    border:2px solid #667268;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 12px #0008;
+}
+
+#compassRose{
+    font-weight:bold;
+    font-size:13px;
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding-top:4px;
+}
+
+#compassArrow{
+    width:4px;
+    height:27px;
+    background:#ff4040;
+    position:absolute;
+    bottom:36px;
+    transform-origin:bottom center;
+    border-radius:3px;
+}
+
+#headingText{
+    position:absolute;
+    bottom:3px;
+    font-size:11px;
+    color:#46ff6b;
+}
+
+/* ================= MENU INFERIOR ================= */
+
+#bottom{
+    height:74px;
+    min-height:74px;
+    background:#0b110d;
+    border-top:2px solid #344036;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:7px;
+    z-index:50;
 }
 
 .btn{
- background:#10232c;
- border:1px solid #31515d;
- color:white;
- border-radius:7px;
- padding:8px 11px;
+    height:56px;
+    min-width:76px;
+    border:1px solid #48564b;
+    background:linear-gradient(#202d23,#101710);
+    color:white;
+    border-radius:8px;
+    font-weight:bold;
+    font-size:11px;
 }
 
-.btn.green{
- border-color:#35ec3d;
- background:#0c281e;
- color:#83ff7b;
+.btn:active{
+    transform:scale(.96);
 }
 
-.btn.red{
- border-color:#9a3b3b;
- background:#301619;
+.btn.greenBtn{
+    border-color:#2fcf53;
+    color:#63ff82;
 }
 
-/* ÁREA PRINCIPAL */
-
-.main{
- position:relative;
- flex:1;
- min-height:0;
- overflow:hidden;
- background:#253e28;
+.btn.redBtn{
+    border-color:#c93c3c;
+    color:#ff7070;
 }
 
-#field{
- position:absolute;
- inset:0;
- width:100%;
- height:100%;
+.btn.blueBtn{
+    border-color:#378de0;
+    color:#72baff;
 }
 
-/* MENU LATERAL */
+/* ================= JANELAS ================= */
 
-.side{
- position:absolute;
- left:0;
- top:0;
- bottom:0;
- width:72px;
- background:#071219e8;
- border-right:1px solid #25414b;
- z-index:5;
- display:flex;
- flex-direction:column;
+.modal{
+    position:absolute;
+    z-index:100;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:min(520px,94vw);
+    max-height:88vh;
+    overflow:auto;
+    background:#101711;
+    border:2px solid #48564b;
+    border-radius:12px;
+    box-shadow:0 15px 50px #000c;
 }
 
-.side button{
- flex:1;
- background:none;
- border:0;
- border-bottom:1px solid #1e3740;
- color:#dce8ea;
- font-size:9px;
+.modalHeader{
+    height:46px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 10px;
+    background:#1a251c;
+    border-bottom:1px solid #39443c;
+    font-weight:bold;
 }
 
-.side strong{
- font-size:20px;
- display:block;
- margin-bottom:3px;
+.modalBody{
+    padding:12px;
 }
 
-.side button.active{
- color:var(--green);
- background:#0b2520;
-}
-
-/* PAINÉIS */
-
-.card{
- position:absolute;
- background:#07131ae8;
- border:1px solid #34535e;
- border-radius:10px;
- box-shadow:0 8px 25px #0008;
- z-index:4;
+.modalClose{
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:6px;
+    background:#481818;
+    color:#ff8585;
+    font-size:21px;
 }
 
 .field{
- left:86px;
- top:12px;
- width:235px;
- padding:10px;
+    margin-bottom:11px;
 }
 
-.guide{
- right:14px;
- top:12px;
- width:270px;
- padding:10px;
+.field label{
+    display:block;
+    font-size:11px;
+    color:#aab7ad;
+    margin-bottom:4px;
 }
 
-.cardtitle{
- font-weight:800;
- margin-bottom:6px;
-}
-
-.muted{
- color:#9eb1b7;
- font-size:11px;
+.field input,
+.field select{
+    width:100%;
+    height:40px;
+    border-radius:6px;
+    border:1px solid #536055;
+    background:#080d09;
+    color:white;
+    padding:0 9px;
+    font-size:15px;
 }
 
 .row{
- display:flex;
- justify-content:space-between;
- gap:10px;
- margin:5px 0;
+    display:flex;
+    gap:8px;
 }
 
-/* BARRA DE LUZ */
-
-.lightbar{
- position:absolute;
- top:13px;
- left:50%;
- transform:translateX(-50%);
- width:min(440px,42vw);
- height:47px;
- background:#071219ef;
- border:1px solid #385660;
- border-radius:9px;
- padding:7px 10px;
- z-index:7;
+.row>*{
+    flex:1;
 }
 
-.lights{
- height:20px;
- display:flex;
- gap:4px;
- justify-content:center;
+.action{
+    width:100%;
+    height:43px;
+    border:0;
+    border-radius:7px;
+    background:#1eaf3f;
+    color:white;
+    font-weight:bold;
+    margin-top:5px;
 }
 
-.lamp{
- width:24px;
- height:13px;
- border-radius:3px;
- background:#1b2a30;
- border:1px solid #395059;
+.action.blue{
+    background:#176bb3;
 }
 
-.lamp.onL{
- background:#29e638;
- box-shadow:0 0 8px #29e638;
+.action.red{
+    background:#a72828;
 }
 
-.lamp.onY{
- background:#ffd21f;
- box-shadow:0 0 8px #ffd21f;
+/* ================= INDICADOR DE COBERTURA ================= */
+
+#coverageInfo{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+    z-index:25;
+    background:#071008dd;
+    border:1px solid #39463b;
+    border-radius:8px;
+    padding:8px 11px;
+    font-size:11px;
 }
 
-.lamp.onR{
- background:#ff3434;
- box-shadow:0 0 8px #ff3434;
+.coverageGreen{
+    color:#44ff6a;
 }
 
-.lbtext{
- text-align:center;
- font-size:9px;
- color:#b8c8cd;
-}
+/* ================= RESPONSIVO ================= */
 
-.lbtext b{
- color:#fff;
-}
-
-/* FERRAMENTAS */
-
-.tools{
- position:absolute;
- right:14px;
- top:145px;
- display:flex;
- flex-direction:column;
- gap:7px;
- z-index:6;
-}
-
-.tools button{
- width:44px;
- height:44px;
- background:#091a22ef;
- color:#fff;
- border:1px solid #36515a;
- border-radius:8px;
- font-weight:bold;
-}
-
-/* CONTROLES INFERIORES */
-
-.bottom{
- position:absolute;
- left:86px;
- right:14px;
- bottom:10px;
- display:flex;
- gap:8px;
- z-index:6;
-}
-
-.ctrl{
- background:#07131aea;
- border:1px solid #304e58;
- border-radius:9px;
- padding:8px 10px;
- min-width:145px;
-}
-
-.ctrl label{
- display:block;
- color:#aebec3;
- font-size:9px;
- margin-bottom:4px;
-}
-
-.ctrl input,
-.ctrl select{
- width:100%;
- padding:7px;
- background:#0c2028;
- color:#fff;
- border:1px solid #31515d;
- border-radius:6px;
-}
-
-.cover{
- display:flex;
- align-items:center;
- gap:8px;
- color:var(--green2);
-}
-
-.cover input{
- width:38px;
- height:20px;
- accent-color:var(--green);
-}
-
-/* MODAL */
-
-.modal{
- position:absolute;
- inset:0;
- background:#000b;
- z-index:30;
- display:none;
- align-items:center;
- justify-content:center;
-}
-
-.box{
- width:min(650px,90vw);
- max-height:85vh;
- overflow:auto;
- background:#09171e;
- border:1px solid #35545f;
- border-radius:12px;
- padding:18px;
-}
-
-.box h2{
- margin:0 0 12px;
-}
-
-.grid{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:9px;
-}
-
-.grid input,
-.grid select{
- width:100%;
- padding:9px;
- background:#0c2028;
- color:#fff;
- border:1px solid #31515d;
- border-radius:6px;
-}
-
-.list{
- margin-top:12px;
- border-top:1px solid #263f48;
-}
-
-.item{
- padding:9px 0;
- border-bottom:1px solid #263f48;
- display:flex;
- justify-content:space-between;
- align-items:center;
-}
-
-.toast{
- position:absolute;
- top:73px;
- left:50%;
- transform:translateX(-50%);
- z-index:20;
- background:#06151cef;
- border:1px solid var(--green);
- border-radius:18px;
- padding:8px 15px;
- display:none;
-}
-
-.badge{
- padding:2px 6px;
- border-radius:10px;
- background:#163027;
- color:#71ff69;
- font-size:9px;
-}
-
-@media(max-width:1000px){
-
- .top{
-  height:55px;
- }
-
- .logo{
-  font-size:16px;
-  min-width:170px;
- }
-
- .stat{
-  min-width:75px;
-  padding:4px 6px;
- }
-
- .stat b{
-  font-size:12px;
- }
-
- .side{
-  width:58px;
- }
-
- .field{
-  left:68px;
-  width:200px;
- }
-
- .bottom{
-  left:68px;
-  overflow-x:auto;
- }
-
- .lightbar{
-  top:7px;
- }
-
- .guide{
-  transform:scale(.85);
-  transform-origin:top right;
- }
+@media(max-height:500px){
+    #topbar{height:52px;min-height:52px}
+    #bottom{height:62px;min-height:62px}
+    .btn{height:48px;min-width:68px}
+    .logoCircle{width:34px;height:34px}
+    #infoPanel{top:5px}
+    #compass{top:5px}
 }
 </style>
 </head>
 
 <body>
 
-<div id="app">
+<div id="topbar">
 
-<header class="top">
+    <div class="logo">
+        <div class="logoCircle">🛰️</div>
+        <div class="logoText">
+            <b>PORTAL SAT GPS</b>
+            <small>AGRÍCOLA • PRECISÃO</small>
+        </div>
+    </div>
 
- <div class="logo">
-   Portal <span>Sat GPS</span>
-   <i class="sub">AGRÍCOLA PRO</i>
- </div>
+    <div class="status">
+        <div class="statusBox">
+            <small>GPS</small>
+            <b id="gpsStatus">OFF</b>
+        </div>
 
- <div class="stat">
-   <b id="gps">SEM GPS</b>
-   <small>POSIÇÃO</small>
- </div>
+        <div class="statusBox">
+            <small>HDOP</small>
+            <b id="hdop">--</b>
+        </div>
 
- <div class="stat">
-   <b id="sat">--</b>
-   <small>SATÉLITES</small>
- </div>
+        <div class="statusBox">
+            <small>VELOC.</small>
+            <b id="speed">0.0</b>
+        </div>
 
- <div class="stat">
-   <b id="spd">0,0</b>
-   <small>KM/H</small>
- </div>
+        <div class="statusBox">
+            <small>RUMO</small>
+            <b id="topHeading">0°</b>
+        </div>
+    </div>
+</div>
 
- <div class="stat">
-   <b id="ha">0,00</b>
-   <small>HECTARES COBERTOS</small>
- </div>
+<div id="main">
 
- <div class="stat">
-   <b id="km">0,00</b>
-   <small>KM PERCORRIDOS</small>
- </div>
+    <canvas id="map"></canvas>
 
- <div class="grow"></div>
+    <div class="grid"></div>
 
- <button class="btn" onclick="settings()">⚙</button>
+    <div class="watermark">
+        PORTAL SAT GPS
+    </div>
 
-</header>
+    <!-- PAINEL DE INFORMAÇÕES -->
+    <div id="infoPanel">
 
+        <div class="panelTitle">
+            <span>STATUS DA OPERAÇÃO</span>
+            <button class="close" onclick="closeElement('infoPanel')">×</button>
+        </div>
 
-<main class="main">
+        <div class="infoContent">
 
-<canvas id="field"></canvas>
+            <div class="infoRow">
+                <span>Talhão</span>
+                <b id="talhaoName">Sem talhão</b>
+            </div>
 
+            <div class="infoRow">
+                <span>Implemento</span>
+                <b id="implementoInfo">6.00 m</b>
+            </div>
+
+            <div class="infoRow">
+                <span>Linha atual</span>
+                <b id="lineNumber">0</b>
+            </div>
+
+            <div class="infoRow">
+                <span>Direção A-B</span>
+                <b id="abDirection">--</b>
+            </div>
+
+            <div class="infoRow">
+                <span>Cobertura</span>
+                <b class="coverageGreen" id="coveragePercent">0%</b>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- BARRA DE LUZ -->
+    <div id="lightbar">
+        <span class="light"></span>
+        <span class="light"></span>
+        <span class="light"></span>
+        <span class="light"></span>
+        <span class="light center"></span>
+        <span class="light"></span>
+        <span class="light"></span>
+        <span class="light"></span>
+        <span class="light"></span>
+    </div>
+
+    <!-- COMPASS -->
+    <div id="compass">
+        <div id="compassRose">N</div>
+        <div id="compassArrow"></div>
+        <div id="headingText">0°</div>
+    </div>
+
+    <!-- COBERTURA -->
+    <div id="coverageInfo">
+        Implemento:
+        <b class="coverageGreen" id="coverageWidth">6.00 m</b>
+        &nbsp; | &nbsp;
+        Cobertura:
+        <b class="coverageGreen" id="coverageArea">0.00 ha</b>
+    </div>
+
+    <!-- TRATOR -->
+    <div id="tractor">
+        <div class="wheel w3"></div>
+        <div class="wheel w4"></div>
+        <div class="wheel w1"></div>
+        <div class="wheel w2"></div>
+        <div class="tractorCab"></div>
+        <div class="tractorBody"></div>
+    </div>
+
+</div>
 
 <!-- MENU -->
+<div id="bottom">
 
-<nav class="side">
+    <button class="btn greenBtn" onclick="openModal('configModal')">
+        ⚙<br>CONFIG
+    </button>
 
- <button class="active">
-  <strong>⌂</strong>
-  Início
- </button>
+    <button class="btn blueBtn" onclick="openModal('talhaoModal')">
+        ▣<br>TALHÃO
+    </button>
 
- <button onclick="fields()">
-  <strong>▣</strong>
-  Talhões
- </button>
+    <button class="btn greenBtn" onclick="setA()">
+        A<br>MARCAR
+    </button>
 
- <button onclick="markA()">
-  <strong>A</strong>
-  Marcar A
- </button>
+    <button class="btn greenBtn" onclick="setB()">
+        B<br>MARCAR
+    </button>
 
- <button onclick="markB()">
-  <strong>B</strong>
-  Marcar B
- </button>
+    <button class="btn" onclick="openModal('linesModal')">
+        ║<br>LINHAS
+    </button>
 
- <button onclick="newBoundary()">
-  <strong>◇</strong>
-  Limite
- </button>
+    <button class="btn" onclick="startGPS()">
+        🛰<br>GPS
+    </button>
 
- <button onclick="settings()">
-  <strong>⚙</strong>
-  Config.
- </button>
-
-</nav>
-
-
-<!-- BARRA DE LUZ -->
-
-<div class="lightbar">
-
- <div class="lights" id="lights"></div>
-
- <div class="lbtext">
-   BARRA DE LUZ •
-   <b id="error">0,00 m</b> •
-   <span id="modeTxt">RETA A–B</span>
- </div>
+    <button class="btn redBtn" onclick="clearOperation()">
+        ⟳<br>LIMPAR
+    </button>
 
 </div>
 
+<!-- ================= CONFIGURAÇÃO ================= -->
 
-<!-- TALHÃO -->
+<div class="modal" id="configModal" style="display:none">
 
-<section class="card field">
+    <div class="modalHeader">
+        <span>CONFIGURAÇÃO DO IMPLEMENTO</span>
+        <button class="modalClose"
+                onclick="closeElement('configModal')">×</button>
+    </div>
 
- <div class="cardtitle">
-   TALHÃO
-   <span class="badge" id="fieldName">
-     NÃO SALVO
-   </span>
- </div>
+    <div class="modalBody">
 
- <div class="row">
-   <span class="muted">Área</span>
-   <b id="fieldArea">0,00 ha</b>
- </div>
+        <div class="field">
+            <label>Largura do implemento (metros)</label>
+            <input id="implementWidth"
+                   type="number"
+                   min="0.5"
+                   max="100"
+                   step="0.01"
+                   value="6">
+        </div>
 
- <div class="row">
-   <span class="muted">Cobertura</span>
-   <b class="green" id="pct">0%</b>
- </div>
+        <div class="field">
+            <label>Espaçamento entre passadas (metros)</label>
+            <input id="lineSpacing"
+                   type="number"
+                   min="0.5"
+                   max="100"
+                   step="0.01"
+                   value="6">
+        </div>
 
- <button
-  class="btn green"
-  style="width:100%"
-  onclick="fields()">
-  ▣ Criar / Salvar Talhão
- </button>
+        <div class="field">
+            <label>Offset lateral (metros)</label>
+            <input id="lateralOffset"
+                   type="number"
+                   step="0.01"
+                   value="0">
+        </div>
 
-</section>
+        <button class="action"
+                onclick="saveConfig()">
+            SALVAR CONFIGURAÇÃO
+        </button>
 
+        <button class="action blue"
+                onclick="enableCompass()">
+            ATIVAR BÚSSOLA DO APARELHO
+        </button>
 
-<!-- GUIAMENTO -->
-
-<section class="card guide">
-
- <div class="cardtitle">
-   <span style="color:#00eaff">A→B</span>
-   GUIAMENTO
- </div>
-
- <div class="row">
-   <span class="muted">Status</span>
-   <b id="ab">Aguardando A</b>
- </div>
-
- <div class="row">
-   <span class="muted">Desvio</span>
-   <b id="err">0,00 m</b>
- </div>
-
- <div class="row">
-   <span class="muted">Direção</span>
-   <b id="head">0°</b>
- </div>
-
- <div class="row">
-   <span class="muted">Passada</span>
-   <b id="pass">0</b>
- </div>
-
- <div style="display:flex;gap:6px;margin-top:7px">
-
-  <button
-   class="btn green"
-   onclick="markA()">
-   Marcar A
-  </button>
-
-  <button
-   class="btn green"
-   onclick="markB()">
-   Marcar B
-  </button>
-
-  <button
-   class="btn red"
-   onclick="resetAB()">
-   Reset
-  </button>
-
- </div>
-
-</section>
-
-
-<!-- FERRAMENTAS -->
-
-<div class="tools">
-
- <button onclick="threeD()">
-  3D
- </button>
-
- <button onclick="zoom(1.15)">
-  +
- </button>
-
- <button onclick="zoom(.87)">
-  −
- </button>
-
- <button onclick="center()">
-  ⌾
- </button>
-
- <button onclick="toggleFollow()">
-  ↗
- </button>
-
+    </div>
 </div>
 
+<!-- ================= TALHÃO ================= -->
 
-<!-- CONTROLES -->
+<div class="modal" id="talhaoModal" style="display:none">
 
-<div class="bottom">
+    <div class="modalHeader">
+        <span>LOTE / TALHÃO</span>
+        <button class="modalClose"
+                onclick="closeElement('talhaoModal')">×</button>
+    </div>
 
- <div class="ctrl">
+    <div class="modalBody">
 
-  <label>
-   LARGURA DO IMPLEMENTO (m)
-  </label>
+        <div class="field">
+            <label>Nome do talhão</label>
+            <input id="talhaoInput"
+                   placeholder="Ex.: Fazenda Portal Sat">
+        </div>
 
-  <input
-   id="width"
-   type="number"
-   value="12"
-   min=".5"
-   max="60"
-   step=".1"
-   onchange="saveCfg()">
+        <button class="action"
+                onclick="saveTalhao()">
+            SALVAR TALHÃO
+        </button>
 
- </div>
+        <button class="action blue"
+                onclick="loadTalhao()">
+            CARREGAR TALHÃO
+        </button>
 
+        <button class="action red"
+                onclick="deleteTalhao()">
+            APAGAR TALHÃO
+        </button>
 
- <div class="ctrl">
-
-  <label>
-   GUIAMENTO
-  </label>
-
-  <select
-   id="guideType"
-   onchange="saveCfg()">
-
-   <option>Reta A–B</option>
-   <option>Curva</option>
-   <option>Pivô</option>
-
-  </select>
-
- </div>
-
-
- <div class="ctrl">
-
-  <label>
-   COBERTURA
-  </label>
-
-  <div class="cover">
-
-   <input
-    id="cov"
-    type="checkbox"
-    checked
-    onchange="saveCfg()">
-
-   ATIVA
-
-  </div>
-
- </div>
-
-
- <div class="ctrl">
-
-  <label>
-   ACOMPANHAR TRATOR
-  </label>
-
-  <div class="cover">
-
-   <input
-    id="follow"
-    type="checkbox"
-    checked>
-
-   ATIVO
-
-  </div>
-
- </div>
-
-
- <div class="ctrl">
-
-  <label>
-   ANTENA EXTERNA
-  </label>
-
-  <button
-   class="btn"
-   onclick="serial()">
-
-   USB / OTG / NMEA
-
-  </button>
-
- </div>
-
+    </div>
 </div>
 
+<!-- ================= LINHAS ================= -->
 
-<div class="toast" id="toast"></div>
+<div class="modal" id="linesModal" style="display:none">
 
+    <div class="modalHeader">
+        <span>GUIAMENTO A → B</span>
+        <button class="modalClose"
+                onclick="closeElement('linesModal')">×</button>
+    </div>
 
-<!-- MODAL -->
+    <div class="modalBody">
 
-<div class="modal" id="modal">
+        <p style="font-size:13px;color:#b6c1b8">
+            O ponto A é marcado na posição atual.
+            O ponto B usa o rumo da bússola/GPS do trator.
+            As linhas seguintes são geradas paralelas.
+        </p>
 
- <div class="box" id="box"></div>
+        <div class="infoRow">
+            <span>Direção A → B</span>
+            <b id="modalDirection">--</b>
+        </div>
 
+        <div class="infoRow">
+            <span>Espaçamento</span>
+            <b id="modalSpacing">6.00 m</b>
+        </div>
+
+        <button class="action"
+                onclick="setA();closeElement('linesModal')">
+            MARCAR PONTO A
+        </button>
+
+        <button class="action"
+                onclick="setB();closeElement('linesModal')">
+            MARCAR PONTO B
+        </button>
+
+        <button class="action blue"
+                onclick="generateParallelLines()">
+            GERAR LINHAS PARALELAS
+        </button>
+
+    </div>
 </div>
-
-</main>
-
-</div>
-
 
 <script>
 
-/* =====================================================
-   PORTAL SAT GPS AGRÍCOLA PRO
-   MOTOR PRINCIPAL
-===================================================== */
+/* =========================================================
+   PORTAL SAT GPS AGRÍCOLA
+   ========================================================= */
 
-const $ = x => document.getElementById(x);
+/* ---------- ELEMENTOS ---------- */
 
-const canvas = $("field");
-
+const canvas = document.getElementById("map");
 const ctx = canvas.getContext("2d");
 
 let W = 0;
 let H = 0;
-let dpr = 1;
 
-let view3d = true;
-let zoomLevel = 1;
-let follow = true;
+/* ---------- CONFIG ---------- */
 
-
-/* POSIÇÃO DO TRATOR */
-
-let pos = {
- x:0,
- y:0,
- h:0,
- speed:0
+let config = {
+    implementWidth: 6,
+    spacing: 6,
+    lateralOffset: 0
 };
 
+/* ---------- GPS ---------- */
 
-/* ORIGEM GPS */
+let gps = {
+    active:false,
+    lat:null,
+    lon:null,
+    speed:0,
+    accuracy:null,
+    hdop:null
+};
 
-let origin = null;
+/* ---------- TRATOR ---------- */
 
+let tractor = {
+    x:0,
+    y:0,
+    heading:0,
+    targetHeading:0
+};
 
-/* HISTÓRICO */
+/* ---------- A/B ---------- */
 
-let track = [];
+let pointA = null;
+let pointB = null;
+let abHeading = null;
 
+/* ---------- LINHAS ---------- */
 
-/* COBERTURA */
+let guidanceLines = [];
+let currentLine = 0;
 
-let swaths = [];
+/* ---------- COBERTURA ---------- */
 
+let coverage = [];
+let coverageArea = 0;
 
-/* LINHA A-B */
+/* ---------- ESCALA ---------- */
 
-let A = null;
-let B = null;
+let pixelsPerMeter = 12;
 
+/* ---------- SIMULAÇÃO ---------- */
 
-/* LIMITE DO TALHÃO */
+let simulation = false;
+let simDistance = 0;
 
-let boundary = [];
-
-
-/* TALHÕES */
-
-let fieldsDB =
- JSON.parse(
-  localStorage.getItem("psgps_fields") || "{}"
- );
-
-let current =
- localStorage.getItem("psgps_current") || "";
-
-
-/* CONFIGURAÇÃO */
-
-let cfg =
- JSON.parse(
-  localStorage.getItem("psgps_cfg") || "{}"
- );
-
-
-$("width").value =
- cfg.width || 12;
-
-$("cov").checked =
- cfg.cov !== false;
-
-$("guideType").value =
- cfg.guide || "Reta A–B";
-
-
-/* =====================================================
-   TELA
-===================================================== */
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
 
 function resize(){
 
- dpr =
-  window.devicePixelRatio || 1;
+    W = canvas.width = canvas.clientWidth * devicePixelRatio;
+    H = canvas.height = canvas.clientHeight * devicePixelRatio;
 
- W = canvas.clientWidth;
- H = canvas.clientHeight;
+    ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
 
- canvas.width =
-  W * dpr;
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
 
- canvas.height =
-  H * dpr;
-
- ctx.setTransform(
-  dpr,0,0,dpr,0,0
- );
-
- draw();
+    draw();
 }
 
-window.addEventListener(
- "resize",
- resize
-);
+window.addEventListener("resize",resize);
 
+resize();
 
-/* =====================================================
-   MENSAGEM
-===================================================== */
+/* =========================================================
+   JANELAS
+   ========================================================= */
 
-function toast(text){
+function openModal(id){
 
- $("toast").textContent =
-  text;
-
- $("toast").style.display =
-  "block";
-
- clearTimeout(toast.timer);
-
- toast.timer =
-  setTimeout(
-   () =>
-    $("toast").style.display =
-     "none",
-   2200
-  );
+    document.getElementById(id).style.display = "block";
 }
 
+function closeElement(id){
 
-/* =====================================================
-   CONFIGURAÇÃO
-===================================================== */
+    const el = document.getElementById(id);
 
-function saveCfg(){
-
- cfg = {
-
-  width:
-   Number($("width").value),
-
-  cov:
-   $("cov").checked,
-
-  guide:
-   $("guideType").value
-
- };
-
- localStorage.setItem(
-  "psgps_cfg",
-  JSON.stringify(cfg)
- );
-
- draw();
+    if(el){
+        el.style.display = "none";
+    }
 }
 
+/* =========================================================
+   CONFIG
+   ========================================================= */
 
-/* =====================================================
-   ZOOM
-===================================================== */
+function saveConfig(){
 
-function zoom(value){
+    let width =
+        parseFloat(document.getElementById("implementWidth").value);
 
- zoomLevel =
-  Math.max(
-   .35,
-   Math.min(
-    5,
-    zoomLevel * value
-   )
-  );
+    let spacing =
+        parseFloat(document.getElementById("lineSpacing").value);
 
- draw();
+    let offset =
+        parseFloat(document.getElementById("lateralOffset").value);
+
+    if(!isFinite(width) || width <= 0){
+        alert("Largura do implemento inválida.");
+        return;
+    }
+
+    if(!isFinite(spacing) || spacing <= 0){
+        alert("Espaçamento inválido.");
+        return;
+    }
+
+    config.implementWidth = width;
+    config.spacing = spacing;
+    config.lateralOffset = isFinite(offset) ? offset : 0;
+
+    document.getElementById("implementoInfo").textContent =
+        width.toFixed(2) + " m";
+
+    document.getElementById("coverageWidth").textContent =
+        width.toFixed(2) + " m";
+
+    document.getElementById("modalSpacing").textContent =
+        spacing.toFixed(2) + " m";
+
+    localStorage.setItem(
+        "portalSatConfig",
+        JSON.stringify(config)
+    );
+
+    closeElement("configModal");
+
+    draw();
 }
 
+function loadConfig(){
 
-/* =====================================================
-   CENTRALIZAR
-===================================================== */
+    try{
 
-function center(){
+        const data =
+            JSON.parse(localStorage.getItem("portalSatConfig"));
 
- pos.x = 0;
- pos.y = 0;
+        if(data){
 
- draw();
+            config = Object.assign(config,data);
+
+            document.getElementById("implementWidth").value =
+                config.implementWidth;
+
+            document.getElementById("lineSpacing").value =
+                config.spacing;
+
+            document.getElementById("lateralOffset").value =
+                config.lateralOffset;
+
+            document.getElementById("implementoInfo").textContent =
+                config.implementWidth.toFixed(2)+" m";
+
+            document.getElementById("coverageWidth").textContent =
+                config.implementWidth.toFixed(2)+" m";
+
+            document.getElementById("modalSpacing").textContent =
+                config.spacing.toFixed(2)+" m";
+        }
+
+    }catch(e){}
 }
 
+loadConfig();
 
-/* =====================================================
-   2D / 3D
-===================================================== */
+/* =========================================================
+   BÚSSOLA
+   ========================================================= */
 
-function threeD(){
+function normalizeHeading(h){
 
- view3d =
-  !view3d;
+    h = Number(h);
 
- draw();
+    if(!isFinite(h)) return 0;
+
+    h %= 360;
+
+    if(h < 0) h += 360;
+
+    return h;
 }
 
+function updateHeading(h){
 
-/* =====================================================
-   ACOMPANHAR
-===================================================== */
+    tractor.heading = normalizeHeading(h);
 
-function toggleFollow(){
+    document.getElementById("topHeading").textContent =
+        Math.round(tractor.heading)+"°";
 
- follow =
-  !follow;
+    document.getElementById("headingText").textContent =
+        Math.round(tractor.heading)+"°";
 
- $("follow").checked =
-  follow;
+    document.getElementById("compassArrow").style.transform =
+        "rotate("+tractor.heading+"deg)";
 
- toast(
-  follow
-   ? "Acompanhamento ativo"
-   : "Acompanhamento pausado"
- );
+    document.getElementById("abDirection").textContent =
+        Math.round(tractor.heading)+"°";
+
+    document.getElementById("modalDirection").textContent =
+        Math.round(tractor.heading)+"°";
+
+    updateLightbar();
 }
 
+function enableCompass(){
 
-/* =====================================================
-   PROJEÇÃO DO TERRENO
-===================================================== */
+    if(
+        typeof DeviceOrientationEvent !== "undefined" &&
+        typeof DeviceOrientationEvent.requestPermission === "function"
+    ){
 
-function world(x,y){
+        DeviceOrientationEvent.requestPermission()
+        .then(permission => {
 
- let rx =
-  x - pos.x;
+            if(permission === "granted"){
+                window.addEventListener(
+                    "deviceorientationabsolute",
+                    orientationHandler,
+                    true
+                );
+            }
 
- let ry =
-  y - pos.y;
+        })
+        .catch(()=>{});
 
+    }else{
 
- if(!view3d){
+        window.addEventListener(
+            "deviceorientationabsolute",
+            orientationHandler,
+            true
+        );
 
-  return {
+        window.addEventListener(
+            "deviceorientation",
+            orientationHandler,
+            true
+        );
+    }
+}
 
-   x:
-    W/2 +
-    rx * zoomLevel,
+function orientationHandler(event){
 
-   y:
-    H/2 -
-    ry * zoomLevel
+    let heading = null;
 
-  };
+    if(event.webkitCompassHeading != null){
 
- }
+        heading = event.webkitCompassHeading;
 
+    }else if(event.alpha != null){
 
- /*
-   PROJEÇÃO 3D:
+        heading = 360 - event.alpha;
+    }
 
-   A linha A-B,
-   cobertura e trator
-   usam exatamente o
-   mesmo plano.
- */
+    if(heading != null){
 
- let depth = ry;
+        updateHeading(heading);
+    }
+}
 
- let perspective =
-  1 /
-  (
-   1 +
-   Math.max(
-    -150,
-    depth
-   ) * .0018
-  );
+/* =========================================================
+   GPS
+   ========================================================= */
 
- return {
+function startGPS(){
 
-  x:
-   W/2 +
-   rx *
-   zoomLevel *
-   perspective,
+    if(!navigator.geolocation){
 
-  y:
-   H*.52 -
-   depth *
-   zoomLevel *
-   .34
+        alert("Este aparelho/navegador não oferece GPS.");
+        return;
+    }
 
- };
+    gps.active = true;
+
+    document.getElementById("gpsStatus").textContent = "BUSCANDO";
+
+    navigator.geolocation.watchPosition(
+
+        position => {
+
+            const c = position.coords;
+
+            gps.lat = c.latitude;
+            gps.lon = c.longitude;
+            gps.speed = c.speed || 0;
+            gps.accuracy = c.accuracy;
+
+            if(c.heading != null &&
+               isFinite(c.heading) &&
+               c.heading >= 0){
+
+                updateHeading(c.heading);
+            }
+
+            gps.hdop =
+                c.accuracy ?
+                (c.accuracy / 1.5) :
+                null;
+
+            document.getElementById("gpsStatus").textContent =
+                "FIX";
+
+            document.getElementById("speed").textContent =
+                ((gps.speed || 0) * 3.6).toFixed(1);
+
+            document.getElementById("hdop").textContent =
+                gps.hdop ?
+                gps.hdop.toFixed(1) :
+                "--";
+
+            /* A posição GPS passa a movimentar o trator */
+
+            if(pointA === null){
+
+                tractor.x = W / 2;
+                tractor.y = H / 2;
+            }
+
+            draw();
+
+        },
+
+        error => {
+
+            document.getElementById("gpsStatus").textContent =
+                "SEM SINAL";
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            maximumAge:100,
+            timeout:5000
+        }
+    );
+
+    /*
+       Se não houver GPS, entra em simulação para
+       permitir testar o sistema.
+    */
+
+    simulation = true;
+}
+
+/* =========================================================
+   MARCAR A
+   ========================================================= */
+
+function setA(){
+
+    pointA = {
+        x:tractor.x,
+        y:tractor.y,
+        heading:tractor.heading
+    };
+
+    pointB = null;
+    guidanceLines = [];
+    currentLine = 0;
+
+    abHeading = tractor.heading;
+
+    document.getElementById("abDirection").textContent =
+        Math.round(abHeading)+"°";
+
+    document.getElementById("modalDirection").textContent =
+        Math.round(abHeading)+"°";
+
+    draw();
+}
+
+/* =========================================================
+   MARCAR B
+   ========================================================= */
+
+function setB(){
+
+    if(!pointA){
+
+        alert("Primeiro marque o ponto A.");
+        return;
+    }
+
+    /*
+       O B é criado na direção que o trator/GPS/bússola
+       está apontando.
+    */
+
+    abHeading = tractor.heading;
+
+    const distance = 100;
+
+    pointB = {
+        x:
+          pointA.x +
+          Math.sin(degToRad(abHeading))*distance,
+
+        y:
+          pointA.y -
+          Math.cos(degToRad(abHeading))*distance
+    };
+
+    document.getElementById("abDirection").textContent =
+        Math.round(abHeading)+"°";
+
+    document.getElementById("modalDirection").textContent =
+        Math.round(abHeading)+"°";
+
+    generateParallelLines();
+
+    draw();
+}
+
+/* =========================================================
+   GERAR PARALELAS
+   ========================================================= */
+
+function generateParallelLines(){
+
+    if(!pointA){
+
+        alert("Marque o ponto A primeiro.");
+        return;
+    }
+
+    if(abHeading === null){
+
+        abHeading = tractor.heading;
+    }
+
+    guidanceLines = [];
+
+    const spacingPixels =
+        config.spacing * pixelsPerMeter;
+
+    /*
+       Vetor da direção A-B
+    */
+
+    const dx = Math.sin(degToRad(abHeading));
+    const dy = -Math.cos(degToRad(abHeading));
+
+    /*
+       Vetor perpendicular
+    */
+
+    const px = Math.cos(degToRad(abHeading));
+    const py = Math.sin(degToRad(abHeading));
+
+    /*
+       Geramos muitas linhas para os dois lados.
+    */
+
+    for(let i=-40;i<=40;i++){
+
+        const offset =
+            i * spacingPixels +
+            config.lateralOffset * pixelsPerMeter;
+
+        const cx =
+            pointA.x + px * offset;
+
+        const cy =
+            pointA.y + py * offset;
+
+        const length = 3000;
+
+        guidanceLines.push({
+
+            index:i,
+
+            x1:cx-dx*length,
+            y1:cy-dy*length,
+
+            x2:cx+dx*length,
+            y2:cy+dy*length
+        });
+    }
+
+    currentLine = 40;
+
+    updateLineNumber();
+
+    draw();
+}
+
+/* =========================================================
+   IDENTIFICAR LINHA MAIS PRÓXIMA
+   ========================================================= */
+
+function updateCurrentLine(){
+
+    if(guidanceLines.length === 0) return;
+
+    let best = Infinity;
+    let bestIndex = 0;
+
+    for(let i=0;i<guidanceLines.length;i++){
+
+        const l = guidanceLines[i];
+
+        const d =
+            pointLineDistance(
+                tractor.x,
+                tractor.y,
+                l.x1,l.y1,
+                l.x2,l.y2
+            );
+
+        if(d < best){
+
+            best = d;
+            bestIndex = i;
+        }
+    }
+
+    currentLine = bestIndex;
+
+    updateLineNumber();
+}
+
+function updateLineNumber(){
+
+    if(guidanceLines.length === 0){
+
+        document.getElementById("lineNumber").textContent = "0";
+        return;
+    }
+
+    const line =
+        guidanceLines[currentLine];
+
+    document.getElementById("lineNumber").textContent =
+        line ? line.index : "0";
 
 }
 
+/* =========================================================
+   DISTÂNCIA PONTO-LINHA
+   ========================================================= */
 
-/* =====================================================
-   DESENHAR
-===================================================== */
+function pointLineDistance(px,py,x1,y1,x2,y2){
+
+    const A = px-x1;
+    const B = py-y1;
+    const C = x2-x1;
+    const D = y2-y1;
+
+    const dot = A*C+B*D;
+    const len = C*C+D*D;
+
+    let param = -1;
+
+    if(len !== 0){
+        param = dot/len;
+    }
+
+    let xx,yy;
+
+    if(param < 0){
+
+        xx=x1;
+        yy=y1;
+
+    }else if(param > 1){
+
+        xx=x2;
+        yy=y2;
+
+    }else{
+
+        xx=x1+param*C;
+        yy=y1+param*D;
+    }
+
+    const dx=px-xx;
+    const dy=py-yy;
+
+    return Math.sqrt(dx*dx+dy*dy);
+}
+
+/* =========================================================
+   COBERTURA
+   ========================================================= */
+
+function addCoverage(){
+
+    if(!gps.active && !simulation) return;
+
+    const width =
+        config.implementWidth * pixelsPerMeter;
+
+    /*
+       Área atrás do implemento.
+    */
+
+    const rad =
+        degToRad(tractor.heading);
+
+    const backX =
+        tractor.x -
+        Math.sin(rad)*18;
+
+    const backY =
+        tractor.y +
+        Math.cos(rad)*18;
+
+    coverage.push({
+
+        x:backX,
+        y:backY,
+        heading:tractor.heading,
+        width:width,
+        length:Math.max(
+            8,
+            (gps.speed*3.6)*0.35
+        )
+    });
+
+    if(coverage.length > 4000){
+        coverage.shift();
+    }
+
+    /*
+       Cálculo aproximado da área trabalhada.
+    */
+
+    const widthM = config.implementWidth;
+
+    let metersPerSample =
+        Math.max(
+            0.05,
+            (gps.speed || 2) * 0.1
+        );
+
+    coverageArea +=
+        widthM * metersPerSample / 10000;
+
+    document.getElementById("coverageArea").textContent =
+        coverageArea.toFixed(3)+" ha";
+
+    document.getElementById("coveragePercent").textContent =
+        Math.min(100,Math.round(
+            coverage.length/30
+        ))+"%";
+}
+
+/* =========================================================
+   BARRA DE LUZ
+   ========================================================= */
+
+function updateLightbar(){
+
+    const lights =
+        document.querySelectorAll(".light");
+
+    lights.forEach(x =>
+        x.classList.remove("on")
+    );
+
+    if(guidanceLines.length === 0) return;
+
+    const line =
+        guidanceLines[currentLine];
+
+    if(!line) return;
+
+    const distance =
+        pointLineDistance(
+            tractor.x,
+            tractor.y,
+            line.x1,
+            line.y1,
+            line.x2,
+            line.y2
+        );
+
+    const offset =
+        distance/pixelsPerMeter;
+
+    const max =
+        Math.min(
+            4,
+            Math.round(
+                offset/(config.spacing/4)
+            )
+        );
+
+    if(offset < 0.15){
+
+        lights[4].classList.add("on");
+
+    }else{
+
+        const side =
+            getSignedLineDistance(
+                tractor.x,
+                tractor.y,
+                line
+            );
+
+        if(side < 0){
+
+            for(let i=0;i<max;i++){
+
+                lights[4-i].classList.add("on");
+            }
+
+        }else{
+
+            for(let i=0;i<max;i++){
+
+                lights[4+i].classList.add("on");
+            }
+        }
+    }
+}
+
+function getSignedLineDistance(px,py,line){
+
+    return (
+        (line.x2-line.x1)*(py-line.y1) -
+        (line.y2-line.y1)*(px-line.x1)
+    );
+}
+
+/* =========================================================
+   SIMULAÇÃO DO TRATOR
+   ========================================================= */
+
+function simulationLoop(){
+
+    /*
+       O trator anda automaticamente em linha
+       para testar cobertura e paralelas.
+    */
+
+    if(simulation){
+
+        const velocity =
+            0.35;
+
+        tractor.x +=
+            Math.sin(degToRad(tractor.heading)) *
+            velocity;
+
+        tractor.y -=
+            Math.cos(degToRad(tractor.heading)) *
+            velocity;
+
+        /*
+           Mantém o trator dentro da tela
+        */
+
+        if(tractor.x < 80) tractor.x=W-80;
+        if(tractor.x > W-80) tractor.x=80;
+
+        if(tractor.y < 100) tractor.y=H-100;
+        if(tractor.y > H-100) tractor.y=100;
+
+        addCoverage();
+        updateCurrentLine();
+        draw();
+    }
+
+    requestAnimationFrame(simulationLoop);
+}
+
+simulationLoop();
+
+/* =========================================================
+   DESENHO
+   ========================================================= */
 
 function draw(){
 
- if(!W)
-  return;
+    ctx.clearRect(0,0,W,H);
 
+    drawField();
 
- ctx.clearRect(
-  0,
-  0,
-  W,
-  H
- );
+    drawCoverage();
 
+    drawGuidanceLines();
 
- /* FUNDO */
+    drawAB();
 
- let gradient =
-  ctx.createLinearGradient(
-   0,
-   0,
-   0,
-   H
-  );
+    drawVehicleMarker();
+}
 
- gradient.addColorStop(
-  0,
-  "#183d35"
- );
+/* =========================================================
+   CAMPO
+   ========================================================= */
 
- gradient.addColorStop(
-  .4,
-  "#6b713d"
- );
+function drawField(){
 
- gradient.addColorStop(
-  1,
-  "#513c28"
- );
+    ctx.save();
 
- ctx.fillStyle =
-  gradient;
+    /*
+       fundo agrícola
+    */
 
- ctx.fillRect(
-  0,
-  0,
-  W,
-  H
- );
+    const gradient =
+        ctx.createRadialGradient(
+            W/2,H/2,20,
+            W/2,H/2,
+            Math.max(W,H)
+        );
 
+    gradient.addColorStop(0,"#1c3b20");
+    gradient.addColorStop(1,"#071008");
 
- /* LINHAS DO TERRENO */
+    ctx.fillStyle=gradient;
 
- ctx.globalAlpha = .2;
+    ctx.fillRect(0,0,W,H);
 
- ctx.strokeStyle =
-  "#e3ca8d";
+    /*
+       textura
+    */
 
- ctx.lineWidth = 1;
+    ctx.globalAlpha=.12;
 
- for(
-  let i=-45;
-  i<=45;
-  i+=3
- ){
+    ctx.strokeStyle="#8ab48d";
 
-  let a =
-   world(
-    i*10,
-    -600
-   );
+    for(let x=0;x<W;x+=40){
 
-  let b =
-   world(
-    i*10,
-    600
-   );
+        ctx.beginPath();
+        ctx.moveTo(x,0);
+        ctx.lineTo(x,H);
+        ctx.stroke();
+    }
 
-  ctx.beginPath();
+    for(let y=0;y<H;y+=40){
 
-  ctx.moveTo(
-   a.x,
-   a.y
-  );
+        ctx.beginPath();
+        ctx.moveTo(0,y);
+        ctx.lineTo(W,y);
+        ctx.stroke();
+    }
 
-  ctx.lineTo(
-   b.x,
-   b.y
-  );
+    ctx.restore();
+}
 
-  ctx.stroke();
+/* =========================================================
+   COBERTURA VISUAL
+   ========================================================= */
 
- }
+function drawCoverage(){
 
- ctx.globalAlpha = 1;
+    ctx.save();
 
+    for(const c of coverage){
 
- /* =================================================
-    COBERTURA VERDE
- ================================================= */
+        ctx.save();
 
- if(
-  $("cov").checked
- ){
+        ctx.translate(c.x,c.y);
 
-  swaths.forEach(
-   s => {
+        ctx.rotate(
+            degToRad(c.heading)
+        );
 
-    let half =
-     s.w / 2;
+        ctx.fillStyle =
+            "rgba(39,210,74,.30)";
 
-    let nx =
-     Math.cos(s.h);
+        ctx.fillRect(
+            -c.width/2,
+            -c.length/2,
+            c.width,
+            c.length
+        );
 
-    let ny =
-     Math.sin(s.h);
+        ctx.restore();
+    }
 
-    let px =
-     -ny * half;
+    ctx.restore();
+}
 
-    let py =
-     nx * half;
+/* =========================================================
+   LINHAS
+   ========================================================= */
 
-    let length =
-     Math.max(
-      1,
-      s.w * .9
-     );
+function drawGuidanceLines(){
 
-    let p1 =
-     world(
-      s.x + px,
-      s.y + py
-     );
+    if(guidanceLines.length===0) return;
 
-    let p2 =
-     world(
-      s.x - px,
-      s.y - py
-     );
+    ctx.save();
 
-    let p3 =
-     world(
-      s.x - px +
-      nx * length,
-      s.y - py +
-      ny * length
-     );
+    for(let i=0;i<guidanceLines.length;i++){
 
-    let p4 =
-     world(
-      s.x + px +
-      nx * length,
-      s.y + py +
-      ny * length
-     );
+        const l = guidanceLines[i];
 
+        const active =
+            i === currentLine;
 
-    ctx.fillStyle =
-     "rgba(45,240,55,.36)";
+        ctx.beginPath();
+
+        ctx.moveTo(l.x1,l.y1);
+        ctx.lineTo(l.x2,l.y2);
+
+        ctx.lineWidth =
+            active ? 3 : 1;
+
+        ctx.strokeStyle =
+            active ?
+            "#ffffff" :
+            "rgba(72,255,106,.50)";
+
+        ctx.setLineDash(
+            active ? [] : [10,8]
+        );
+
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+/* =========================================================
+   A / B
+   ========================================================= */
+
+function drawAB(){
+
+    ctx.save();
+
+    if(pointA){
+
+        drawPoint(
+            pointA.x,
+            pointA.y,
+            "#35ff63",
+            "A"
+        );
+    }
+
+    if(pointB){
+
+        drawPoint(
+            pointB.x,
+            pointB.y,
+            "#ff4747",
+            "B"
+        );
+    }
+
+    if(pointA && pointB){
+
+        ctx.strokeStyle="#ffffff";
+        ctx.lineWidth=2;
+
+        ctx.beginPath();
+
+        ctx.moveTo(pointA.x,pointA.y);
+        ctx.lineTo(pointB.x,pointB.y);
+
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
+function drawPoint(x,y,color,label){
+
+    ctx.fillStyle=color;
 
     ctx.beginPath();
-
-    ctx.moveTo(
-     p1.x,
-     p1.y
-    );
-
-    ctx.lineTo(
-     p2.x,
-     p2.y
-    );
-
-    ctx.lineTo(
-     p3.x,
-     p3.y
-    );
-
-    ctx.lineTo(
-     p4.x,
-     p4.y
-    );
-
-    ctx.closePath();
-
+    ctx.arc(x,y,7,0,Math.PI*2);
     ctx.fill();
 
-   }
-  );
-
- }
-
-
- /* =================================================
-    LIMITE DO TALHÃO
- ================================================= */
-
- if(
-  boundary.length > 1
- ){
-
-  ctx.strokeStyle =
-   "#ffd52e";
-
-  ctx.lineWidth = 3;
-
-  ctx.beginPath();
-
-  boundary.forEach(
-   (p,i) => {
-
-    let q =
-     world(
-      p.x,
-      p.y
-     );
-
-    if(i)
-     ctx.lineTo(
-      q.x,
-      q.y
-     );
-    else
-     ctx.moveTo(
-      q.x,
-      q.y
-     );
-
-   }
-  );
-
-  ctx.stroke();
-
- }
-
-
- /* =================================================
-    LINHA A-B 3D
- ================================================= */
-
- if(A && B){
-
-  let dx =
-   B.x - A.x;
-
-  let dy =
-   B.y - A.y;
-
-  let length =
-   Math.hypot(
-    dx,
-    dy
-   ) || 1;
-
-  let nx =
-   -dy / length;
-
-  let ny =
-   dx / length;
-
-
-  let p =
-   world(
-    A.x - nx*700,
-    A.y - ny*700
-   );
-
-  let q =
-   world(
-    A.x + nx*700,
-    A.y + ny*700
-   );
-
-
-  ctx.strokeStyle =
-   "#00eaff";
-
-  ctx.lineWidth = 3;
-
-  ctx.beginPath();
-
-  ctx.moveTo(
-   p.x,
-   p.y
-  );
-
-  ctx.lineTo(
-   q.x,
-   q.y
-  );
-
-  ctx.stroke();
-
-
-  /* PONTO A */
-
-  let a =
-   world(
-    A.x,
-    A.y
-   );
-
-  ctx.fillStyle =
-   "#f22";
-
-  ctx.beginPath();
-
-  ctx.arc(
-   a.x,
-   a.y,
-   13,
-   0,
-   Math.PI*2
-  );
-
-  ctx.fill();
-
-  ctx.fillStyle =
-   "#fff";
-
-  ctx.font =
-   "bold 12px Arial";
-
-  ctx.textAlign =
-   "center";
-
-  ctx.fillText(
-   "A",
-   a.x,
-   a.y+4
-  );
-
-
-  /* PONTO B */
-
-  let b =
-   world(
-    B.x,
-    B.y
-   );
-
-  ctx.fillStyle =
-   "#176dff";
-
-  ctx.beginPath();
-
-  ctx.arc(
-   b.x,
-   b.y,
-   13,
-   0,
-   Math.PI*2
-  );
-
-  ctx.fill();
-
-  ctx.fillStyle =
-   "#fff";
-
-  ctx.fillText(
-   "B",
-   b.x,
-   b.y+4
-  );
-
- }
-
-
- /* =================================================
-    RASTRO
- ================================================= */
-
- if(
-  track.length > 1
- ){
-
-  ctx.strokeStyle =
-   "#8cff76";
-
-  ctx.lineWidth = 2;
-
-  ctx.beginPath();
-
-  track.forEach(
-   (p,i) => {
-
-    let q =
-     world(
-      p.x,
-      p.y
-     );
-
-    if(i)
-     ctx.lineTo(
-      q.x,
-      q.y
-     );
-    else
-     ctx.moveTo(
-      q.x,
-      q.y
-     );
-
-   }
-  );
-
-  ctx.stroke();
-
- }
-
-
- /* =================================================
-    TRATOR
- ================================================= */
-
- let tractor =
-  world(
-   pos.x,
-   pos.y
-  );
-
- ctx.save();
-
- ctx.translate(
-  tractor.x,
-  tractor.y
- );
-
- ctx.rotate(
-  -pos.h
- );
-
- ctx.fillStyle =
-  "#111";
-
- ctx.fillRect(
-  -18,
-  -20,
-  7,
-  15
- );
-
- ctx.fillRect(
-  11,
-  -20,
-  7,
-  15
- );
-
- ctx.fillRect(
-  -18,
-  6,
-  7,
-  15
- );
-
- ctx.fillRect(
-  11,
-  6,
-  7,
-  15
- );
-
- ctx.fillStyle =
-  "#31e83b";
-
- ctx.fillRect(
-  -12,
-  -17,
-  24,
-  31
- );
-
- ctx.fillStyle =
-  "#17252b";
-
- ctx.fillRect(
-  -9,
-  -12,
-  18,
-  10
- );
-
- ctx.restore();
-
-
- drawLightbar();
-
+    ctx.fillStyle="#fff";
+    ctx.font="bold 14px Arial";
+    ctx.fillText(label,x+10,y+5);
 }
 
+/* =========================================================
+   TRATOR / MARCADOR
+   ========================================================= */
 
-/* =====================================================
-   ERRO DA LINHA
-===================================================== */
+function drawVehicleMarker(){
 
-function calcError(){
+    /*
+       o elemento HTML do trator acompanha
+       a posição lógica do plano
+    */
 
- if(
-  !A ||
-  !B
- )
-  return 0;
+    const el =
+        document.getElementById("tractor");
 
- let dx =
-  B.x-A.x;
+    el.style.left =
+        tractor.x+"px";
 
- let dy =
-  B.y-A.y;
+    el.style.top =
+        tractor.y+"px";
 
- let L =
-  Math.hypot(
-   dx,
-   dy
-  ) || 1;
-
- return (
-  (pos.x-A.x)*(-dy) +
-  (pos.y-A.y)*dx
- ) / L;
-
+    el.style.transform =
+        "translate(-50%,-50%) rotate("+
+        tractor.heading+
+        "deg)";
 }
 
+/* =========================================================
+   TALHÃO
+   ========================================================= */
 
-/* =====================================================
-   BARRA DE LUZ
-===================================================== */
+function saveTalhao(){
 
-function drawLightbar(){
+    const name =
+        document.getElementById("talhaoInput").value.trim();
 
- let count = 15;
+    if(!name){
 
- let html = "";
+        alert("Digite o nome do talhão.");
+        return;
+    }
 
- let error =
-  calcError();
+    const data = {
 
+        name:name,
 
- let active =
-  Math.max(
-   -7,
-   Math.min(
-    7,
-    Math.round(error)
-   )
-  );
+        pointA:pointA,
 
+        pointB:pointB,
 
- for(
-  let i=-7;
-  i<=7;
-  i++
- ){
+        lines:guidanceLines,
 
-  let cls = "";
+        coverage:coverage,
 
+        config:config
+    };
 
-  if(
-   i === active
-  ){
+    localStorage.setItem(
+        "portalSatTalhao",
+        JSON.stringify(data)
+    );
 
-   if(
-    Math.abs(error) < .25
-   )
-    cls =
-     "onL";
+    document.getElementById("talhaoName").textContent =
+        name;
 
-   else if(
-    Math.abs(error) < 1
-   )
-    cls =
-     "onY";
-
-   else
-    cls =
-     "onR";
-
-  }
-
-
-  html +=
-   '<span class="lamp '+
-   cls+
-   '"></span>';
-
- }
-
-
- $("lights").innerHTML =
-  html;
-
- $("error").textContent =
-  error.toFixed(2) +
-  " m";
-
- $("err").textContent =
-  error.toFixed(2) +
-  " m";
-
+    alert("Talhão salvo.");
 }
 
+function loadTalhao(){
 
-/* =====================================================
-   ATUALIZAR INFORMAÇÕES
-===================================================== */
+    try{
 
-function update(){
+        const data =
+            JSON.parse(
+                localStorage.getItem(
+                    "portalSatTalhao"
+                )
+            );
 
- let speed =
-  pos.speed || 0;
+        if(!data){
 
- $("spd").textContent =
-  (speed*3.6)
-  .toFixed(1)
-  .replace(".",",");
+            alert("Nenhum talhão salvo.");
+            return;
+        }
 
+        pointA=data.pointA;
+        pointB=data.pointB;
+        guidanceLines=data.lines || [];
+        coverage=data.coverage || [];
 
- $("head").textContent =
-  (
-   (
-    pos.h*180/Math.PI +
-    360
-   ) % 360
-  ).toFixed(0) +
-  "°";
+        if(data.config){
 
+            config=Object.assign(
+                config,
+                data.config
+            );
+        }
 
- let error =
-  calcError();
+        document.getElementById("talhaoName").textContent =
+            data.name;
 
+        updateLineNumber();
 
- if(
-  A &&
-  B
- ){
+        draw();
 
-  $("pass").textContent =
-   Math.round(
-    error /
-    (
-     Number(
-      $("width").value
-     ) || 12
-    )
-   );
+        alert("Talhão carregado.");
 
- }
+    }catch(e){
 
-
- let hectares =
-  swaths.reduce(
-   (sum,s) =>
-    sum +
-    s.w*.9,
-   0
-  ) / 10000;
-
-
- $("ha").textContent =
-  hectares
-  .toFixed(2)
-  .replace(".",",");
-
-
- $("fieldArea").textContent =
-  hectares
-  .toFixed(2)
-  .replace(".",",");
-
-
- let kilometers =
-  track.length
-  ? track.length*.001
-  : 0;
-
-
- $("km").textContent =
-  kilometers
-  .toFixed(2)
-  .replace(".",",");
-
-
- if(
-  current &&
-  fieldsDB[current] &&
-  fieldsDB[current].area
- ){
-
-  let pct =
-   Math.min(
-    100,
-    hectares /
-    fieldsDB[current].area *
-    100
-   );
-
-  $("pct").textContent =
-   pct.toFixed(0) +
-   "%";
-
- }
-
- drawLightbar();
-
+        alert("Erro ao carregar talhão.");
+    }
 }
 
+function deleteTalhao(){
 
-/* =====================================================
-   RECEBER GPS
-===================================================== */
+    localStorage.removeItem(
+        "portalSatTalhao"
+    );
 
-function gps(
- lat,
- lon,
- speed=0,
- heading=null
-){
+    document.getElementById("talhaoName").textContent =
+        "Sem talhão";
 
- if(!origin){
-
-  origin = {
-   lat,
-   lon
-  };
-
- }
-
-
- let x =
-  (
-   lon-origin.lon
-  ) *
-  111320 *
-  Math.cos(
-   lat*Math.PI/180
-  );
-
-
- let y =
-  (
-   lat-origin.lat
-  ) *
-  111320;
-
-
- let old =
-  track[
-   track.length-1
-  ];
-
-
- if(
-  old &&
-  heading == null
- ){
-
-  heading =
-   Math.atan2(
-    y-old.y,
-    x-old.x
-   );
-
- }
-
-
- pos.x = x;
- pos.y = y;
- pos.speed = speed;
-
-
- if(
-  heading != null
- ){
-
-  pos.h =
-   heading *
-   Math.PI /
-   180;
-
- }
-
-
- track.push({
-  x,
-  y
- });
-
-
- if(
-  track.length > 4000
- )
-  track.shift();
-
-
- /* COBERTURA */
-
- if(
-  $("cov").checked
- ){
-
-  let width =
-   Number(
-    $("width").value
-   ) || 12;
-
-
-  swaths.push({
-
-   x,
-   y,
-   h:pos.h,
-   w:width
-
-  });
-
-
-  if(
-   swaths.length > 7000
-  )
-   swaths.shift();
-
- }
-
-
- update();
-
- draw();
-
+    alert("Talhão apagado.");
 }
 
+/* =========================================================
+   LIMPAR OPERAÇÃO
+   ========================================================= */
 
-/* =====================================================
-   GPS DO ANDROID
-===================================================== */
+function clearOperation(){
 
-if(
- navigator.geolocation
-){
+    if(!confirm(
+        "Limpar A/B, linhas e cobertura?"
+    )) return;
 
- navigator.geolocation.watchPosition(
+    pointA=null;
+    pointB=null;
+    abHeading=null;
+    guidanceLines=[];
+    coverage=[];
+    coverageArea=0;
+    currentLine=0;
 
-  p => {
+    document.getElementById("coverageArea").textContent =
+        "0.00 ha";
 
-   $("gps").textContent =
-    "GPS ATIVO";
+    document.getElementById("coveragePercent").textContent =
+        "0%";
 
-   $("sat").textContent =
-    "GNSS";
+    document.getElementById("lineNumber").textContent =
+        "0";
 
+    document.getElementById("abDirection").textContent =
+        "--";
 
-   gps(
-
-    p.coords.latitude,
-
-    p.coords.longitude,
-
-    p.coords.speed || 0,
-
-    p.coords.heading
-
-   );
-
-  },
-
-  () => {
-
-   $("gps").textContent =
-    "SEM GPS";
-
-  },
-
-  {
-
-   enableHighAccuracy:true,
-
-   maximumAge:500,
-
-   timeout:5000
-
-  }
-
- );
-
+    draw();
 }
 
+/* =========================================================
+   CONVERSÃO
+   ========================================================= */
 
-/* =====================================================
-   MARCAR A
-===================================================== */
+function degToRad(deg){
 
-function markA(){
-
- A = {
-
-  x:pos.x,
-  y:pos.y
-
- };
-
- $("ab").textContent =
-  "A marcado — marque B";
-
- toast(
-  "Ponto A marcado"
- );
-
- draw();
-
+    return deg*Math.PI/180;
 }
 
+/* =========================================================
+   GPS REAL → MOVIMENTO NO PLANO
+   ========================================================= */
 
-/* =====================================================
-   MARCAR B
-===================================================== */
+let lastGPS = null;
 
-function markB(){
+function updateFromGPS(position){
 
- if(!A){
+    const c=position.coords;
 
-  toast(
-   "Marque A primeiro"
-  );
+    if(lastGPS){
 
-  return;
+        /*
+           distância aproximada entre posições GPS.
+        */
 
- }
+        const lat1=degToRad(lastGPS.latitude);
+        const lat2=degToRad(c.latitude);
 
+        const dLat =
+            degToRad(
+                c.latitude -
+                lastGPS.latitude
+            );
 
- B = {
+        const dLon =
+            degToRad(
+                c.longitude -
+                lastGPS.longitude
+            );
 
-  x:pos.x,
-  y:pos.y
+        const R=6371000;
 
- };
+        const a =
+            Math.sin(dLat/2)**2 +
+            Math.cos(lat1)*
+            Math.cos(lat2)*
+            Math.sin(dLon/2)**2;
 
+        const distance =
+            2*R*Math.atan2(
+                Math.sqrt(a),
+                Math.sqrt(1-a)
+            );
 
- $("ab").textContent =
-  "A→B ATIVO";
+        let heading =
+            c.heading != null &&
+            c.heading >= 0 ?
+            c.heading :
+            tractor.heading;
 
- toast(
-  "Linha A–B criada"
- );
+        /*
+           transforma metros em pixels
+        */
 
- saveCurrent();
+        tractor.x +=
+            Math.sin(
+                degToRad(heading)
+            ) *
+            distance *
+            pixelsPerMeter;
 
- draw();
+        tractor.y -=
+            Math.cos(
+                degToRad(heading)
+            ) *
+            distance *
+            pixelsPerMeter;
 
+        addCoverage();
+        updateCurrentLine();
+
+        draw();
+    }
+
+    lastGPS={
+        latitude:c.latitude,
+        longitude:c.longitude
+    };
 }
 
+/* =========================================================
+   NOVO WATCH GPS MAIS PRECISO
+   ========================================================= */
 
-/* =====================================================
-   RESET A-B
-===================================================== */
+if(navigator.geolocation){
 
-function resetAB(){
+    navigator.geolocation.watchPosition(
 
- A = null;
- B = null;
+        position=>{
 
- $("ab").textContent =
-  "Aguardando A";
+            gps.active=true;
 
- draw();
+            gps.lat=position.coords.latitude;
+            gps.lon=position.coords.longitude;
+            gps.speed=position.coords.speed || 0;
+            gps.accuracy=position.coords.accuracy;
 
+            if(
+                position.coords.heading != null &&
+                position.coords.heading >= 0
+            ){
+
+                updateHeading(
+                    position.coords.heading
+                );
+            }
+
+            document.getElementById("gpsStatus").textContent =
+                "FIX";
+
+            document.getElementById("speed").textContent =
+                (
+                    (gps.speed || 0)*3.6
+                ).toFixed(1);
+
+            document.getElementById("hdop").textContent =
+                gps.accuracy ?
+                (
+                    gps.accuracy/1.5
+                ).toFixed(1) :
+                "--";
+
+            updateFromGPS(position);
+
+        },
+
+        ()=>{
+
+            document.getElementById("gpsStatus").textContent =
+                "SEM SINAL";
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            maximumAge:100,
+            timeout:5000
+        }
+    );
 }
 
+/* =========================================================
+   TECLADO / TESTE MANUAL
+   ========================================================= */
 
-/* =====================================================
-   LIMITE
-===================================================== */
+document.addEventListener(
+    "keydown",
+    e=>{
 
-function newBoundary(){
+        const step=5;
 
- boundary.push({
+        if(e.key==="ArrowUp"){
+            tractor.y-=step;
+        }
 
-  x:pos.x,
-  y:pos.y
+        if(e.key==="ArrowDown"){
+            tractor.y+=step;
+        }
 
- });
+        if(e.key==="ArrowLeft"){
+            tractor.x-=step;
+        }
 
- toast(
-  "Ponto do limite adicionado"
- );
+        if(e.key==="ArrowRight"){
+            tractor.x+=step;
+        }
 
- saveCurrent();
+        updateCurrentLine();
+        addCoverage();
+        draw();
+    }
+);
 
- draw();
+/* =========================================================
+   START
+   ========================================================= */
 
-}
+tractor.x=W/2;
+tractor.y=H/2;
 
-
-/* =====================================================
-   TALHÕES
-===================================================== */
-
-function fields(){
-
- $("modal").style.display =
-  "flex";
-
-
- let list =
-  Object.entries(
-   fieldsDB
-  );
-
-
- $("box").innerHTML = `
-
- <h2>
-  ▣ Talhões
- </h2>
-
- <div class="grid">
-
-  <input
-   id="fn"
-   placeholder="Nome do talhão">
-
-  <input
-   id="fa"
-   type="number"
-   min="0"
-   step=".01"
-   placeholder="Área planejada (ha)">
-
- </div>
-
- <div
-  style="
-   margin-top:10px;
-   display:flex;
-   gap:7px
-  ">
-
-  <button
-   class="btn green"
-   onclick="createField()">
-
-   Criar e salvar
-
-  </button>
-
-  <button
-   class="btn"
-   onclick="closeM()">
-
-   Fechar
-
-  </button>
-
- </div>
-
- <div class="list">
-
- ${
-  list.length
-
-  ?
-
-  list.map(
-   ([name,f]) => `
-
-   <div class="item">
-
-    <span>
-
-     <b>
-      ${esc(name)}
-     </b>
-
-     <br>
-
-     <small class="muted">
-      ${f.area || 0} ha
-     </small>
-
-    </span>
-
-    <span>
-
-     <button
-      class="btn green"
-      onclick="
-       loadField(
-        '${encodeURIComponent(name)}'
-       )
-      ">
-
-      Abrir
-
-     </button>
-
-     <button
-      class="btn red"
-      onclick="
-       delField(
-        '${encodeURIComponent(name)}'
-       )
-      ">
-
-      Excluir
-
-     </button>
-
-    </span>
-
-   </div>
-
-   `
-  ).join("")
-
-  :
-
-  `
-   <p class="muted">
-    Nenhum talhão salvo.
-   </p>
-  `
-
- }
-
- </div>
-
- `;
-
-}
-
-
-/* =====================================================
-   CRIAR TALHÃO
-===================================================== */
-
-function createField(){
-
- let name =
-  $("fn").value.trim();
-
-
- if(!name){
-
-  toast(
-   "Digite o nome do talhão"
-  );
-
-  return;
-
- }
-
-
- fieldsDB[name] = {
-
-  area:
-   Number(
-    $("fa").value
-   ) || 0,
-
-  A,
-  B,
-
-  boundary,
-
-  coverage:
-   swaths
-
- };
-
-
- current =
-  name;
-
-
- localStorage.setItem(
-  "psgps_fields",
-  JSON.stringify(
-   fieldsDB
-  )
- );
-
-
- localStorage.setItem(
-  "psgps_current",
-  current
- );
-
-
- $("fieldName").textContent =
-  name;
-
-
- closeM();
-
-
- toast(
-  "Talhão salvo"
- );
-
-}
-
-
-/* =====================================================
-   SALVAR TALHÃO ATUAL
-===================================================== */
-
-function saveCurrent(){
-
- if(!current)
-  return;
-
-
- fieldsDB[current] = {
-
-  ...(fieldsDB[current] || {}),
-
-  A,
-  B,
-
-  boundary,
-
-  coverage:
-   swaths
-
- };
-
-
- localStorage.setItem(
-  "psgps_fields",
-  JSON.stringify(
-   fieldsDB
-  )
- );
-
-}
-
-
-/* =====================================================
-   ABRIR TALHÃO
-===================================================== */
-
-function loadField(encoded){
-
- let name =
-  decodeURIComponent(
-   encoded
-  );
-
-
- let field =
-  fieldsDB[name];
-
-
- current =
-  name;
-
-
- $("fieldName").textContent =
-  name;
-
-
- A =
-  field.A || null;
-
- B =
-  field.B || null;
-
-
- boundary =
-  field.boundary || [];
-
-
- swaths =
-  field.coverage || [];
-
-
- localStorage.setItem(
-  "psgps_current",
-  name
- );
-
-
- closeM();
-
- draw();
-
- toast(
-  "Talhão carregado"
- );
-
-}
-
-
-/* =====================================================
-   EXCLUIR TALHÃO
-===================================================== */
-
-function delField(encoded){
-
- let name =
-  decodeURIComponent(
-   encoded
-  );
-
-
- delete fieldsDB[name];
-
-
- if(
-  current === name
- ){
-
-  current = "";
-
-  $("fieldName").textContent =
-   "NÃO SALVO";
-
- }
-
-
- localStorage.setItem(
-  "psgps_fields",
-  JSON.stringify(
-   fieldsDB
-  )
- );
-
-
- fields();
-
-}
-
-
-/* =====================================================
-   CONFIGURAÇÕES
-===================================================== */
-
-function settings(){
-
- $("modal").style.display =
-  "flex";
-
-
- $("box").innerHTML = `
-
- <h2>
-  ⚙ Configurações PRO
- </h2>
-
- <div class="grid">
-
-  <label>
-
-   Largura do implemento
-
-   <input
-    id="sw"
-    type="number"
-    value="${$("width").value}"
-    step=".1">
-
-  </label>
-
-
-  <label>
-
-   Tipo de guia
-
-   <select id="sg">
-
-    <option>
-     Reta A–B
-    </option>
-
-    <option>
-     Curva
-    </option>
-
-    <option>
-     Pivô
-    </option>
-
-   </select>
-
-  </label>
-
- </div>
-
-
- <p class="muted">
-
-  A barra de luz utiliza o
-  erro lateral da posição
-  em relação à linha A–B.
-
-  Verde = centralizado.
-
-  Amarelo = correção.
-
-  Vermelho = maior desvio.
-
- </p>
-
-
- <div
-  style="
-   display:flex;
-   gap:7px
-  ">
-
-  <button
-   class="btn green"
-   onclick="saveSettings()">
-
-   Salvar
-
-  </button>
-
-
-  <button
-   class="btn"
-   onclick="serial()">
-
-   Conectar antena externa
-
-  </button>
-
-
-  <button
-   class="btn"
-   onclick="closeM()">
-
-   Fechar
-
-  </button>
-
- </div>
-
- `;
-
-}
-
-
-/* =====================================================
-   SALVAR CONFIGURAÇÕES
-===================================================== */
-
-function saveSettings(){
-
- $("width").value =
-  $("sw").value;
-
- $("guideType").value =
-  $("sg").value;
-
- saveCfg();
-
- closeM();
-
- draw();
-
-}
-
-
-/* =====================================================
-   MODAL
-===================================================== */
-
-function closeM(){
-
- $("modal").style.display =
-  "none";
-
-}
-
-
-/* =====================================================
-   ANTENA EXTERNA USB / OTG
-===================================================== */
-
-async function serial(){
-
- if(
-  !("serial" in navigator)
- ){
-
-  toast(
-   "Este navegador não oferece Web Serial"
-  );
-
-  return;
-
- }
-
-
- try{
-
-  let port =
-   await navigator.serial.requestPort();
-
-
-  await port.open({
-
-   baudRate:4800
-
-  });
-
-
-  toast(
-   "Antena conectada — NMEA"
-  );
-
-
-  readSerial(
-   port
-  );
-
-
- }
-
- catch(e){
-
-  toast(
-   "Conexão não realizada"
-  );
-
- }
-
-}
-
-
-/* =====================================================
-   LEITURA NMEA
-===================================================== */
-
-async function readSerial(port){
-
- const decoder =
-  new TextDecoderStream();
-
-
- port.readable.pipeTo(
-  decoder.writable
- );
-
-
- const reader =
-  decoder.readable.getReader();
-
-
- let buffer = "";
-
-
- while(true){
-
-  let result =
-   await reader.read();
-
-
-  if(
-   result.done
-  )
-   break;
-
-
-  buffer +=
-   result.value;
-
-
-  let lines =
-   buffer.split(
-    /\r?\n/
-   );
-
-
-  buffer =
-   lines.pop();
-
-
-  lines.forEach(
-   parseNMEA
-  );
-
- }
-
-}
-
-
-/* =====================================================
-   PARSER NMEA GGA
-===================================================== */
-
-function parseNMEA(sentence){
-
- if(
-  !sentence.startsWith("$")
- )
-  return;
-
-
- let p =
-  sentence.split(",");
-
-
- if(
-  p[0].includes("GGA") &&
-  p[6] > 0
- ){
-
-  let lat =
-   Number(p[2]);
-
-  let lon =
-   Number(p[4]);
-
-
-  lat =
-   (
-    Math.floor(lat/100) +
-    (lat%100)/60
-   ) *
-   (
-    p[3] === "S"
-    ? -1
-    : 1
-   );
-
-
-  lon =
-   (
-    Math.floor(lon/100) +
-    (lon%100)/60
-   ) *
-   (
-    p[5] === "W"
-    ? -1
-    : 1
-   );
-
-
-  $("gps").textContent =
-   "GPS ATIVO";
-
-
-  $("sat").textContent =
-   p[7] || "--";
-
-
-  gps(
-   lat,
-   lon,
-   0
-  );
-
- }
-
-}
-
-
-/* =====================================================
-   SEGURANÇA DE TEXTO
-===================================================== */
-
-function esc(text){
-
- return text.replace(
-  /[&<>"']/g,
-  function(m){
-
-   return {
-
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
-
-   }[m];
-
-  }
- );
-
-}
-
-
-/* =====================================================
-   INICIALIZAÇÃO
-===================================================== */
-
-function init(){
-
- if(current){
-
-  $("fieldName").textContent =
-   current;
-
- }
-
- resize();
-
- update();
-
- draw();
-
-}
-
-init();
+updateHeading(0);
 
 </script>
 
