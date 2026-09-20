@@ -122,7 +122,6 @@
         .ponto-a { background: #22c55e; box-shadow: 0 0 10px #22c55e; bottom: 30px; }
         .ponto-b { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; top: 30px; }
 
-        /* ========== FLECHA — APONTA PARA PONTO B E SEGUE GPS ========== */
         .trator {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -257,12 +256,16 @@ const estado = {
     talhao: 'Talhão 1', correcao: 'gnss',
     modoVisual: '2d', escala: 1,
     ultimoPonto: null, distanciaPercorrida: 0,
-    pintando: false
+    pintando: false,
+    // Controle de posição relativa para movimento
+    deslocX: 0, deslocY: 0,
+    latAnterior: null, lonAnterior: null
 };
 
 const canvas = document.getElementById('canvasCobertura');
 const ctx = canvas.getContext('2d');
 const mapa = document.getElementById('mapa');
+const trator = document.getElementById('trator');
 
 function ajustarCanvas() {
     const rect = mapa.getBoundingClientRect();
@@ -284,39 +287,58 @@ function iniciarGPS() {
                 estado.lat = pos.coords.latitude;
                 estado.lon = pos.coords.longitude;
                 estado.velocidade = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
-                // ========== FLECHA APONTA PARA O PONTO B ==========
-                if (estado.pontoA && estado.pontoB) {
-                    // Calcula direção do ponto atual → Ponto B
-                    const dLat = estado.pontoB.lat - estado.lat;
-                    const dLon = estado.pontoB.lon - estado.lon;
-                    estado.rumo = (Math.atan2(dLon, dLat) * 180 / Math.PI + 360) % 360;
-                } else {
-                    estado.rumo = pos.coords.heading || estado.rumo;
-                }
+                estado.rumo = pos.coords.heading ?? estado.rumo;
+                
+                // ========== FLECHA MOVE CONFORME GPS ==========
+                atualizarPosicaoTela();
+                
                 atualizarDesvio();
                 atualizarTela();
                 if (estado.pintando) desenharCobertura();
             },
             err => console.log("GPS — simulação ativada"),
-            { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
+            { enableHighAccuracy: true, maximumAge: 500, timeout: 3000 }
         );
     }
+    // Simulação movimento
     setInterval(() => {
-        estado.lat += 0.000003;
-        estado.lon += 0.000001;
-        // ========== FLECHA APONTA PARA PONTO B ==========
-        if (estado.pontoA && estado.pontoB) {
-            const dLat = estado.pontoB.lat - estado.lat;
-            const dLon = estado.pontoB.lon - estado.lon;
-            estado.rumo = (Math.atan2(dLon, dLat) * 180 / Math.PI + 360) % 360;
-        } else {
-            estado.rumo = (estado.rumo + 0.5) % 360;
-        }
+        estado.lat += 0.000005 * Math.cos(estado.rumo * Math.PI / 180);
+        estado.lon += 0.000005 * Math.sin(estado.rumo * Math.PI / 180);
         estado.velocidade = 8 + Math.random() * 2;
+        estado.rumo += Math.sin(Date.now() / 8000) * 0.3;
+        if (estado.rumo < 0) estado.rumo += 360;
+        if (estado.rumo >= 360) estado.rumo -= 360;
+        
+        atualizarPosicaoTela();
         atualizarDesvio();
         atualizarTela();
         if (estado.pintando) desenharCobertura();
-    }, 500);
+    }, 300);
+}
+
+// ========== FLECHA ANDA CONFORME MOVIMENTO DO GPS ==========
+function atualizarPosicaoTela() {
+    const pxPorGrau = 111000 * estado.escala;
+    
+    if (estado.latAnterior !== null && estado.lonAnterior !== null) {
+        const dLat = estado.lat - estado.latAnterior;
+        const dLon = estado.lon - estado.lonAnterior;
+        
+        // Converte graus para pixels na tela
+        const metrosPorGrauLon = 111320 * Math.cos(estado.lat * Math.PI / 180);
+        const dx = dLon * metrosPorGrauLon * estado.escala;
+        const dy = dLat * 111000 * estado.escala;
+        
+        // Atualiza deslocamento (movimento relativo)
+        estado.deslocX += dx;
+        estado.deslocY -= dy; // Inverte eixo Y
+        
+        // Aplica movimento ao mapa (cobertura fica parada, ponto se move)
+        mapa.style.backgroundPosition = `${estado.deslocX}px ${estado.deslocY}px`;
+    }
+    
+    estado.latAnterior = estado.lat;
+    estado.lonAnterior = estado.lon;
 }
 
 function atualizarDesvio() {
@@ -337,20 +359,17 @@ function atualizarTela() {
     document.getElementById('dLargura').textContent = estado.largura.toFixed(1) + 'm';
     document.getElementById('dArea').textContent = estado.area.toFixed(2) + 'ha';
 
-    // ========== FLECHA GIRA CONFORME RUMO DO GPS ==========
-    document.getElementById('trator').style.transform = 
-        `translate(-50%, -50%) rotate(${estado.rumo}deg)`;
+    // Flecha gira conforme rumo do GPS
+    trator.style.transform = `translate(-50%, -50%) rotate(${estado.rumo}deg)`;
 
     atualizarBarraLuz();
 
     const bolinha = document.getElementById('bolinhaGps');
     bolinha.className = 'bolinha ' + (estado.correcao==='rtk'?'verde':estado.correcao==='sbas'?'amarela':'');
-    document.getElementById('precisao').textContent = 
-        estado.correcao==='rtk'?'2cm':estado.correcao==='sbas'?'40cm':'2-5m';
+    document.getElementById('precisao').textContent = estado.correcao==='rtk'?'2cm':estado.correcao==='sbas'?'40cm':'2-5m';
     document.getElementById('modoGnss').textContent = estado.correcao.toUpperCase();
 
-    document.getElementById('linhaAB').style.display = 
-        (estado.pontoA && estado.pontoB) ? 'block' : 'none';
+    document.getElementById('linhaAB').style.display = (estado.pontoA && estado.pontoB) ? 'block' : 'none';
     document.getElementById('pontoA').style.display = estado.pontoA ? 'flex' : 'none';
     document.getElementById('pontoB').style.display = estado.pontoB ? 'flex' : 'none';
 }
@@ -393,7 +412,7 @@ function alternarPintura() {
     }
 }
 
-// ========== COBERTURA ACOMPANHA A DIREÇÃO DA FLECHA ==========
+// ========== COBERTURA APARECE E SEGUE A FLECHA ==========
 function desenharCobertura() {
     const pxPorMetro = 8 / estado.escala;
     const larguraFaixa = estado.largura * pxPorMetro;
@@ -409,13 +428,13 @@ function desenharCobertura() {
     estado.distanciaPercorrida += dist;
     estado.area = (estado.distanciaPercorrida * estado.largura) / 10000;
 
-    // ========== COBERTURA GIRA JUNTO COM A FLECHA ==========
-    const anguloRadar = estado.rumo * Math.PI / 180;
+    // Cobertura alinhada com a direção do movimento
+    const angulo = estado.rumo * Math.PI / 180;
 
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
-    ctx.rotate(anguloRadar); // ← Cobertura acompanha a direção
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.45)';
+    ctx.rotate(angulo);
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.5)';
     ctx.fillRect(-larguraFaixa/2, -dist/2, larguraFaixa, dist);
     ctx.restore();
 
@@ -428,6 +447,10 @@ function criarPontoA() {
     estado.ultimoPonto = null;
     estado.distanciaPercorrida = 0;
     estado.area = 0;
+    estado.latAnterior = estado.lat;
+    estado.lonAnterior = estado.lon;
+    estado.deslocX = 0;
+    estado.deslocY = 0;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     atualizarTela();
 }
@@ -446,8 +469,20 @@ function alternarModoVisual() {
 }
 
 function paralelas() {}
-function zoomIn() { estado.escala *= 1.3; }
-function zoomOut() { estado.escala /= 1.3; }
+
+// ========== ZOOM FUNCIONANDO ==========
+function zoomIn() { 
+    estado.escala *= 1.3; 
+    atualizarCanvas();
+}
+function zoomOut() { 
+    estado.escala /= 1.3; 
+    atualizarCanvas();
+}
+function atualizarCanvas() {
+    // Redesenha cobertura com nova escala
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
 function abrirConfig() {
     document.getElementById('modalConfig').style.display = 'flex';
@@ -492,6 +527,8 @@ function limparTudo() {
     estado.pontoA = null; estado.pontoB = null;
     estado.area = 0; estado.distanciaPercorrida = 0;
     estado.ultimoPonto = null;
+    estado.deslocX = 0; estado.deslocY = 0;
+    estado.latAnterior = null; estado.lonAnterior = null;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     atualizarTela();
 }
