@@ -5,413 +5,538 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PORTAL SAT GPS 🛰️</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         html, body {
-            width: 100vw; height: 100vh;
-            overflow: hidden; background: #0f2040; color: #fff;
+            width: 100vw; height: 100vh; height: 100dvh;
+            overflow: hidden; position: fixed;
+            background: #000; color: #fff;
+            user-select: none;
         }
 
-        /* LAYOUT PRINCIPAL — SEMPRE VISÍVEL */
-        .app {
+        /* ========== LAYOUT PRINCIPAL ========== */
+        .tela {
             width: 100%; height: 100%;
             display: grid;
-            grid-template-rows: 60px 1fr;
-            grid-template-columns: 70px 1fr 70px;
+            grid-template-rows: 45px 1fr;
+            grid-template-columns: 50px 1fr 50px;
             grid-template-areas:
                 "topo topo topo"
                 "esq mapa dir";
+            gap: 0;
+            background: #000;
         }
 
-        /* TOPO */
+        /* ========== TOPO — STATUS ========== */
         .topo {
-            grid-area: topo; background: #0f2040;
+            grid-area: topo;
+            background: #0b2344;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 15px; border-bottom: 2px solid #2E7D32;
+            padding: 0 12px; border-bottom: 2px solid #2E7D32;
         }
-        .logo { font-size: 22px; font-weight: bold; color: #4ade80; display: flex; align-items: center; gap: 8px; }
-        .status { display: flex; gap: 15px; font-size: 13px; align-items: center; }
+        .logo { font-size: 18px; font-weight: bold; color: #4ade80; }
+        .status-gps { display: flex; gap: 15px; font-size: 12px; }
+        .status-item { display: flex; align-items: center; gap: 4px; }
         .bolinha { width: 12px; height: 12px; border-radius: 50%; background: #444; }
         .bolinha.verde { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+        .bolinha.amarela { background: #eab308; }
+        .bolinha.vermelha { background: #ef4444; }
 
-        /* BARRA DE LUZ — HORIZONTAL */
+        /* ========== BARRA DE LUZ — CENTRAL ========== */
         .barra-luz {
-            position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
-            width: 450px; height: 22px; background: #1a1a1a; border-radius: 11px;
-            display: flex; align-items: center; z-index: 100; overflow: hidden;
+            position: absolute; top: 55px; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 20px;
+            background: #1a1a1a; border: 2px solid #333; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 150;
         }
         .luz-esq, .luz-dir {
-            height: 100%; width: 200px;
+            height: 14px; width: 130px;
             background: linear-gradient(90deg, #ef4444, #eab308, #22c55e);
-            transform: scaleX(0); transition: transform 0.1s;
+            border-radius: 2px;
+            transition: transform 0.1s ease;
         }
-        .luz-esq { transform-origin: right; }
-        .luz-dir { transform-origin: left; }
-        .centro { width: 3px; height: 22px; background: #fff; z-index: 5; }
-        .desvio { position: absolute; top: 30px; font-size: 16px; color: #ffd700; font-weight: bold; }
+        .luz-esq { transform-origin: right; margin-right: 2px; }
+        .luz-dir { transform-origin: left; margin-left: 2px; }
+        .centro-luz { width: 3px; height: 18px; background: #fff; border-radius: 2px; z-index: 5; }
+        .desvio-valor {
+            position: absolute; bottom: -20px; font-size: 14px; font-weight: bold;
+            color: #ffd700; text-shadow: 0 0 3px #000;
+        }
 
-        /* PAINEIS LATERAIS */
-        .esq, .dir {
-            background: #0f2040; display: flex; flex-direction: column;
-            align-items: center; padding: 10px 0; gap: 12px;
-            border-right: 2px solid #2E7D32;
+        /* ========== PAINEIS LATERAIS ========== */
+        .painel-esq, .painel-dir {
+            background: #0f172a;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 8px 4px; gap: 8px;
+            border-right: 1px solid #2E7D32;
         }
-        .dir { border-right: none; border-left: 2px solid #2E7D32; }
+        .painel-dir { border-right: none; border-left: 1px solid #2E7D32; }
         .btn {
-            width: 50px; height: 50px; font-size: 24px; border-radius: 8px;
-            border: none; background: #1e293b; color: #fff; cursor: pointer;
+            width: 40px; height: 40px; padding: 0; font-size: 18px;
+            border-radius: 6px; border: none; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+            background: #1e293b; color: #fff;
         }
-        .btn.ativo { background: #2E7D32; box-shadow: 0 0 8px #22c55e; }
-        .btn.pintando { background: #22c55e; animation: piscar 1s infinite; }
-        @keyframes piscar { 0% {opacity:1;} 50% {opacity:0.6;} 100% {opacity:1;} }
+        .btn:active { transform: scale(0.92); background: #334155; }
+        .btn.ativo { background: #2E7D32; box-shadow: inset 0 0 6px rgba(0,0,0,0.5); }
+        .btn.ultimo { margin-top: auto; margin-bottom: 8px; }
 
-        /* MAPA — GRADE VISÍVEL */
+        /* ========== MAPA — TELA MAIOR + 2D/3D ========== */
         .mapa {
-            grid-area: mapa; background: #0a0f1a;
-            background-image: 
-                linear-gradient(rgba(46,125,50,0.15) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(46,125,50,0.15) 1px, transparent 1px);
-            background-size: 30px 30px; position: relative; overflow: hidden;
+            grid-area: mapa;
+            background: #050508;
+            position: relative; overflow: hidden;
+            cursor: grab;
+            transition: transform 0.3s ease;
         }
-        #canvasCobertura { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+        .mapa.modo-2d {
+            background-image: 
+                linear-gradient(rgba(46, 125, 50, 0.12) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46, 125, 50, 0.12) 1px, transparent 1px);
+            background-size: 25px 25px;
+            transform: perspective(0px) rotateX(0deg) !important;
+        }
+        .mapa.modo-3d {
+            background-image: 
+                linear-gradient(rgba(46, 125, 50, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46, 125, 50, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            transform: perspective(600px) rotateX(50deg) scale(1.2);
+            transform-origin: center bottom;
+        }
 
-        /* LINHA AB E PONTOS */
+        /* ========== CANVAS DE COBERTURA ========== */
+        #canvasCobertura {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10;
+        }
+
+        /* ========== LINHA AB — VERTICAL NO CENTRO ========== */
         .linha-ab {
-            position: absolute; top: 0; bottom: 0; left: 50%; width: 4px;
-            background: linear-gradient(180deg, #22c55e, #4ade80, #22c55e);
-            transform: translateX(-50%); display: none; z-index: 10;
+            position: absolute; top: 0; bottom: 0; left: 50%;
+            width: 3px; background: linear-gradient(180deg, #22c55e, #4ade80, #22c55e);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+            transform: translateX(-50%);
+            z-index: 20; display: none;
         }
         .ponto-a, .ponto-b {
-            position: absolute; left: 50%; transform: translateX(-50%);
-            width: 32px; height: 32px; border-radius: 50%;
+            position: absolute; left: 50%;
+            transform: translateX(-50%);
+            width: 28px; height: 28px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; z-index: 11; display: none;
+            font-weight: bold; font-size: 15px; color: #fff;
+            z-index: 25; display: none;
         }
-        .ponto-a { background: #22c55e; bottom: 30px; }
-        .ponto-b { background: #3b82f6; top: 80px; }
+        .ponto-a { 
+            background: #22c55e; box-shadow: 0 0 10px #22c55e; 
+            bottom: 20px; /* Ponto A em BAIXO */
+        }
+        .ponto-b { 
+            background: #3b82f6; box-shadow: 0 0 10px #3b82f6; 
+            top: 20px; /* Ponto B em CIMA */
+        }
 
-        /* SETA AMARELA */
+        /* ========== SETA AMARELA — APONTA PARA CIMA ✅ SUBINDO ========== */
         .trator {
-            position: absolute; top: 50%; left: 50%;
+            position: absolute; bottom: 50%; left: 50%;
+            transform: translate(-50%, 50%);
             width: 0; height: 0;
-            border-left: 18px solid transparent;
-            border-right: 18px solid transparent;
-            border-bottom: 36px solid #ffd700;
-            filter: drop-shadow(0 0 10px #ffd700);
-            transform: translate(-50%, -50%);
-            z-index: 15;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-bottom: 28px solid #ffd700; /* ✅ PONTA PARA CIMA */
+            filter: drop-shadow(0 0 8px #ffd700);
+            z-index: 30;
+            transition: transform 0.1s linear;
         }
 
-        /* DADOS */
-        .dados {
-            position: absolute; bottom: 15px; left: 15px;
-            background: rgba(0,0,0,0.8); padding: 12px; border-radius: 8px;
-            border: 2px solid #2E7D32; font-size: 14px; line-height: 1.6; z-index: 20;
+        /* ========== DADOS FLUTUANTES ========== */
+        .dados-flutuantes {
+            position: absolute; bottom: 10px; left: 10px;
+            background: rgba(0,0,0,0.75); padding: 8px 10px;
+            border-radius: 6px; border: 1px solid #2E7D32;
+            font-size: 11px; line-height: 1.6;
+            z-index: 40;
         }
-        .dados span { color: #4ade80; font-weight: bold; }
+        .dados-flutuantes span { color: #4ade80; font-weight: bold; }
 
-        /* MODAL */
+        /* ========== MODAL ========== */
         .modal {
-            position: fixed; top:0; left:0; right:0; bottom:0;
-            background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center;
-            z-index: 200;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.92); z-index: 200;
+            display: none; align-items: center; justify-content: center;
         }
-        .modal-c {
-            background: #1a2a4a; padding: 20px; border-radius: 10px;
-            border: 2px solid #2E7D32; width: 90%; max-width: 350px;
+        .modal-content {
+            background: #1a1a2e; padding: 20px; border-radius: 10px;
+            border: 2px solid #2E7D32; width: 90%; max-width: 380px;
         }
-        .modal-c h3 { color: #4ade80; margin-bottom: 15px; text-align: center; }
+        .modal-content h3 { color: #4ade80; margin-bottom: 15px; text-align: center; }
         .campo { margin-bottom: 12px; }
-        .campo label { display: block; margin-bottom: 5px; font-size: 14px; }
-        .campo input { width: 100%; padding: 8px; border-radius: 5px; border: none; background: #253555; color: #fff; }
-        .botoes { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-m { flex:1; padding:10px; border:none; border-radius:5px; font-weight:bold; cursor:pointer; }
-        .btn-m.verde { background: #2E7D32; color: white; }
-        .btn-m.cinza { background: #445566; color: white; }
+        .campo label { display: block; margin-bottom: 4px; color: #ccc; font-size: 13px; }
+        .campo input, .campo select {
+            width: 100%; padding: 8px; border-radius: 4px; border: none;
+            background: #252540; color: #fff; font-size: 15px;
+        }
+        .modal-botoes { display: flex; gap: 8px; margin-top: 15px; }
+        .btn-modal { flex: 1; padding: 10px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .btn-modal.verde { background: #2E7D32; color: white; }
+        .btn-modal.cinza { background: #444; color: white; }
     </style>
 </head>
 <body>
 
-<div class="app">
+<div class="tela">
     <!-- TOPO -->
     <div class="topo">
         <div class="logo">🛰️ PORTAL SAT GPS</div>
-        <div class="status">
-            <span><span id="gpsBol" class="bolinha"></span> GPS</span>
-            <span id="precisao">2-5m</span>
-            <span id="hora">00:00:00</span>
+        <div class="status-gps">
+            <div class="status-item"><span id="bolinhaGps" class="bolinha"></span> GPS</div>
+            <div class="status-item">📡 <span id="satNum">0/12</span></div>
+            <div class="status-item">🎯 <span id="precisao">---</span></div>
+            <div class="status-item" id="modoGnss">GNSS</div>
+            <div class="status-item">⏱️ <span id="hora">00:00:00</span></div>
         </div>
     </div>
 
     <!-- BARRA DE LUZ -->
-    <div class="barra-luz">
+    <div class="barra-luz" id="barraLuz">
         <div class="luz-esq" id="luzEsq"></div>
-        <div class="centro"></div>
+        <div class="centro-luz"></div>
         <div class="luz-dir" id="luzDir"></div>
-        <div class="desvio" id="desvioValor">0.00 m</div>
+        <div class="desvio-valor" id="desvioValor">0.00 m</div>
     </div>
 
-    <!-- PAINEL ESQUERDO -->
-    <div class="esq">
-        <button class="btn" id="btnPintar" onclick="alternarPintura()" title="Pintar">🖌️</button>
-        <button class="btn" onclick="criarA()" title="Ponto A">📍</button>
-        <button class="btn" onclick="criarB()" title="Ponto B">🎯</button>
-        <button class="btn" onclick="centralizar()" title="Centralizar">🎯</button>
-        <button class="btn" onclick="zoomIn()" title="Zoom +">➕</button>
-        <button class="btn" onclick="zoomOut()" title="Zoom −">➖</button>
+    <!-- PAINEL ESQUERDO — ÍCONES MENORES + BOTÃO CENTRALIZAR -->
+    <div class="painel-esq">
+        <button class="btn" onclick="criarPontoA()" title="Ponto A">📍</button>
+        <button class="btn" onclick="criarPontoB()" title="Ponto B">🎯</button>
+        <button class="btn" onclick="alternarModoVisual()" id="btnModoVisual" title="2D/3D">📐</button>
+        <button class="btn" onclick="paralelas()" title="Paralelas">〰️</button>
+        <button class="btn ultimo" onclick="centralizar()" title="Centralizar">🎯</button>
     </div>
 
-    <!-- MAPA -->
-    <div class="mapa" id="mapa">
+    <!-- MAPA CENTRAL -->
+    <div class="mapa modo-2d" id="mapa">
         <canvas id="canvasCobertura"></canvas>
         <div class="linha-ab" id="linhaAB"></div>
         <div class="ponto-a" id="pontoA">A</div>
         <div class="ponto-b" id="pontoB">B</div>
         <div class="trator" id="trator"></div>
 
-        <div class="dados">
-            <div>Lat: <span id="dLat">-25.197674</span></div>
-            <div>Lon: <span id="dLon">-54.924653</span></div>
+        <!-- DADOS FLUTUANTES -->
+        <div class="dados-flutuantes">
+            <div>Lat: <span id="dLat">--.------</span></div>
+            <div>Lon: <span id="dLon">--.------</span></div>
             <div>Vel: <span id="dVel">0.0</span> km/h</div>
-            <div>Faixa: <span id="dLarg">10.0m</span></div>
+            <div>Rumo: <span id="dRumo">000°</span></div>
+            <div>Faixa: <span id="dLargura">24.0m</span></div>
             <div>Área: <span id="dArea">0.00ha</span></div>
         </div>
     </div>
 
     <!-- PAINEL DIREITO -->
-    <div class="dir">
-        <button class="btn" onclick="abrirConfig()" title="Config">⚙️</button>
+    <div class="painel-dir">
+        <button class="btn" onclick="abrirConfig()" title="Configurações">⚙️</button>
         <button class="btn" onclick="salvarTalhao()" title="Salvar">💾</button>
         <button class="btn" onclick="carregarTalhao()" title="Carregar">📂</button>
-        <button class="btn" onclick="limpar()" title="Limpar">🗑️</button>
+        <button class="btn" onclick="limparTudo()" title="Limpar">🗑️</button>
+        <button class="btn" onclick="zoomIn()" title="Aproximar">➕</button>
+        <button class="btn" onclick="zoomOut()" title="Afastar">➖</button>
     </div>
 </div>
 
-<!-- MODAL CONFIG -->
+<!-- MODAL CONFIGURAÇÕES -->
 <div class="modal" id="modalConfig">
-    <div class="modal-c">
+    <div class="modal-content">
         <h3>⚙️ CONFIGURAÇÕES</h3>
         <div class="campo">
-            <label>Largura (m)</label>
-            <input type="number" id="inpLarg" value="10.0" step="0.1">
+            <label>Largura do Implemento (m)</label>
+            <input type="number" id="inpLargura" value="24.0" step="0.1">
         </div>
         <div class="campo">
-            <label>Talhão</label>
-            <input type="text" id="inpNome" value="Talhão 1">
+            <label>Nome do Talhão</label>
+            <input type="text" id="inpTalhao" value="Talhão 1">
         </div>
-        <div class="botoes">
-            <button class="btn-m verde" onclick="salvarConfig()">Salvar</button>
-            <button class="btn-m cinza" onclick="fecharConfig()">Fechar</button>
+        <div class="campo">
+            <label>Correção GNSS</label>
+            <select id="inpCorrecao">
+                <option value="gnss">GNSS (2-5m)</option>
+                <option value="sbas">SBAS (30-50cm)</option>
+                <option value="rtk">RTK (1-2cm)</option>
+            </select>
+        </div>
+        <div class="modal-botoes">
+            <button class="btn-modal verde" onclick="salvarConfig()">✅ Salvar</button>
+            <button class="btn-modal cinza" onclick="fecharConfig()">❌ Cancelar</button>
         </div>
     </div>
 </div>
 
 <script>
-// ==============================================
-// PORTAL SAT GPS — VERSÃO SIMPLES E FUNCIONAL
-// ==============================================
-const est = {
-    lat: -25.197674, lon: -54.924653,
-    vel: 0, rumo: 0,
+// ==================================================
+// 🛰️ PORTAL SAT GPS — SETA SUBINDO
+// ==================================================
+const estado = {
+    lat: -26.3412, lon: -54.6879,
+    velocidade: 0, rumo: 0, // ✅ Rumo 0° = NORTE = seta SUBINDO
     pontoA: null, pontoB: null,
-    largura: 10.0, area: 0.00,
-    pintando: false, escala: 1.0,
-    ultimoPonto: null, distPercorrida: 0
+    largura: 24.0, desvio: 0, area: 0,
+    talhao: 'Talhão 1', correcao: 'gnss',
+    modoVisual: '2d', escala: 1,
+    ultimoPonto: null, distanciaPercorrida: 0,
+    ativo: false
 };
 
+// CANVAS COBERTURA
 const canvas = document.getElementById('canvasCobertura');
 const ctx = canvas.getContext('2d');
 const mapa = document.getElementById('mapa');
 
-// Ajusta canvas
 function ajustarCanvas() {
-    const r = mapa.getBoundingClientRect();
-    canvas.width = r.width;
-    canvas.height = r.height;
+    const rect = mapa.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
 }
-ajustarCanvas();
 window.addEventListener('resize', ajustarCanvas);
+setTimeout(ajustarCanvas, 100);
 
-// Relógio
+// ========== RELÓGIO ==========
 setInterval(() => {
     const h = new Date();
-    document.getElementById('hora').textContent = h.toLocaleTimeString('pt-BR', {hour12:false});
+    document.getElementById('hora').textContent = 
+        h.toLocaleTimeString('pt-BR', {hour12: false});
 }, 1000);
 
-// GPS REAL
+// ========== GPS — SETA SUBINDO = NORTE ==========
 function iniciarGPS() {
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
             pos => {
-                est.lat = pos.coords.latitude;
-                est.lon = pos.coords.longitude;
-                est.vel = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
-                est.rumo = pos.coords.heading || 0;
+                estado.lat = pos.coords.latitude;
+                estado.lon = pos.coords.longitude;
+                estado.velocidade = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
+                estado.rumo = pos.coords.heading || 0; // ✅ 0° = NORTE = SUBINDO
+                estado.precisao = pos.coords.accuracy;
+                atualizarDesvio();
                 atualizarTela();
-                if (est.pintando) desenhar();
+                desenharCobertura();
             },
-            err => console.log("GPS disponível — mova para funcionar"),
+            err => console.log("GPS — simulação"),
             { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
         );
     }
-    // SIMULAÇÃO — remover quando usar GPS real
+    // ✅ SIMULAÇÃO: Anda para NORTE → seta SUBINDO na tela
     setInterval(() => {
-        est.lat += 0.000003;
-        est.lon += Math.sin(Date.now()/2000)*0.000002;
-        est.vel = 7 + Math.random()*3;
+        estado.lat += 0.000005; // ✅ Latitude aumenta = NORTE = SOBE
+        estado.lon += Math.sin(Date.now() / 2000) * 0.000002; // Desvio lateral
+        estado.rumo = 0; // ✅ Sempre aponta para CIMA
+        estado.velocidade = 8 + Math.random() * 2;
+        atualizarDesvio();
         atualizarTela();
-        if (est.pintando) desenhar();
-    }, 500);
+        desenharCobertura();
+    }, 300);
 }
 
-// Atualizar Tela
-function atualizarTela() {
-    document.getElementById('dLat').textContent = est.lat.toFixed(6);
-    document.getElementById('dLon').textContent = est.lon.toFixed(6);
-    document.getElementById('dVel').textContent = est.vel.toFixed(1);
-    document.getElementById('dLarg').textContent = est.largura.toFixed(1)+'m';
-    document.getElementById('dArea').textContent = est.area.toFixed(2)+'ha';
-
-    // Seta
-    document.getElementById('trator').style.transform = 
-        `translate(-50%, -50%) rotate(${est.rumo}deg)`;
-
-    // Linha AB
-    document.getElementById('linhaAB').style.display = (est.pontoA && est.pontoB) ? 'block' : 'none';
-    document.getElementById('pontoA').style.display = est.pontoA ? 'flex' : 'none';
-    document.getElementById('pontoB').style.display = est.pontoB ? 'flex' : 'none';
-
-    // Barra de Luz
-    atualizarBarraLuz();
-}
-
-// Barra de Luz
-function atualizarBarraLuz() {
-    if (!est.pontoA || !est.pontoB) {
-        document.getElementById('luzEsq').style.transform = 'scaleX(0)';
-        document.getElementById('luzDir').style.transform = 'scaleX(0)';
-        document.getElementById('desvioValor').textContent = '0.00 m';
+// ========== DESVIO DA LINHA VERTICAL ==========
+function atualizarDesvio() {
+    if (!estado.pontoA || !estado.pontoB) {
+        estado.desvio = 0;
         return;
     }
-    const lonC = (est.pontoA.lon + est.pontoB.lon)/2;
-    const metrosGrau = 111320 * Math.cos(est.lat * Math.PI/180);
-    const desvio = (est.lon - lonC) * metrosGrau;
-    document.getElementById('desvioValor').textContent = desvio.toFixed(2)+' m';
-    
-    const maxD = 0.5;
-    const esc = Math.min(Math.abs(desvio)/maxD, 1);
+    const lonCentral = (estado.pontoA.lon + estado.pontoB.lon) / 2;
+    const metrosPorGrau = 111320 * Math.cos(estado.lat * Math.PI / 180);
+    estado.desvio = (estado.lon - lonCentral) * metrosPorGrau;
+}
+
+// ========== ATUALIZAR TELA ==========
+function atualizarTela() {
+    document.getElementById('dLat').textContent = estado.lat.toFixed(6);
+    document.getElementById('dLon').textContent = estado.lon.toFixed(6);
+    document.getElementById('dVel').textContent = estado.velocidade.toFixed(1);
+    document.getElementById('dRumo').textContent = Math.round(estado.rumo) + '°';
+    document.getElementById('dLargura').textContent = estado.largura.toFixed(1) + 'm';
+    document.getElementById('dArea').textContent = estado.area.toFixed(2) + 'ha';
+
+    // ✅ SETA SUBINDO — rumo 0° = aponta para CIMA
+    document.getElementById('trator').style.transform = 
+        `translate(-50%, 50%) rotate(${estado.rumo}deg)`;
+
+    atualizarBarraLuz();
+
+    // Status GPS
+    const bolinha = document.getElementById('bolinhaGps');
+    bolinha.className = 'bolinha ' + (estado.correcao==='rtk'?'verde':estado.correcao==='sbas'?'amarela':'');
+    document.getElementById('precisao').textContent = 
+        estado.correcao==='rtk'?'2cm':estado.correcao==='sbas'?'40cm':'2-5m';
+    document.getElementById('modoGnss').textContent = estado.correcao.toUpperCase();
+
+    // Linha AB visível
+    document.getElementById('linhaAB').style.display = 
+        (estado.pontoA && estado.pontoB) ? 'block' : 'none';
+}
+
+// ========== BARRA DE LUZ ==========
+function atualizarBarraLuz() {
+    if (!estado.pontoA || !estado.pontoB) {
+        document.getElementById('luzEsq').style.transform = 'scaleX(0)';
+        document.getElementById('luzDir').style.transform = 'scaleX(0)';
+        document.getElementById('desvioValor').textContent = '--- m';
+        return;
+    }
+    const desvio = estado.desvio;
+    const maxDesvio = 0.5;
+    const escala = Math.min(Math.abs(desvio) / maxDesvio, 1);
     if (desvio < -0.02) {
-        document.getElementById('luzEsq').style.transform = `scaleX(${esc})`;
+        document.getElementById('luzEsq').style.transform = `scaleX(${escala})`;
         document.getElementById('luzDir').style.transform = 'scaleX(0)';
     } else if (desvio > 0.02) {
         document.getElementById('luzEsq').style.transform = 'scaleX(0)';
-        document.getElementById('luzDir').style.transform = `scaleX(${esc})`;
+        document.getElementById('luzDir').style.transform = `scaleX(${escala})`;
     } else {
         document.getElementById('luzEsq').style.transform = 'scaleX(0)';
         document.getElementById('luzDir').style.transform = 'scaleX(0)';
     }
+    document.getElementById('desvioValor').textContent = desvio.toFixed(2) + ' m';
 }
 
-// PINTAR / PARAR
-function alternarPintura() {
-    est.pintando = !est.pintando;
-    const btn = document.getElementById('btnPintar');
-    if (est.pintando) {
-        btn.classList.add('pintando');
-        btn.innerHTML = '⏹';
-        est.ultimoPonto = { lat: est.lat, lon: est.lon };
-    } else {
-        btn.classList.remove('pintando');
-        btn.innerHTML = '🖌️';
-        est.ultimoPonto = null;
-    }
-}
+// ========== COBERTURA — PINTA CONFORME SOBE ==========
+function desenharCobertura() {
+    const pxPorMetro = 6 / estado.escala;
+    const larguraFaixa = estado.largura * pxPorMetro;
 
-// DESENHAR COBERTURA
-function desenhar() {
-    const pxPorM = 6 / est.escala;
-    const larg = est.largura * pxPorM;
-
-    if (!est.ultimoPonto) {
-        est.ultimoPonto = { lat: est.lat, lon: est.lon };
+    if (!estado.ultimoPonto) {
+        estado.ultimoPonto = { lat: estado.lat, lon: estado.lon };
         return;
     }
 
-    const dy = (est.lat - est.ultimoPonto.lat) * 111000 * pxPorM;
-    const dx = (est.lon - est.ultimoPonto.lon) * 111000 * Math.cos(est.lat * Math.PI/180) * pxPorM;
-    const dist = Math.sqrt(dx*dx + dy*dy) / pxPorM;
-    est.distPercorrida += dist;
-    est.area = (est.distPercorrida * est.largura) / 10000;
+    // ✅ Movimento = NORTE (lat aumenta) → sobe na tela
+    const dy = (estado.lat - estado.ultimoPonto.lat) * 111000 * pxPorMetro;
+    const dx = (estado.lon - estado.ultimoPonto.lon) * 111000 * Math.cos(estado.lat * Math.PI/180) * pxPorMetro;
 
+    // Área percorrida
+    const dist = Math.sqrt(dx*dx + dy*dy) / pxPorMetro;
+    estado.distanciaPercorrida += dist;
+    estado.area = (estado.distanciaPercorrida * estado.largura) / 10000;
+
+    // Desenha faixa verde
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.fillStyle = 'rgba(34, 197, 94, 0.45)';
-    ctx.fillRect(-larg/2, -2, larg, 4);
+    ctx.fillRect(-larguraFaixa/2, -2, larguraFaixa, 4);
     ctx.restore();
 
-    est.ultimoPonto = { lat: est.lat, lon: est.lon };
-    document.getElementById('dArea').textContent = est.area.toFixed(2)+'ha';
+    estado.ultimoPonto = { lat: estado.lat, lon: estado.lon };
 }
 
-// FUNÇÕES
-function criarA() {
-    est.pontoA = { lat: est.lat, lon: est.lon };
-    est.pontoB = null;
-    est.distPercorrida = 0;
-    est.area = 0;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    atualizarTela();
+// ========== FUNÇÕES ==========
+function criarPontoA() {
+    estado.pontoA = { lat: estado.lat, lon: estado.lon };
+    document.getElementById('pontoA').style.display = 'flex';
+    document.getElementById('pontoB').style.display = 'none';
+    estado.pontoB = null;
+    estado.ultimoPonto = null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    estado.distanciaPercorrida = 0;
+    estado.area = 0;
+    alert('✅ PONTO A CRIADO (em BAIXO)! Siga em linha reta para CIMA para criar o Ponto B.');
 }
-function criarB() {
-    if (!est.pontoA) return;
-    est.pontoB = { lat: est.lat, lon: est.lon };
-    atualizarTela();
+
+function criarPontoB() {
+    if (!estado.pontoA) { alert('⚠️ Crie o PONTO A primeiro!'); return; }
+    estado.pontoB = { lat: estado.lat, lon: estado.lon };
+    document.getElementById('pontoB').style.display = 'flex';
+    estado.ativo = true;
+    alert('✅ LINHA AB VERTICAL CRIADA! Siga para CIMA — barra de luz ativa!');
 }
+
 function centralizar() {
-    if (!est.pontoA || !est.pontoB) return;
-    est.lon = (est.pontoA.lon + est.pontoB.lon)/2;
-    est.ultimoPonto = null;
+    estado.desvio = 0;
+    if (estado.pontoA && estado.pontoB) {
+        const lonCentral = (estado.pontoA.lon + estado.pontoB.lon) / 2;
+        estado.lon = lonCentral;
+        estado.ultimoPonto = null;
+    }
     atualizarTela();
+    alert('🎯 CENTRALIZADO!');
 }
-function zoomIn() { est.escala *= 1.2; }
-function zoomOut() { est.escala /= 1.2; }
+
+function alternarModoVisual() {
+    estado.modoVisual = estado.modoVisual === '2d' ? '3d' : '2d';
+    mapa.classList.remove('modo-2d', 'modo-3d');
+    mapa.classList.add('modo-' + estado.modoVisual);
+    document.getElementById('btnModoVisual').classList.toggle('ativo');
+}
+
+function paralelas() {
+    if (!estado.pontoA || !estado.pontoB) { alert('⚠️ Crie a Linha AB primeiro!'); return; }
+    alert('〰️ Modo Paralelas ativado!');
+}
+
+function zoomIn() { estado.escala *= 1.3; }
+function zoomOut() { estado.escala /= 1.3; }
 
 function abrirConfig() {
     document.getElementById('modalConfig').style.display = 'flex';
-    document.getElementById('inpLarg').value = est.largura;
+    document.getElementById('inpLargura').value = estado.largura;
+    document.getElementById('inpTalhao').value = estado.talhao;
+    document.getElementById('inpCorrecao').value = estado.correcao;
 }
 function fecharConfig() {
     document.getElementById('modalConfig').style.display = 'none';
 }
 function salvarConfig() {
-    est.largura = parseFloat(document.getElementById('inpLarg').value);
+    estado.largura = parseFloat(document.getElementById('inpLargura').value);
+    estado.talhao = document.getElementById('inpTalhao').value;
+    estado.correcao = document.getElementById('inpCorrecao').value;
+    localStorage.setItem('portalSatConfig', JSON.stringify(estado));
     fecharConfig();
     atualizarTela();
+    alert('✅ Salvo! Largura: ' + estado.largura + 'm');
 }
+
 function salvarTalhao() {
-    localStorage.setItem('talhao', JSON.stringify({
-        a: est.pontoA, b: est.pontoB, larg: est.largura, area: est.area
+    localStorage.setItem('talhao_' + estado.talhao, JSON.stringify({
+        pontoA: estado.pontoA, pontoB: estado.pontoB,
+        largura: estado.largura, area: estado.area,
+        distancia: estado.distanciaPercorrida
     }));
+    alert('✅ Talhão SALVO!');
 }
+
 function carregarTalhao() {
-    const d = localStorage.getItem('talhao');
-    if (d) {
-        const t = JSON.parse(d);
-        est.pontoA = t.a; est.pontoB = t.b;
-        est.largura = t.larg; est.area = t.area || 0;
+    const nome = prompt('Nome do talhão:');
+    if (!nome) return;
+    const dados = localStorage.getItem('talhao_' + nome);
+    if (dados) {
+        const t = JSON.parse(dados);
+        estado.pontoA = t.pontoA;
+        estado.pontoB = t.pontoB;
+        estado.largura = t.largura;
+        estado.talhao = nome;
+        estado.area = t.area;
+        estado.distanciaPercorrida = t.distancia || 0;
+        document.getElementById('pontoA').style.display = t.pontoA ? 'flex' : 'none';
+        document.getElementById('pontoB').style.display = t.pontoB ? 'flex' : 'none';
         atualizarTela();
-    }
+        alert('✅ Talhão CARREGADO!');
+    } else alert('❌ Não encontrado!');
 }
-function limpar() {
-    est.pontoA = null; est.pontoB = null;
-    est.area = 0; est.distPercorrida = 0;
-    est.ultimoPonto = null;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+function limparTudo() {
+    if (!confirm('🗑️ Limpar cobertura e pontos?')) return;
+    estado.pontoA = null; estado.pontoB = null;
+    estado.area = 0; estado.distanciaPercorrida = 0;
+    estado.ultimoPonto = null; estado.desvio = 0;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('pontoA').style.display = 'none';
+    document.getElementById('pontoB').style.display = 'none';
     atualizarTela();
 }
 
-// INICIAR
+// ========== INICIALIZAÇÃO ==========
 window.onload = () => {
+    const cfg = localStorage.getItem('portalSatConfig');
+    if (cfg) Object.assign(estado, JSON.parse(cfg));
     ajustarCanvas();
     atualizarTela();
     iniciarGPS();
