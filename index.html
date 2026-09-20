@@ -1,34 +1,500 @@
-<!-- Configurações / Conexão -->
-<section class="card" id="configCard" aria-label="Configurações e conexão">
-  <h2>Configurações</h2>
-  <div class="grid" style="align-items: start;">
-    <div>
-      <label for="port">Conexão (ex.: BLE, COM,/[Identificador]):</label>
-      <input type="text" id="port" placeholder="Conexão (ex.: BLE-Trimble-001)" />
-    </div>
-    <div>
-      <label for="baud">Baud Rate (ex.: 9600):</label>
-      <input type="number" id="baud" value="9600" />
-    </div>
-    <div style="grid-column: 1 / 3;">
-      <label>Sentences NMEA a enviar/esperar:</label>
-      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
-        <label><input type="checkbox" checked disabled> GGA</label>
-        <label><input type="checkbox" checked disabled> RMC</label>
-        <label><input type="checkbox" checked disabled> GSA</label>
-        <label><input type="checkbox" checked disabled> GSV</label>
-      </div>
-    </div>
-  </div>
-  <div style="margin-top:0.75rem;">
-    <button id="connectBtn" title="Conectar com o dispositivo via bridge nativo">Conectar</button>
-    <button class="secondary" id="simulateBtn" style="margin-left:0.5rem;">Simular Dados</button>
-  </div>
-  <p style="color:#9fb6d6; margin-top:0.5rem;">Observação: a conexão real requer um plugin nativo (Cordova/Capacitor) que passe dados para a página JS. Este HTML facilita a estrutura de tela e parsing básico.</p>
-</section>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PORTAL SAT GPS 🛰️</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        html, body {
+            width: 100vw; height: 100vh; height: 100dvh;
+            overflow: hidden; position: fixed;
+            background: #000; color: #fff;
+            transform: rotate(0deg); /* Tela deitada = paisagem */
+            user-select: none;
+        }
 
-<!-- Logs / Debug -->
-<section class="card" id="logsCard" aria-label="Logs">
-  <h2>Logs</h2>
-  <pre id="log">Aguardando dados...</pre>
-</section>
+        /* TELA PRINCIPAL — PAISAGEM */
+        .tela {
+            width: 100%; height: 100%;
+            display: grid;
+            grid-template-rows: 50px 1fr 70px;
+            grid-template-columns: 220px 1fr 200px;
+            grid-template-areas:
+                "topo topo topo"
+                "dados mapa botoes"
+                "barra barra barra";
+            gap: 2px;
+            background: #111;
+        }
+
+        /* ========== TOPO — STATUS GPS ========== */
+        .topo {
+            grid-area: topo;
+            background: #0b2344;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 15px; border-bottom: 2px solid #2E7D32;
+        }
+        .logo { font-size: 22px; font-weight: bold; color: #4ade80; }
+        .status-gps { display: flex; gap: 20px; font-size: 14px; }
+        .status-item { display: flex; align-items: center; gap: 5px; }
+        .bolinha { width: 14px; height: 14px; border-radius: 50%; background: #555; }
+        .bolinha.verde { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .bolinha.amarela { background: #eab308; }
+        .bolinha.vermelha { background: #ef4444; }
+
+        /* ========== BARRA DE LUZ — TRIMBLE STYLE ========== */
+        .barra-luz {
+            position: absolute; top: 55px; left: 50%; transform: translateX(-50%);
+            width: 320px; height: 24px;
+            background: #222; border: 2px solid #444; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100;
+        }
+        .luz-esq, .luz-dir {
+            height: 18px; width: 140px;
+            background: linear-gradient(90deg, #ef4444 0%, #eab308 50%, #22c55e 100%);
+            border-radius: 3px;
+        }
+        .luz-esq { transform: scaleX(0.3); transform-origin: right; margin-right: 2px; }
+        .luz-dir { transform: scaleX(0.3); transform-origin: left; margin-left: 2px; }
+        .centro-luz {
+            width: 4px; height: 22px; background: #fff; border-radius: 2px;
+            z-index: 5;
+        }
+        .desvio-valor {
+            position: absolute; bottom: -22px; font-size: 16px; font-weight: bold;
+            color: #fff; background: #000; padding: 2px 8px; border-radius: 4px;
+        }
+
+        /* ========== PAINEL ESQUERDO — DADOS ========== */
+        .painel-esq {
+            grid-area: dados;
+            background: #1a1a2e;
+            padding: 10px; overflow-y: auto;
+        }
+        .dado-box {
+            background: #252540; padding: 10px; margin-bottom: 10px;
+            border-radius: 6px; border-left: 3px solid #2E7D32;
+        }
+        .dado-label { font-size: 11px; color: #999; margin-bottom: 3px; }
+        .dado-valor { font-size: 18px; font-weight: bold; color: #4ade80; }
+        .dado-valor.pequeno { font-size: 14px; }
+
+        /* ========== MAPA — ÁREA CENTRAL ========== */
+        .mapa {
+            grid-area: mapa;
+            background: #0a0a12;
+            position: relative; overflow: hidden;
+            background-image: 
+                linear-gradient(rgba(46, 125, 50, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46, 125, 50, 0.15) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .triangulo {
+            position: absolute; bottom: 50%; left: 50%;
+            transform: translate(-50%, 50%);
+            width: 0; height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 24px solid #ffd700;
+            filter: drop-shadow(0 0 6px #ffd700);
+            z-index: 50;
+            transition: transform 0.15s ease-out;
+        }
+        .linha-ab {
+            position: absolute; bottom: 50%; left: 0; right: 0;
+            height: 3px; background: linear-gradient(90deg, #22c55e, #4ade80, #22c55e);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+            transform: translateY(50%);
+        }
+        .ponto-a {
+            position: absolute; bottom: calc(50% + 20px); left: 50%;
+            transform: translateX(-50%);
+            width: 30px; height: 30px; background: #22c55e;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 16px; color: #fff;
+            box-shadow: 0 0 10px #22c55e; z-index: 55;
+        }
+        .ponto-b {
+            position: absolute; bottom: calc(50% - 50px); left: 50%;
+            transform: translateX(-50%);
+            width: 30px; height: 30px; background: #3b82f6;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 16px; color: #fff;
+            box-shadow: 0 0 10px #3b82f6; z-index: 55;
+        }
+        .cobertura-faixa {
+            position: absolute; bottom: 50%; left: 0; right: 0;
+            height: 0; background: rgba(46, 125, 50, 0.35);
+            transform: translateY(50%);
+            transition: height 0.3s ease;
+        }
+        .pintado {
+            position: absolute; background: rgba(46, 125, 50, 0.5);
+            pointer-events: none;
+        }
+
+        /* ========== PAINEL DIREITO — BOTÕES ========== */
+        .painel-dir {
+            grid-area: botoes;
+            background: #1a1a2e;
+            padding: 10px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .btn {
+            padding: 12px 8px; font-size: 13px; font-weight: bold; border: none;
+            border-radius: 6px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-verde { background: #2E7D32; color: #fff; }
+        .btn-verde:active { background: #1b5e20; transform: scale(0.97); }
+        .btn-azul { background: #1565c0; color: #fff; }
+        .btn-azul:active { background: #0d47a1; }
+        .btn-laranja { background: #e65100; color: #fff; }
+        .btn-laranja:active { background: #bf360c; }
+        .btn-vermelho { background: #c62828; color: #fff; }
+        .btn-vermelho:active { background: #8e0000; }
+        .btn-cinza { background: #424242; color: #fff; }
+        .btn-cinza:active { background: #212121; }
+
+        /* ========== BARRA INFERIOR — MODO ========== */
+        .barra-inf {
+            grid-area: barra;
+            background: #0b2344;
+            display: flex; align-items: center; justify-content: space-around;
+            padding: 0 10px; border-top: 2px solid #2E7D32;
+        }
+        .modo { text-align: center; font-size: 13px; }
+        .modo span { display: block; font-size: 18px; font-weight: bold; color: #4ade80; }
+
+        /* MODAL CONFIGURAÇÕES */
+        .modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9); z-index: 200;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #1a1a2e; padding: 25px; border-radius: 10px;
+            border: 2px solid #2E7D32; width: 90%; max-width: 450px;
+        }
+        .modal-content h2 { color: #4ade80; margin-bottom: 20px; text-align: center; }
+        .campo { margin-bottom: 15px; }
+        .campo label { display: block; margin-bottom: 5px; color: #ccc; }
+        .campo input, .campo select {
+            width: 100%; padding: 10px; border-radius: 5px; border: none;
+            background: #252540; color: #fff; font-size: 16px;
+        }
+        .modal-botoes { display: flex; gap: 10px; margin-top: 20px; }
+
+        /* Ajuste para tela deitada */
+        @media (orientation: portrait) {
+            body { transform: rotate(90deg); transform-origin: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="tela">
+    <!-- TOPO -->
+    <div class="topo">
+        <div class="logo">🛰️ PORTAL SAT GPS</div>
+        <div class="status-gps">
+            <div class="status-item"><span id="bolinha-gps" class="bolinha"></span> GPS</div>
+            <div class="status-item">📡 <span id="sat-num">0/12</span></div>
+            <div class="status-item">🎯 <span id="precisao">--- m</span></div>
+            <div class="status-item" id="modo-gnss">GNSS</div>
+            <div class="status-item">⏱️ <span id="hora">00:00:00</span></div>
+        </div>
+    </div>
+
+    <!-- BARRA DE LUZ — ESTILO TRIMBLE -->
+    <div class="barra-luz" id="barraLuz">
+        <div class="luz-esq" id="luzEsq"></div>
+        <div class="centro-luz"></div>
+        <div class="luz-dir" id="luzDir"></div>
+        <div class="desvio-valor" id="desvioValor">0.00 m</div>
+    </div>
+
+    <!-- PAINEL ESQUERDO — DADOS -->
+    <div class="painel-esq">
+        <div class="dado-box">
+            <div class="dado-label">LATITUDE</div>
+            <div class="dado-valor pequeno" id="lat">--.------</div>
+        </div>
+        <div class="dado-box">
+            <div class="dado-label">LONGITUDE</div>
+            <div class="dado-valor pequeno" id="lon">--.------</div>
+        </div>
+        <div class="dado-box">
+            <div class="dado-label">VELOCIDADE</div>
+            <div class="dado-valor" id="velocidade">0.0 km/h</div>
+        </div>
+        <div class="dado-box">
+            <div class="dado-label">RUMO</div>
+            <div class="dado-valor" id="rumo">000°</div>
+        </div>
+        <div class="dado-box">
+            <div class="dado-label">LARG. IMPLEMENTO</div>
+            <div class="dado-valor" id="largura">24.0 m</div>
+        </div>
+        <div class="dado-box">
+            <div class="dado-label">ÁREA TRABALHADA</div>
+            <div class="dado-valor" id="area">0.00 ha</div>
+        </div>
+        <div class="dado-box">
+            <div class="dado-label">TALHÃO</div>
+            <div class="dado-valor pequeno" id="nomeTalhao">Padrão</div>
+        </div>
+    </div>
+
+    <!-- MAPA CENTRAL -->
+    <div class="mapa" id="mapa">
+        <div class="cobertura-faixa" id="coberturaFaixa"></div>
+        <div class="linha-ab" id="linhaAB"></div>
+        <div class="ponto-a" id="pontoA" style="display:none;">A</div>
+        <div class="ponto-b" id="pontoB" style="display:none;">B</div>
+        <div class="triangulo" id="trator"></div>
+    </div>
+
+    <!-- PAINEL DIREITO — BOTÕES -->
+    <div class="painel-dir">
+        <button class="btn btn-verde" onclick="criarPontoA()">📍 PONTO A</button>
+        <button class="btn btn-azul" onclick="criarPontoB()">📍 PONTO B</button>
+        <button class="btn btn-laranja" onclick="paralelas()">〰️ PARALELAS</button>
+        <button class="btn btn-cinza" onclick="modoCurva()">🔄 CURVA</button>
+        <button class="btn btn-verde" onclick="abrirConfig()">⚙️ CONFIG</button>
+        <button class="btn btn-azul" onclick="salvarTalhao()">💾 SALVAR</button>
+        <button class="btn btn-cinza" onclick="carregarTalhao()">📂 CARREGAR</button>
+        <button class="btn btn-vermelho" onclick="limparTudo()">🗑️ LIMPAR</button>
+        <button class="btn btn-cinza" onclick="alternarModo()">🔄 2D/3D</button>
+    </div>
+
+    <!-- BARRA INFERIOR -->
+    <div class="barra-inf">
+        <div class="modo">MODO<span id="modoAtual">RETA</span></div>
+        <div class="modo">FAIXA<span id="larguraFaixa">24.0m</span></div>
+        <div class="modo">DESVIO<span id="desvio">0.00m</span></div>
+        <div class="modo">PRECISÃO<span id="prec">---</span></div>
+        <div class="modo">CORREÇÃO<span id="correcao">GNSS</span></div>
+    </div>
+</div>
+
+<!-- MODAL CONFIGURAÇÕES -->
+<div class="modal" id="modalConfig">
+    <div class="modal-content">
+        <h2>⚙️ CONFIGURAÇÕES</h2>
+        <div class="campo">
+            <label>Largura do Implemento (metros)</label>
+            <input type="number" id="inpLargura" value="24.0" step="0.1">
+        </div>
+        <div class="campo">
+            <label>Nome do Talhão</label>
+            <input type="text" id="inpTalhao" value="Talhão 1">
+        </div>
+        <div class="campo">
+            <label>Tipo de Linha</label>
+            <select id="inpModo">
+                <option value="reta">Linha Reta (AB)</option>
+                <option value="curva">Curva Constante</option>
+                <option value="contorno">Contorno</option>
+                <option value="pivot">Pivot Central</option>
+            </select>
+        </div>
+        <div class="campo">
+            <label>Correção GNSS</label>
+            <select id="inpCorrecao">
+                <option value="gnss">GNSS (2-5m)</option>
+                <option value="sbas">SBAS (30-50cm)</option>
+                <option value="rtk">RTK (1-2cm)</option>
+            </select>
+        </div>
+        <div class="modal-botoes">
+            <button class="btn btn-verde" onclick="salvarConfig()">✅ SALVAR</button>
+            <button class="btn btn-cinza" onclick="fecharConfig()">❌ CANCELAR</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================================================
+// 🛰️ PORTAL SAT GPS — SISTEMA PRINCIPAL
+// ==================================================
+let estado = {
+    lat: 0, lon: 0, velocidade: 0, rumo: 0,
+    pontoA: null, pontoB: null,
+    largura: 24.0, desvio: 0, area: 0,
+    modo: 'reta', correcao: 'gnss',
+    talhao: 'Talhão 1', ativo: false
+};
+
+// Atualizar relógio
+setInterval(() => {
+    const h = new Date();
+    document.getElementById('hora').textContent = 
+        h.toLocaleTimeString('pt-BR', {hour12: false});
+}, 1000);
+
+// ========== SIMULAÇÃO GPS (substituir por NMEA real) ==========
+function lerGPS() {
+    // ⚡ CONECTAR ANTENA EXTERNA AQUI:
+    // Usar Web Bluetooth / Serial API para ler NMEA
+    // Exemplo: $GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47
+    
+    // SIMULAÇÃO — remover quando usar GPS real
+    estado.lat += (Math.random()-0.5)*0.00001;
+    estado.lon += (Math.random()-0.5)*0.00001;
+    estado.velocidade = 8.0 + Math.random()*2;
+    estado.rumo = 180 + (Math.random()-0.5)*4;
+    estado.desvio = (Math.random()-0.5)*0.3;
+    
+    atualizarTela();
+}
+setInterval(lerGPS, 500);
+
+// ========== ATUALIZAR TELA ==========
+function atualizarTela() {
+    document.getElementById('lat').textContent = estado.lat.toFixed(6);
+    document.getElementById('lon').textContent = estado.lon.toFixed(6);
+    document.getElementById('velocidade').textContent = estado.velocidade.toFixed(1) + ' km/h';
+    document.getElementById('rumo').textContent = Math.round(estado.rumo) + '°';
+    document.getElementById('desvio').textContent = estado.desvio.toFixed(2) + ' m';
+    document.getElementById('largura').textContent = estado.largura.toFixed(1) + ' m';
+    document.getElementById('larguraFaixa').textContent = estado.largura.toFixed(1) + 'm';
+    document.getElementById('area').textContent = estado.area.toFixed(2) + ' ha';
+    document.getElementById('nomeTalhao').textContent = estado.talhao;
+    document.getElementById('modoAtual').textContent = estado.modo.toUpperCase();
+    document.getElementById('correcao').textContent = estado.correcao.toUpperCase();
+    
+    // Barra de Luz
+    atualizarBarraLuz();
+    
+    // Status GPS
+    const bolinha = document.getElementById('bolinha-gps');
+    bolinha.className = 'bolinha ' + (estado.correcao==='rtk'?'verde':estado.correcao==='sbas'?'amarela':'cinza');
+    document.getElementById('prec').textContent = estado.correcao==='rtk'?'2cm':estado.correcao==='sbas'?'40cm':'2-5m';
+    document.getElementById('precisao').textContent = estado.correcao==='rtk'?'0.02 m':estado.correcao==='sbas'?'0.40 m':'2.50 m';
+    
+    // Rotação do triângulo
+    document.getElementById('trator').style.transform = 
+        `translate(-50%, 50%) rotate(${estado.rumo}deg)`;
+    
+    // Cobertura
+    document.getElementById('coberturaFaixa').style.height = (estado.largura * 6) + 'px';
+}
+
+// ========== BARRA DE LUZ (estilo Trimble) ==========
+function atualizarBarraLuz() {
+    const desvio = estado.desvio;
+    const max = 0.5; // 50cm fim da barra
+    const escala = Math.min(Math.abs(desvio)/max, 1);
+    
+    if (desvio < -0.02) {
+        document.getElementById('luzEsq').style.transform = `scaleX(${escala})`;
+        document.getElementById('luzDir').style.transform = 'scaleX(0)';
+    } else if (desvio > 0.02) {
+        document.getElementById('luzEsq').style.transform = 'scaleX(0)';
+        document.getElementById('luzDir').style.transform = `scaleX(${escala})`;
+    } else {
+        document.getElementById('luzEsq').style.transform = 'scaleX(0)';
+        document.getElementById('luzDir').style.transform = 'scaleX(0)';
+    }
+    document.getElementById('desvioValor').textContent = desvio.toFixed(2) + ' m';
+}
+
+// ========== FUNÇÕES PRINCIPAIS ==========
+function criarPontoA() {
+    estado.pontoA = {lat: estado.lat, lon: estado.lon};
+    document.getElementById('pontoA').style.display = 'flex';
+    document.getElementById('pontoB').style.display = 'none';
+    estado.pontoB = null;
+    alert('✅ PONTO A CRIADO! Continue em linha reta para criar o Ponto B.');
+}
+
+function criarPontoB() {
+    if (!estado.pontoA) { alert('⚠️ Crie o PONTO A primeiro!'); return; }
+    estado.pontoB = {lat: estado.lat, lon: estado.lon};
+    document.getElementById('pontoB').style.display = 'flex';
+    estado.ativo = true;
+    alert('✅ LINHA AB CRIADA! Navegando...');
+}
+
+function paralelas() {
+    if (!estado.pontoA || !estado.pontoB) { alert('⚠️ Crie a Linha AB primeiro!'); return; }
+    alert('〰️ Modo Paralelas ativado!');
+}
+
+function modoCurva() {
+    estado.modo = estado.modo === 'curva' ? 'reta' : 'curva';
+    alert(`🔄 Modo: ${estado.modo.toUpperCase()}`);
+}
+
+function alternarModo() {
+    document.body.style.transform = 
+        document.body.style.transform === 'scale(0.95)' ? '' : 'scale(0.95)';
+}
+
+function abrirConfig() {
+    document.getElementById('modalConfig').style.display = 'flex';
+    document.getElementById('inpLargura').value = estado.largura;
+    document.getElementById('inpTalhao').value = estado.talhao;
+    document.getElementById('inpModo').value = estado.modo;
+    document.getElementById('inpCorrecao').value = estado.correcao;
+}
+
+function fecharConfig() {
+    document.getElementById('modalConfig').style.display = 'none';
+}
+
+function salvarConfig() {
+    estado.largura = parseFloat(document.getElementById('inpLargura').value);
+    estado.talhao = document.getElementById('inpTalhao').value;
+    estado.modo = document.getElementById('inpModo').value;
+    estado.correcao = document.getElementById('inpCorrecao').value;
+    localStorage.setItem('portalSatConfig', JSON.stringify(estado));
+    fecharConfig();
+    atualizarTela();
+    alert('✅ Configurações salvas!');
+}
+
+function salvarTalhao() {
+    localStorage.setItem('talhao_' + estado.talhao, JSON.stringify({
+        pontoA: estado.pontoA, pontoB: estado.pontoB,
+        largura: estado.largura, area: estado.area, data: new Date()
+    }));
+    alert('✅ Talhão SALVO!');
+}
+
+function carregarTalhao() {
+    const nome = prompt('Digite o nome do talhão:');
+    if (!nome) return;
+    const dados = localStorage.getItem('talhao_' + nome);
+    if (dados) {
+        const t = JSON.parse(dados);
+        estado.pontoA = t.pontoA;
+        estado.pontoB = t.pontoB;
+        estado.largura = t.largura;
+        estado.talhao = nome;
+        document.getElementById('pontoA').style.display = t.pontoA ? 'flex' : 'none';
+        document.getElementById('pontoB').style.display = t.pontoB ? 'flex' : 'none';
+        atualizarTela();
+        alert('✅ Talhão CARREGADO!');
+    } else alert('❌ Talhão não encontrado!');
+}
+
+function limparTudo() {
+    if (!confirm('🗑️ Limpar tudo?')) return;
+    estado.pontoA = null; estado.pontoB = null;
+    estado.area = 0; estado.ativo = false;
+    document.getElementById('pontoA').style.display = 'none';
+    document.getElementById('pontoB').style.display = 'none';
+    atualizarTela();
+}
+
+// Carregar configurações salvas
+window.onload = () => {
+    const cfg = localStorage.getItem('portalSatConfig');
+    if (cfg) Object.assign(estado, JSON.parse(cfg));
+    atualizarTela();
+};
+</script>
+</body>
+</html>
