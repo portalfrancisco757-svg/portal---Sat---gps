@@ -86,12 +86,23 @@
             grid-area: mapa; background: #050810;
             position: relative; overflow: hidden;
             cursor: crosshair;
+            transition: transform 0.5s ease;
         }
-        .mapa-grade {
+        /* MODO 2D — Plano */
+        .mapa-grade-2d {
             background-image: 
-                linear-gradient(rgba(46, 125, 50, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(46, 125, 50, 0.08) 1px, transparent 1px);
-            background-size: 20px 20px;
+                linear-gradient(rgba(46, 125, 50, 0.12) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46, 125, 50, 0.12) 1px, transparent 1px);
+            background-size: 25px 25px;
+        }
+        /* MODO 3D — Perspectiva */
+        .mapa-grade-3d {
+            background-image: 
+                linear-gradient(rgba(46, 125, 50, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46, 125, 50, 0.15) 1px, transparent 1px);
+            background-size: 25px 25px;
+            transform: perspective(800px) rotateX(30deg);
+            transform-origin: center center;
         }
 
         #canvasCobertura {
@@ -99,7 +110,6 @@
             pointer-events: none; z-index: 10;
         }
 
-        /* LINHAS PARALELAS NA TELA INTEIRA */
         .linha-guia-principal {
             position: absolute; top: 0; bottom: 0; width: 3px;
             background: linear-gradient(180deg, #22c55e, #4ade80, #22c55e);
@@ -122,16 +132,17 @@
         .ponto-a { background: #22c55e; box-shadow: 0 0 12px #22c55e; bottom: 20px; }
         .ponto-b { background: #3b82f6; box-shadow: 0 0 12px #3b82f6; top: 20px; }
 
+        /* FLECHA AMARELA — TRATOR — SEGUE MOVIMENTO GPS */
         .trator {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
+            position: absolute; 
             width: 0; height: 0;
             border-left: 15px solid transparent;
             border-right: 15px solid transparent;
             border-bottom: 30px solid #ffd700;
             filter: drop-shadow(0 0 10px #ffd700);
             z-index: 30;
-            transition: transform 0.1s linear;
+            transition: transform 0.15s linear;
+            transform-origin: center center;
         }
 
         .dados {
@@ -204,10 +215,9 @@
         <button class="btn" onclick="paralelas()" title="Linhas Paralelas">〰️</button>
     </div>
 
-    <div class="mapa mapa-grade modo-2d" id="mapa">
+    <div class="mapa mapa-grade-2d" id="mapa">
         <canvas id="canvasCobertura"></canvas>
         <div class="linha-guia-principal" id="linhaGuia"></div>
-        <!-- Linhas paralelas geradas dinamicamente -->
         <div class="ponto-a" id="pontoA">A</div>
         <div class="ponto-b" id="pontoB">B</div>
         <div class="trator" id="trator"></div>
@@ -273,7 +283,7 @@ const ESTADO = {
     
     pontoA: null, pontoB: null,
     desvioLinha: 0,
-    distanciaDesdeA: 0, // Distância percorrida desde o Ponto A
+    distanciaDesdeA: 0,
     pontoA_lat: null, pontoA_lon: null,
     
     larguraImplemento: 24.0,
@@ -288,7 +298,15 @@ const ESTADO = {
     ultimoPonto: null,
     
     modoVisual: '2d',
-    linhasParalelas: [] // Armazena as linhas paralelas
+    linhasParalelas: [],
+    
+    // Controle de movimento do mapa
+    deslocamentoX: 0,
+    deslocamentoY: 0,
+    latOrigem: null,
+    lonOrigem: null,
+    metrosPorGrauLat: 111320,
+    metrosPorGrauLon: 111320 * Math.cos(-26.34 * Math.PI / 180)
 };
 
 const canvas = document.getElementById('canvasCobertura');
@@ -312,40 +330,89 @@ setInterval(() => {
     document.getElementById('hora').textContent = h.toLocaleTimeString('pt-BR', {hour12: false});
 }, 1000);
 
-// ========== CÁLCULO DE DISTÂNCIA ENTRE PONTOS (Haversine) ==========
+// ========== CÁLCULO DE DISTÂNCIA ENTRE PONTOS ==========
 function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // Raio da Terra em metros
+    const R = 6371000;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
               Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
               Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c; // Distância em metros
+    return R * c;
 }
 
-// ========== INICIAR GPS ==========
+// ========== ATUALIZAR POSIÇÃO DO MAPA — FLECHA NO CENTRO, MAPA SE MOVE ==========
+function atualizarPosicaoMapa() {
+    // Define ponto de origem na primeira atualização
+    if (ESTADO.latOrigem === null) {
+        ESTADO.latOrigem = ESTADO.lat;
+        ESTADO.lonOrigem = ESTADO.lon;
+    }
+
+    // Atualiza fator de metros por grau com a latitude atual
+    ESTADO.metrosPorGrauLon = 111320 * Math.cos(ESTADO.lat * Math.PI / 180);
+
+    // Calcula deslocamento em graus → pixels
+    const dLat = ESTADO.lat - ESTADO.latOrigem;
+    const dLon = ESTADO.lon - ESTADO.lonOrigem;
+    
+    const pxPorMetro = 3 * ESTADO.escala; // Escala visual
+    const deslX = dLon * ESTADO.metrosPorGrauLon * pxPorMetro;
+    const deslY = -dLat * ESTADO.metrosPorGrauLat * pxPorMetro;
+
+    // Aplica transformação no mapa
+    if (ESTADO.modoVisual === '2d') {
+        mapa.style.transform = `translate(${-deslX}px, ${-deslY}px)`;
+    } else {
+        mapa.style.transform = `translate(${-deslX}px, ${-deslY}px) perspective(800px) rotateX(30deg)`;
+    }
+
+    // Ajusta posição do trator (sempre no centro da tela)
+    trator.style.left = '50%';
+    trator.style.top = '50%';
+    trator.style.transform = `translate(-50%, -50%) rotate(${ESTADO.rumo}deg)`;
+}
+
+// ========== INICIAR GPS — FUNCIONALIDADE PRINCIPAL ==========
 function iniciarGPS() {
     if (!navigator.geolocation) {
-        alert("⚠️ GPS não disponível. Verifique permissões.");
+        alert("⚠️ GPS não disponível. Verifique permissões de localização.");
         return;
     }
 
     const opcoesGPS = {
         enableHighAccuracy: true,
-        maximumAge: 1000,
-        timeout: 5000
+        maximumAge: 500,
+        timeout: 3000
     };
 
     navigator.geolocation.watchPosition(
         (posicao) => {
+            // Salva posição anterior
+            ESTADO.latAnterior = ESTADO.lat;
+            ESTADO.lonAnterior = ESTADO.lon;
+
+            // Atualiza com dados reais do GPS
             ESTADO.lat = posicao.coords.latitude;
             ESTADO.lon = posicao.coords.longitude;
             ESTADO.precisao = posicao.coords.accuracy || 0;
             ESTADO.satelites = posicao.coords.satellites || 8;
             ESTADO.velocidade = posicao.coords.speed ? posicao.coords.speed * 3.6 : 0;
-            if (posicao.coords.heading !== null) {
+            
+            // Rumo/direção — PRIORIDADE dos dados do GPS
+            if (posicao.coords.heading !== null && posicao.coords.speed > 0.3) {
                 ESTADO.rumo = posicao.coords.heading;
+            } 
+            // Fallback: calcula rumo pela diferença de posição
+            else if (ESTADO.latAnterior && ESTADO.lonAnterior) {
+                const dLat = ESTADO.lat - ESTADO.latAnterior;
+                const dLon = ESTADO.lon - ESTADO.lonAnterior;
+                if (Math.abs(dLat) > 0.000001 || Math.abs(dLon) > 0.000001) {
+                    let rumoCalc = Math.atan2(dLon, dLat) * 180 / Math.PI;
+                    if (rumoCalc < 0) rumoCalc += 360;
+                    ESTADO.rumo = rumoCalc;
+                }
             }
 
             // ========== VERIFICAR DISTÂNCIA DESDE PONTO A ==========
@@ -357,7 +424,6 @@ function iniciarGPS() {
                 ESTADO.distanciaDesdeA = dist;
                 document.getElementById('dDistancia').textContent = dist.toFixed(1) + ' m';
                 
-                // LIBERAR PONTO B APÓS 5 METROS
                 if (dist >= 5) {
                     btnB.disabled = false;
                     avisoDistancia.style.display = 'block';
@@ -370,32 +436,37 @@ function iniciarGPS() {
             }
 
             calcularDesvioLinha();
+            atualizarPosicaoMapa(); // 🔑 MAPA SE MOVE CONFORME GPS
             atualizarTela();
             if (ESTADO.pintando) desenharCobertura();
         },
         (erro) => {
+            console.warn("⚠️ GPS — modo simulação:", erro.message);
             simularMovimento();
         },
         opcoesGPS
     );
 }
 
+// ========== SIMULAÇÃO DE MOVIMENTO (quando sem sinal GPS) ==========
 let timerSimulacao = null;
 function simularMovimento() {
     if (timerSimulacao) return;
     timerSimulacao = setInterval(() => {
         const rad = ESTADO.rumo * Math.PI / 180;
-        const passo = 0.000004;
+        const passo = 0.000003;
+        
+        ESTADO.latAnterior = ESTADO.lat;
+        ESTADO.lonAnterior = ESTADO.lon;
         
         ESTADO.lat += Math.cos(rad) * passo;
         ESTADO.lon += Math.sin(rad) * passo;
-        ESTADO.rumo += Math.sin(Date.now() / 6000) * 0.3;
+        ESTADO.rumo += Math.sin(Date.now() / 8000) * 0.2;
         if (ESTADO.rumo < 0) ESTADO.rumo += 360;
         if (ESTADO.rumo >= 360) ESTADO.rumo -= 360;
-        ESTADO.velocidade = 7 + Math.random() * 4;
+        ESTADO.velocidade = 8 + Math.sin(Date.now() / 5000) * 3;
         ESTADO.precisao = 3.5;
 
-        // Atualizar distância desde A
         if (ESTADO.pontoA && !ESTADO.pontoB) {
             const dist = calcularDistancia(
                 ESTADO.pontoA.lat, ESTADO.pontoA.lon,
@@ -416,6 +487,7 @@ function simularMovimento() {
         }
 
         calcularDesvioLinha();
+        atualizarPosicaoMapa();
         atualizarTela();
         if (ESTADO.pintando) desenharCobertura();
     }, 300);
@@ -466,15 +538,12 @@ function atualizarTela() {
     document.getElementById('dLargura').textContent = ESTADO.larguraImplemento.toFixed(1) + ' m';
     document.getElementById('dArea').textContent = ESTADO.areaTotal.toFixed(2) + ' ha';
     
-    trator.style.transform = `translate(-50%, -50%) rotate(${ESTADO.rumo}deg)`;
-    
     atualizarBarraLuz();
     atualizarStatusGNSS();
     
     document.getElementById('pontoA').style.display = ESTADO.pontoA ? 'flex' : 'none';
     document.getElementById('pontoB').style.display = ESTADO.pontoB ? 'flex' : 'none';
     
-    // Mostrar linha guia e paralelas quando AB estiver definido
     if (ESTADO.pontoA && ESTADO.pontoB) {
         linhaGuia.style.display = 'block';
         avisoDistancia.style.display = 'none';
@@ -537,34 +606,29 @@ function atualizarStatusGNSS() {
     }
 }
 
-// ========== DESENHAR LINHAS PARALELAS NA TELA INTEIRA ==========
+// ========== DESENHAR LINHAS PARALELAS ==========
 function desenharLinhasParalelas() {
     removerTodasLinhasParalelas();
     
     const larguraTela = mapa.clientWidth;
-    const espacamentoPx = (ESTADO.larguraImplemento / 10) * ESTADO.escala * 50; // Conversão metros → pixels
+    const espacamentoPx = ESTADO.larguraImplemento * 4 * ESTADO.escala;
     
-    // Quantidade de linhas para cobrir a tela inteira
     const linhasCadaLado = Math.ceil((larguraTela / 2) / espacamentoPx);
     
-    // Linhas à ESQUERDA da linha principal
     for (let i = 1; i <= linhasCadaLado; i++) {
         const linha = document.createElement('div');
         linha.className = 'linha-paralela';
         linha.style.left = `calc(50% - ${espacamentoPx * i}px)`;
-        linha.dataset.lado = 'esq';
-        linha.dataset.indice = i;
+        linha.style.display = 'block';
         mapa.appendChild(linha);
         ESTADO.linhasParalelas.push(linha);
     }
     
-    // Linhas à DIREITA da linha principal
     for (let i = 1; i <= linhasCadaLado; i++) {
         const linha = document.createElement('div');
         linha.className = 'linha-paralela';
         linha.style.left = `calc(50% + ${espacamentoPx * i}px)`;
-        linha.dataset.lado = 'dir';
-        linha.dataset.indice = i;
+        linha.style.display = 'block';
         mapa.appendChild(linha);
         ESTADO.linhasParalelas.push(linha);
     }
@@ -577,13 +641,14 @@ function removerTodasLinhasParalelas() {
 
 function atualizarEspacamentoParalelas() {
     ESTADO.larguraImplemento = parseFloat(document.getElementById('inpLargura').value);
+    document.getElementById('dLargura').textContent = ESTADO.larguraImplemento.toFixed(1) + ' m';
     if (ESTADO.pontoA && ESTADO.pontoB) {
         desenharLinhasParalelas();
     }
 }
 
 function desenharCobertura() {
-    const pxPorMetro = 8 / ESTADO.escala;
+    const pxPorMetro = 4 * ESTADO.escala;
     const larguraFaixa = ESTADO.larguraImplemento * pxPorMetro;
 
     if (!ESTADO.ultimoPonto) {
@@ -639,7 +704,12 @@ function criarPontoA() {
     ESTADO.areaTotal = 0;
     ESTADO.ultimoPonto = null;
     
-    btnB.disabled = true; // Bloqueia B até percorrer 5m
+    // Reseta origem do mapa para centralizar no ponto A
+    ESTADO.latOrigem = ESTADO.lat;
+    ESTADO.lonOrigem = ESTADO.lon;
+    mapa.style.transform = 'translate(0, 0)';
+    
+    btnB.disabled = true;
     avisoDistancia.style.display = 'block';
     avisoDistancia.textContent = '📍 Anda 5 metros para liberar o Ponto B';
     
@@ -661,18 +731,27 @@ function criarPontoB() {
     ESTADO.pontoB = { lat: ESTADO.lat, lon: ESTADO.lon };
     avisoDistancia.style.display = 'none';
     
-    // Gerar linha guia e linhas paralelas na tela inteira
     desenharLinhasParalelas();
     
-    alert('✅ Linha AB criada! Linhas paralelas visíveis na tela inteira com espaçamento de ' + ESTADO.larguraImplemento + 'm');
+    alert('✅ Linha AB criada! Linhas paralelas: ' + ESTADO.larguraImplemento + 'm de espaçamento');
     atualizarTela();
 }
 
+// ========== 🔑 BOTÃO 2D/3D — FUNCIONAL ==========
 function alternarModoVisual() {
     ESTADO.modoVisual = ESTADO.modoVisual === '2d' ? '3d' : '2d';
-    mapa.classList.remove('modo-2d', 'modo-3d');
-    mapa.classList.add('modo-' + ESTADO.modoVisual);
+    
+    // Troca classe de grade
+    mapa.classList.remove('mapa-grade-2d', 'mapa-grade-3d');
+    mapa.classList.add('mapa-grade-' + ESTADO.modoVisual);
+    
+    // Reaplica transformação com perspectiva 3D
+    atualizarPosicaoMapa();
+    
+    // Ativa botão
     document.getElementById('btnModoVisual').classList.toggle('ativo');
+    
+    console.log('Modo visual:', ESTADO.modoVisual);
 }
 
 function paralelas() {
@@ -681,11 +760,19 @@ function paralelas() {
         return;
     }
     desenharLinhasParalelas();
-    alert('〰️ Linhas paralelas atualizadas — espaçamento: ' + ESTADO.larguraImplemento + 'm');
+    alert('〰️ Linhas paralelas atualizadas — ' + ESTADO.larguraImplemento + 'm');
 }
 
-function zoomIn() { ESTADO.escala *= 1.25; desenharLinhasParalelas(); }
-function zoomOut() { ESTADO.escala /= 1.25; desenharLinhasParalelas(); }
+function zoomIn() { 
+    ESTADO.escala *= 1.25; 
+    atualizarPosicaoMapa();
+    desenharLinhasParalelas(); 
+}
+function zoomOut() { 
+    ESTADO.escala /= 1.25; 
+    atualizarPosicaoMapa();
+    desenharLinhasParalelas(); 
+}
 
 function abrirConfig() {
     document.getElementById('modalConfig').style.display = 'flex';
@@ -743,6 +830,15 @@ function carregarTalhao() {
         ESTADO.distanciaPercorrida = t.distancia || 0;
         ESTADO.nomeTalhao = nome;
         
+        // Centraliza mapa no ponto A carregado
+        if (ESTADO.pontoA) {
+            ESTADO.latOrigem = ESTADO.pontoA.lat;
+            ESTADO.lonOrigem = ESTADO.pontoA.lon;
+            ESTADO.lat = ESTADO.pontoA.lat;
+            ESTADO.lon = ESTADO.pontoA.lon;
+            mapa.style.transform = 'translate(0, 0)';
+        }
+        
         if (ESTADO.pontoA && ESTADO.pontoB) {
             desenharLinhasParalelas();
         }
@@ -763,6 +859,11 @@ function limparTudo() {
     ESTADO.distanciaDesdeA = 0;
     ESTADO.ultimoPonto = null;
     ESTADO.pintando = false;
+    
+    // Reseta origem do mapa
+    ESTADO.latOrigem = null;
+    ESTADO.lonOrigem = null;
+    mapa.style.transform = 'translate(0, 0)';
     
     btnB.disabled = true;
     avisoDistancia.style.display = 'none';
