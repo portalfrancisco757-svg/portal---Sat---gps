@@ -3,1486 +3,2274 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Portal Sat GPS 🛰️</title>
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Portal Sat GPS Agrícola</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    user-select:none;
+}
+
 html,body{
- margin:0;width:100%;height:100%;overflow:hidden;
- font-family:Arial,Helvetica,sans-serif;
- background:#06100c;color:#fff
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#020912;
+    font-family:Arial,Helvetica,sans-serif;
+    color:white;
 }
-button,input,select{font:inherit}
+
+button,input,select{
+    font-family:inherit;
+}
+
 button{
- border:1px solid #395448;background:#15251d;color:#fff;
- border-radius:8px;padding:9px 12px;cursor:pointer
-}
-button:active{transform:scale(.97)}
-input,select{
- background:#101c17;color:#fff;border:1px solid #40594c;
- border-radius:7px;padding:8px;width:100%
+    border:0;
+    cursor:pointer;
 }
 
-#app{height:100%;display:flex;flex-direction:column}
-
-/* TOPO */
-#top{
- height:58px;display:flex;align-items:center;
- gap:8px;padding:7px 10px;background:#09140f;
- border-bottom:1px solid #30473c;z-index:10
+#app{
+    width:100vw;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    background:#020912;
 }
+
+/* ================= HEADER ================= */
+
+#header{
+    height:82px;
+    min-height:82px;
+    background:linear-gradient(180deg,#071522,#020a12);
+    border-bottom:1px solid #14536b;
+    display:flex;
+    align-items:center;
+    z-index:20;
+}
+
 .logo{
- font-weight:800;font-size:17px;color:#9dff72;
- white-space:nowrap
+    width:290px;
+    padding-left:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
+
+.logoIcon{
+    font-size:45px;
+}
+
+.logoText{
+    font-size:28px;
+    font-weight:bold;
+}
+
+.logoText span{
+    color:#39ff14;
+}
+
+.logoSub{
+    font-size:13px;
+    color:#c9d5dc;
+    margin-top:2px;
+}
+
+.statusArea{
+    flex:1;
+    height:100%;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+}
+
 .status{
- display:flex;gap:7px;align-items:center;
- font-size:12px;margin-left:auto
-}
-.dot{width:10px;height:10px;border-radius:50%;background:#777}
-.ok{background:#36df6b}.warn{background:#ffc107}.bad{background:#f44336}
-
-/* ÁREA PRINCIPAL */
-#work{
- position:relative;flex:1;overflow:hidden;
- background:
- radial-gradient(circle at 50% 50%,rgba(31,85,47,.35),transparent 55%),
- linear-gradient(#0a2116,#07130d)
-}
-#map{
- position:absolute;inset:0;width:100%;height:100%
-}
-#watermark{
- position:absolute;inset:0;display:flex;
- align-items:center;justify-content:center;
- pointer-events:none;opacity:.075;font-size:48px;
- font-weight:900;transform:rotate(-18deg)
+    min-width:150px;
+    height:58px;
+    border-left:1px solid #18536b;
+    padding-left:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
-/* BARRA DE LUZ */
+.statusIcon{
+    font-size:28px;
+}
+
+.statusTitle{
+    color:#dce8ee;
+    font-size:13px;
+}
+
+.statusValue{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.green{
+    color:#22ff62;
+}
+
+.cyan{
+    color:#16eaff;
+}
+
+.orange{
+    color:#ffb020;
+}
+
+.clock{
+    min-width:130px;
+    text-align:center;
+    font-size:25px;
+}
+
+.date{
+    font-size:12px;
+    color:#b9c7cf;
+}
+
+/* ================= BODY ================= */
+
+#body{
+    flex:1;
+    min-height:0;
+    display:flex;
+    position:relative;
+}
+
+/* ================= LEFT ================= */
+
+#leftPanel{
+    width:118px;
+    min-width:118px;
+    background:linear-gradient(180deg,#061421,#030a11);
+    border-right:1px solid #15465c;
+    z-index:10;
+    transition:.25s;
+}
+
+#leftPanel.hidden{
+    width:0;
+    min-width:0;
+    overflow:hidden;
+}
+
+.menuBtn{
+    width:100%;
+    height:72px;
+    background:transparent;
+    color:#dce9ef;
+    border-bottom:1px solid #123748;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:5px;
+    font-size:12px;
+}
+
+.menuBtn .ico{
+    font-size:25px;
+}
+
+.menuBtn.active{
+    background:linear-gradient(90deg,#0aad47,#066f31);
+    color:white;
+}
+
+.menuBtn:hover{
+    background:#0b2635;
+}
+
+.menuBtn.active:hover{
+    background:#0aad47;
+}
+
+/* ================= WORK AREA ================= */
+
+#workArea{
+    flex:1;
+    min-width:0;
+    position:relative;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at center,#17451e 0,#07150c 45%,#02070a 100%);
+}
+
+/* Campo */
+
+#field{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    perspective:850px;
+    background:
+      linear-gradient(90deg,
+      rgba(30,80,24,.4) 0%,
+      rgba(73,130,43,.25) 50%,
+      rgba(26,71,25,.5) 100%),
+      repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,.025) 0px,
+      rgba(255,255,255,.025) 35px,
+      rgba(0,0,0,.035) 36px,
+      rgba(0,0,0,.035) 72px
+      );
+}
+
+#field.sky{
+    background:
+      linear-gradient(#67b7ed 0 24%,#80a64e 24% 25%,#385b28 25% 100%);
+}
+
+#field.mode3d{
+    transform-origin:center bottom;
+}
+
+.fieldLines{
+    position:absolute;
+    inset:-30%;
+    transform:rotate(0deg);
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 80px,
+        rgba(180,255,120,.12) 81px,
+        transparent 83px
+      );
+}
+
+#coverageCanvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+}
+
+/* ================= TRACTOR ================= */
+
+#tractor{
+    position:absolute;
+    left:50%;
+    top:58%;
+    width:125px;
+    height:145px;
+    transform:translate(-50%,-50%);
+    z-index:8;
+    transition:left .08s linear,top .08s linear;
+}
+
+.tractorBody{
+    position:absolute;
+    width:70px;
+    height:72px;
+    left:27px;
+    top:35px;
+    background:linear-gradient(90deg,#218a30,#61d82d,#137122);
+    border:2px solid #073e12;
+    border-radius:12px 12px 8px 8px;
+}
+
+.cabin{
+    position:absolute;
+    width:64px;
+    height:48px;
+    left:30px;
+    top:5px;
+    background:linear-gradient(135deg,#78c7dc,#0c3e50);
+    border:3px solid #15383d;
+    border-radius:9px 9px 3px 3px;
+}
+
+.roof{
+    position:absolute;
+    width:78px;
+    height:8px;
+    left:23px;
+    top:0;
+    background:#e1c625;
+    border-radius:4px;
+}
+
+.wheel{
+    position:absolute;
+    width:34px;
+    height:55px;
+    background:#080b0d;
+    border:5px solid #20292b;
+    border-radius:50%;
+    top:47px;
+}
+
+.wheel.left{
+    left:4px;
+}
+
+.wheel.right{
+    right:4px;
+}
+
+.wheelSmall{
+    position:absolute;
+    width:25px;
+    height:36px;
+    background:#080b0d;
+    border:4px solid #20292b;
+    border-radius:50%;
+    bottom:4px;
+}
+
+.wheelSmall.left{
+    left:17px;
+}
+
+.wheelSmall.right{
+    right:17px;
+}
+
+.implement{
+    position:absolute;
+    width:190px;
+    height:38px;
+    left:-32px;
+    bottom:-16px;
+    background:#e2c51d;
+    border:3px solid #4d4310;
+    border-radius:5px;
+}
+
+.implementBar{
+    position:absolute;
+    left:10px;
+    right:10px;
+    top:25px;
+    height:12px;
+    background:#151b1d;
+}
+
+.row{
+    position:absolute;
+    width:7px;
+    height:32px;
+    bottom:-25px;
+    background:#121719;
+}
+
+.r1{left:15px}.r2{left:40px}.r3{left:65px}.r4{left:90px}
+.r5{left:115px}.r6{left:140px}.r7{left:165px}
+
+/* ================= GUIDANCE ================= */
+
+.guideline{
+    position:absolute;
+    width:4px;
+    height:180%;
+    top:-40%;
+    background:#19ff45;
+    box-shadow:0 0 8px #19ff45;
+    transform-origin:center;
+    z-index:3;
+}
+
+#lineAB{
+    position:absolute;
+    width:5px;
+    height:180%;
+    left:50%;
+    top:-40%;
+    background:#ffffff;
+    box-shadow:0 0 8px white;
+    transform:translateX(-50%);
+    z-index:4;
+}
+
+#lineA,#lineB{
+    position:absolute;
+    padding:8px 13px;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    z-index:5;
+}
+
+#lineA{
+    background:#087f3a;
+    left:43%;
+    top:25%;
+}
+
+#lineB{
+    background:#1236bb;
+    right:43%;
+    top:25%;
+}
+
+/* ================= LIGHTBAR ================= */
+
 #lightbar{
- position:absolute;top:9px;left:50%;
- transform:translateX(-50%);
- display:flex;gap:3px;padding:5px 8px;
- background:rgba(4,9,7,.82);border:1px solid #405449;
- border-radius:9px;z-index:4
-}
-.lb{width:16px;height:16px;border-radius:3px;background:#26362e}
-.lb.center{background:#ddd}
-.lb.active{background:#20e26a}
-.lb.left{background:#ffb300}
-.lb.right{background:#ffb300}
-
-/* INFO */
-#info{
- position:absolute;top:55px;left:50%;
- transform:translateX(-50%);
- display:flex;gap:10px;background:rgba(5,12,8,.85);
- border:1px solid #385346;border-radius:10px;
- padding:6px 10px;font-size:12px;z-index:4;
- white-space:nowrap
-}
-.big{font-size:18px;font-weight:800}
-
-/* PAINÉIS */
-.panel{
- position:absolute;top:7px;bottom:7px;width:310px;
- background:rgba(8,17,13,.96);
- border:1px solid #40564b;border-radius:10px;
- padding:12px;overflow:auto;z-index:20;
- box-shadow:0 8px 35px rgba(0,0,0,.45)
-}
-#leftPanel{left:7px}
-#rightPanel{right:7px}
-.hidden{display:none!important}
-.panel h2{font-size:16px;margin:3px 0 12px;color:#aaff81}
-.panel h3{
- font-size:12px;color:#8ca99a;
- margin:14px 0 7px;text-transform:uppercase
-}
-.grid{
- display:grid;grid-template-columns:1fr 1fr;gap:7px
-}
-.row{margin-bottom:8px}
-.row label{
- display:block;font-size:11px;color:#9db3a7;margin-bottom:3px
-}
-.full{grid-column:1/-1}
-.action{
- display:grid;grid-template-columns:1fr 1fr;gap:7px
-}
-.action button{width:100%}
-.close{
- float:right;background:#321a1a;border-color:#704040
+    position:absolute;
+    top:12px;
+    left:50%;
+    transform:translateX(-50%);
+    height:34px;
+    padding:5px 16px;
+    border-radius:25px;
+    background:#061018;
+    border:2px solid #183c4b;
+    display:flex;
+    gap:7px;
+    z-index:15;
 }
 
-/* BOTÕES FLUTUANTES */
-#floating{
- position:absolute;left:9px;bottom:9px;
- display:flex;gap:6px;z-index:6
-}
-#floating button{font-weight:bold}
-
-#rightFloat{
- position:absolute;right:9px;bottom:9px;
- display:flex;flex-direction:column;gap:6px;z-index:6
+.light{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#1ee84d;
+    box-shadow:0 0 8px #1ee84d;
 }
 
-/* RODAPÉ */
+.light.red{
+    background:#ff2929;
+    box-shadow:0 0 8px #ff2929;
+}
+
+.light.yellow{
+    background:#ffd11a;
+    box-shadow:0 0 8px #ffd11a;
+}
+
+#crossTrack{
+    position:absolute;
+    top:49px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:15;
+    background:#071522;
+    border-radius:0 0 12px 12px;
+    padding:5px 32px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+/* ================= CARDS ================= */
+
+.card{
+    position:absolute;
+    background:rgba(3,17,28,.91);
+    border:1px solid #205a70;
+    border-radius:13px;
+    box-shadow:0 5px 20px rgba(0,0,0,.5);
+    z-index:12;
+}
+
+.cardTitle{
+    font-size:17px;
+    font-weight:bold;
+    padding:12px;
+    border-bottom:1px solid #1c4758;
+}
+
+.abCard{
+    left:12px;
+    top:14px;
+    width:280px;
+}
+
+.abRow{
+    display:flex;
+    justify-content:space-between;
+    padding:7px 12px;
+}
+
+.abRow b{
+    font-size:17px;
+}
+
+.infoCard{
+    right:14px;
+    top:14px;
+    width:285px;
+}
+
+.infoRow{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 12px;
+    color:#c8d6dc;
+}
+
+.infoRow strong{
+    color:white;
+    font-size:17px;
+}
+
+.implementCard{
+    right:14px;
+    top:225px;
+    width:285px;
+}
+
+.coverCard{
+    left:14px;
+    bottom:22px;
+    width:220px;
+}
+
+.coverBar{
+    height:18px;
+    margin:8px 12px;
+    background:linear-gradient(90deg,#1eff42,#11b935);
+    border-radius:5px;
+}
+
+/* ================= RIGHT ================= */
+
+#rightPanel{
+    width:92px;
+    min-width:92px;
+    background:linear-gradient(180deg,#061421,#030a11);
+    border-left:1px solid #15465c;
+    z-index:10;
+    transition:.25s;
+}
+
+#rightPanel.hidden{
+    width:0;
+    min-width:0;
+    overflow:hidden;
+}
+
+.rightBtn{
+    width:100%;
+    height:70px;
+    color:#e2edf2;
+    background:transparent;
+    border-bottom:1px solid #123748;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+}
+
+.rightBtn .ico{
+    font-size:25px;
+}
+
+/* ================= TOGGLE ================= */
+
+.panelToggle{
+    position:absolute;
+    z-index:30;
+    top:50%;
+    transform:translateY(-50%);
+    width:26px;
+    height:75px;
+    border-radius:0 10px 10px 0;
+    background:#087f3a;
+    color:white;
+    font-size:18px;
+}
+
+#toggleLeft{
+    left:0;
+}
+
+#toggleRight{
+    right:0;
+    border-radius:10px 0 0 10px;
+}
+
+/* ================= BOTTOM ================= */
+
 #bottom{
- height:55px;background:#09140f;border-top:1px solid #30473c;
- display:flex;align-items:center;justify-content:space-around;
- gap:5px;padding:5px;z-index:10
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:115px;
+    background:linear-gradient(180deg,rgba(2,12,19,.72),#020b13);
+    border-top:1px solid #1b5368;
+    z-index:18;
+    display:flex;
+    align-items:center;
+    padding:10px;
+    gap:10px;
 }
+
 .bottomBtn{
- min-width:80px;height:43px;padding:4px 7px;
- font-size:11px
+    height:88px;
+    min-width:105px;
+    border-radius:10px;
+    border:1px solid #18516b;
+    background:#061b2b;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:7px;
 }
-.bottomBtn b{display:block;font-size:12px}
 
-/* MODAL */
-.modal{
- position:fixed;inset:0;background:rgba(0,0,0,.7);
- display:flex;align-items:center;justify-content:center;
- z-index:100
+.bottomBtn .ico{
+    font-size:25px;
 }
+
+.bottomBtn:hover{
+    background:#0c3045;
+}
+
+.rateBox{
+    flex:1;
+    min-width:180px;
+    height:88px;
+    border:1px solid #1a6c42;
+    background:#041810;
+    border-radius:10px;
+    padding:10px;
+}
+
+.rateTitle{
+    color:#b9d7c3;
+    font-size:12px;
+}
+
+.rateValue{
+    font-size:23px;
+    color:#36ff65;
+    font-weight:bold;
+}
+
+.progress{
+    margin-top:7px;
+    height:8px;
+    border-radius:5px;
+    background:#092a19;
+    overflow:hidden;
+}
+
+.progress div{
+    height:100%;
+    width:70%;
+    background:#28ef54;
+}
+
+.modeBox{
+    display:flex;
+    gap:4px;
+}
+
+.modeBtn{
+    width:90px;
+    height:78px;
+    background:#061a2a;
+    border:1px solid #184e65;
+    color:white;
+    border-radius:10px;
+    font-size:15px;
+}
+
+.modeBtn.active{
+    background:#087f3a;
+    border-color:#31ff62;
+}
+
+/* ================= FOOTER ================= */
+
+#footer{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:27px;
+    z-index:25;
+    background:#020b13;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 15px;
+    font-size:12px;
+    color:#c9d8df;
+}
+
+/* ================= MODAL ================= */
+
+#modal{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+}
+
+#modal.show{
+    display:flex;
+}
+
 .modalBox{
- width:min(500px,92vw);max-height:90vh;overflow:auto;
- background:#0b1711;border:1px solid #466052;
- border-radius:13px;padding:15px
+    width:min(500px,90vw);
+    max-height:90vh;
+    overflow:auto;
+    background:#061521;
+    border:1px solid #23728e;
+    border-radius:15px;
+    padding:20px;
+    box-shadow:0 15px 50px #000;
 }
-.modalBox h2{margin-top:0;color:#aaff81}
-.tabs{
- display:flex;gap:5px;overflow:auto;margin-bottom:10px
-}
-.tab{
- flex:1;white-space:nowrap
-}
-.notice{
- padding:9px;background:#102319;
- border-left:4px solid #45e673;
- border-radius:6px;font-size:12px;margin:8px 0
-}
-.red{color:#ff7e7e}
-.green{color:#73f99b}
-.yellow{color:#ffd25c}
 
-/* RESPONSIVO DEITADO */
-@media(max-height:520px){
- #top{height:48px}
- #bottom{height:47px}
- .panel{top:5px;bottom:5px;width:285px}
- .bottomBtn{height:37px}
- #info{top:48px}
+.modalBox h2{
+    margin-bottom:15px;
+}
+
+.formGroup{
+    margin-bottom:14px;
+}
+
+.formGroup label{
+    display:block;
+    margin-bottom:5px;
+    color:#c8d5db;
+}
+
+.formGroup input,
+.formGroup select{
+    width:100%;
+    height:42px;
+    border-radius:8px;
+    border:1px solid #276178;
+    background:#020d15;
+    color:white;
+    padding:0 10px;
+    font-size:16px;
+}
+
+.modalActions{
+    display:flex;
+    gap:8px;
+    margin-top:18px;
+}
+
+.modalActions button{
+    flex:1;
+    height:45px;
+    border-radius:8px;
+    background:#087f3a;
+    color:white;
+    font-weight:bold;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+
+    .logo{
+        width:210px;
+    }
+
+    .logoText{
+        font-size:19px;
+    }
+
+    .status{
+        min-width:100px;
+    }
+
+    .statusTitle{
+        display:none;
+    }
+
+    #leftPanel{
+        width:90px;
+        min-width:90px;
+    }
+
+    #rightPanel{
+        width:75px;
+        min-width:75px;
+    }
+
+    .abCard{
+        width:220px;
+    }
+
+    .infoCard,
+    .implementCard{
+        width:220px;
+    }
+
+    .bottomBtn{
+        min-width:75px;
+    }
+}
+
+.hiddenUI{
+    display:none !important;
 }
 </style>
 </head>
 
 <body>
+
 <div id="app">
 
-<!-- TOPO -->
-<header id="top">
- <div class="logo">🛰️ PORTAL SAT GPS</div>
+<header id="header">
 
- <button onclick="togglePanel('leftPanel')">☰</button>
+    <div class="logo">
+        <div class="logoIcon">🛰️🌱</div>
+        <div>
+            <div class="logoText">
+                Portal Sat <span>GPS</span>
+            </div>
+            <div class="logoSub">
+                AGRÍCOLA • PRECISÃO QUE PLANTA RESULTADOS
+            </div>
+        </div>
+    </div>
 
- <div class="status">
-   <span id="gpsDot" class="dot bad"></span>
-   <span id="gpsText">GPS</span>
-   <span id="rtkDot" class="dot"></span>
-   <span id="rtkText">RTK</span>
-   <span id="satText">SAT --</span>
- </div>
+    <div class="statusArea">
 
- <button onclick="togglePanel('rightPanel')">⚙</button>
+        <div class="status">
+            <div class="statusIcon">🛰️</div>
+            <div>
+                <div class="statusTitle">Satélites</div>
+                <div class="statusValue" id="satellites">18/20</div>
+            </div>
+        </div>
+
+        <div class="status">
+            <div class="statusIcon green">📡</div>
+            <div>
+                <div class="statusTitle">RTK</div>
+                <div class="statusValue green" id="rtk">FIX</div>
+            </div>
+        </div>
+
+        <div class="status">
+            <div class="statusIcon cyan">🎯</div>
+            <div>
+                <div class="statusTitle">Precisão</div>
+                <div class="statusValue cyan" id="precision">± 2 cm</div>
+            </div>
+        </div>
+
+        <div class="status">
+            <div class="statusIcon cyan">◉</div>
+            <div>
+                <div class="statusTitle">Velocidade</div>
+                <div class="statusValue" id="speed">8,4 km/h</div>
+            </div>
+        </div>
+
+        <div class="clock">
+            <div id="clock">--:--</div>
+            <div class="date" id="date">--/--/----</div>
+        </div>
+
+    </div>
+
 </header>
 
-<!-- ÁREA DE TRABALHO -->
-<main id="work">
+<div id="body">
 
- <canvas id="map"></canvas>
+    <!-- ESQUERDA -->
 
- <div id="watermark">PORTAL SAT GPS 🛰️</div>
+    <aside id="leftPanel">
 
- <!-- BARRA DE LUZ -->
- <div id="lightbar"></div>
+        <button class="menuBtn active" onclick="setSection('trabalho')">
+            <span class="ico">🚜</span>
+            Trabalho
+        </button>
 
- <!-- INFORMAÇÕES -->
- <div id="info">
-   <span>Velocidade<br><b id="speed" class="big">0.0</b> km/h</span>
-   <span>HDG<br><b id="heading" class="big">0°</b></span>
-   <span>Erro<br><b id="cross" class="big">0.00</b> m</span>
-   <span>Passada<br><b id="pass">--</b></span>
- </div>
+        <button class="menuBtn" onclick="openModal('talhao')">
+            <span class="ico">🌾</span>
+            Talhão/Lote
+        </button>
 
- <!-- PAINEL ESQUERDO -->
- <section id="leftPanel" class="panel hidden">
-  <button class="close" onclick="togglePanel('leftPanel')">×</button>
-  <h2>Portal Sat GPS 🛰️</h2>
+        <button class="menuBtn" onclick="centerTractor()">
+            <span class="ico">📍</span>
+            Mapa
+        </button>
 
-  <h3>Campo / Talhão</h3>
-  <div class="row">
-   <label>Nome do campo</label>
-   <input id="fieldName" value="Talhão 01">
-  </div>
+        <button class="menuBtn" onclick="createAB()">
+            <span class="ico">📐</span>
+            Linhas A-B
+        </button>
 
-  <div class="action">
-   <button onclick="newField()">Novo campo</button>
-   <button onclick="saveField()">Salvar</button>
-   <button onclick="loadField()">Carregar</button>
-   <button onclick="clearField()">Limpar</button>
-  </div>
+        <button class="menuBtn" onclick="toggleCoverage()">
+            <span class="ico">▦</span>
+            Cobertura
+        </button>
 
-  <h3>Orientação</h3>
-  <div class="action">
-   <button onclick="setA()">📍 MARCAR A</button>
-   <button onclick="setB()">📍 MARCAR B</button>
-   <button onclick="generateAB()">AB / PARALELAS</button>
-   <button onclick="toggleGuidance()">GUIA ON/OFF</button>
-  </div>
+        <button class="menuBtn" onclick="openModal('config')">
+            <span class="ico">⚙️</span>
+            Config.
+        </button>
 
-  <h3>Padrão</h3>
-  <div class="row">
-   <select id="pattern">
-    <option value="AB">A-B</option>
-    <option value="AB_CURVE">A-B / Curva</option>
-    <option value="FREE">Livre / FreeForm</option>
-   </select>
-  </div>
+        <button class="menuBtn" onclick="openModal('implemento')">
+            <span class="ico">🔧</span>
+            Implemento
+        </button>
 
-  <h3>Nudge / Correção</h3>
-  <div class="grid">
-   <button onclick="nudge(-1)">◀ Nudge</button>
-   <button onclick="nudge(1)">Nudge ▶</button>
-   <button onclick="resetNudge()" class="full">Reset Nudge</button>
-  </div>
+        <button class="menuBtn" onclick="openRecords()">
+            <span class="ico">📋</span>
+            Registros
+        </button>
 
-  <h3>Cobertura</h3>
-  <div class="action">
-   <button onclick="startCoverage()">▶ Cobertura</button>
-   <button onclick="stopCoverage()">■ Parar</button>
-   <button onclick="clearCoverage()" class="full">Apagar cobertura</button>
-  </div>
+        <button class="menuBtn" onclick="location.reload()">
+            <span class="ico">🚪</span>
+            Sair
+        </button>
 
-  <h3>Limite</h3>
-  <div class="action">
-   <button onclick="startBoundary()">Iniciar limite</button>
-   <button onclick="stopBoundary()">Fechar limite</button>
-  </div>
- </section>
+    </aside>
 
- <!-- PAINEL DIREITO -->
- <section id="rightPanel" class="panel hidden">
-  <button class="close" onclick="togglePanel('rightPanel')">×</button>
-  <h2>Configurações</h2>
+    <!-- MAPA -->
 
-  <div class="tabs">
-   <button class="tab" onclick="showConfig('implement')">Implemento</button>
-   <button class="tab" onclick="showConfig('gps')">GPS</button>
-   <button class="tab" onclick="showConfig('view')">Tela</button>
-  </div>
+    <main id="workArea">
 
-  <div id="cfgImplement">
+        <div id="field">
 
-   <h3>Implemento</h3>
+            <div class="fieldLines"></div>
 
-   <div class="row">
-    <label>Nome</label>
-    <input id="implName" value="Implemento">
-   </div>
+            <canvas id="coverageCanvas"></canvas>
 
-   <div class="grid">
-    <div class="row">
-     <label>Largura (m)</label>
-     <input id="width" type="number" step=".01" value="3.60">
+            <div id="lineAB"></div>
+
+            <div id="lineA">A</div>
+            <div id="lineB">B</div>
+
+            <!-- TRATOR -->
+
+            <div id="tractor">
+
+                <div class="roof"></div>
+                <div class="cabin"></div>
+                <div class="tractorBody"></div>
+
+                <div class="wheel left"></div>
+                <div class="wheel right"></div>
+
+                <div class="wheelSmall left"></div>
+                <div class="wheelSmall right"></div>
+
+                <div class="implement">
+                    <div class="implementBar"></div>
+
+                    <div class="row r1"></div>
+                    <div class="row r2"></div>
+                    <div class="row r3"></div>
+                    <div class="row r4"></div>
+                    <div class="row r5"></div>
+                    <div class="row r6"></div>
+                    <div class="row r7"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- BARRA DE LUZ -->
+
+        <div id="lightbar">
+
+            <div class="light"></div>
+            <div class="light"></div>
+            <div class="light"></div>
+            <div class="light"></div>
+
+            <div class="light yellow"></div>
+            <div class="light red"></div>
+            <div class="light red"></div>
+
+            <div class="light"></div>
+            <div class="light"></div>
+            <div class="light"></div>
+
+        </div>
+
+        <div id="crossTrack">0,00 m</div>
+
+        <!-- CARTÃO A/B -->
+
+        <div class="card abCard">
+
+            <div class="cardTitle">🔗 Linha A-B</div>
+
+            <div class="abRow">
+                <b>A</b>
+                <span id="pointA">0+00,000 m</span>
+            </div>
+
+            <div class="abRow">
+                <b class="cyan">B</b>
+                <span id="pointB">0+00,000 m</span>
+            </div>
+
+            <div class="abRow">
+                <span>📏 Espaçamento</span>
+                <strong id="spacingDisplay">12,0 m</strong>
+            </div>
+
+        </div>
+
+        <!-- INFORMAÇÕES -->
+
+        <div class="card infoCard">
+
+            <div class="cardTitle">📊 Informações de Trabalho</div>
+
+            <div class="infoRow">
+                <span>Área trabalhada</span>
+                <strong id="workedArea">0,00 ha</strong>
+            </div>
+
+            <div class="infoRow">
+                <span>Área do talhão</span>
+                <strong id="fieldArea">0,00 ha</strong>
+            </div>
+
+            <div class="infoRow">
+                <span>Tempo de trabalho</span>
+                <strong id="workTime">00:00:00</strong>
+            </div>
+
+            <div class="infoRow">
+                <span>Rendimento</span>
+                <strong id="yield">0,00 ha/h</strong>
+            </div>
+
+            <div class="infoRow">
+                <span>Heading</span>
+                <strong id="heading">0°</strong>
+            </div>
+
+        </div>
+
+        <!-- IMPLEMENTO -->
+
+        <div class="card implementCard">
+
+            <div class="cardTitle">🚜 Implemento</div>
+
+            <div class="infoRow">
+                <span>Modelo</span>
+                <strong id="implementName">
+                    Plantadeira
+                </strong>
+            </div>
+
+            <div class="infoRow">
+                <span>Largura</span>
+                <strong id="widthDisplay">
+                    12,0 m
+                </strong>
+            </div>
+
+            <div class="infoRow">
+                <span>Taxa aplicação</span>
+                <strong id="rateDisplay">
+                    85 kg/ha
+                </strong>
+            </div>
+
+        </div>
+
+        <!-- COBERTURA -->
+
+        <div class="card coverCard">
+
+            <div class="cardTitle">🌱 Cobertura de Passada</div>
+
+            <div class="coverBar"></div>
+
+            <div class="infoRow">
+                <span>100%</span>
+                <strong id="coveragePercent">0%</strong>
+            </div>
+
+        </div>
+
+        <!-- DIREITA -->
+
+        <aside id="rightPanel">
+
+            <button class="rightBtn" onclick="toggleLeft()">
+                <span class="ico">☰</span>
+                Painéis
+            </button>
+
+            <button class="rightBtn" onclick="toggle3D()">
+                <span class="ico">◇</span>
+                Mapa 3D
+            </button>
+
+            <button class="rightBtn" onclick="zoomIn()">
+                <span class="ico">🔍+</span>
+                Ampliar
+            </button>
+
+            <button class="rightBtn" onclick="zoomOut()">
+                <span class="ico">🔍−</span>
+                Diminuir
+            </button>
+
+            <button class="rightBtn" onclick="centerTractor()">
+                <span class="ico">🎯</span>
+                Centralizar
+            </button>
+
+            <button class="rightBtn" onclick="toggleNight()">
+                <span class="ico">🌙</span>
+                Noturna
+            </button>
+
+            <button class="rightBtn" onclick="fullscreen()">
+                <span class="ico">⛶</span>
+                Tela Cheia
+            </button>
+
+        </aside>
+
+        <!-- ABAS LATERAIS -->
+
+        <button class="panelToggle" id="toggleLeft" onclick="toggleLeft()">‹</button>
+
+        <button class="panelToggle" id="toggleRight" onclick="toggleRight()">›</button>
+
+        <!-- BOTTOM -->
+
+        <div id="bottom">
+
+            <button class="bottomBtn" onclick="openModal('talhao')">
+                <span class="ico">🌾</span>
+                Criar Talhão
+            </button>
+
+            <button class="bottomBtn" onclick="loadField()">
+                <span class="ico">📁</span>
+                Carregar
+            </button>
+
+            <button class="bottomBtn" onclick="saveField()">
+                <span class="ico">💾</span>
+                Salvar
+            </button>
+
+            <button class="bottomBtn" onclick="openRecords()">
+                <span class="ico">📄</span>
+                Gerenciar
+            </button>
+
+            <div class="rateBox">
+
+                <div class="rateTitle">
+                    🌱 Taxa de Aplicação
+                </div>
+
+                <div class="rateValue" id="bottomRate">
+                    85,0 kg/ha
+                </div>
+
+                <div class="progress">
+                    <div id="rateProgress"></div>
+                </div>
+
+            </div>
+
+            <div class="rateBox">
+
+                <div class="rateTitle">
+                    💨 Pressão
+                </div>
+
+                <div class="rateValue">
+                    2,8 bar
+                </div>
+
+            </div>
+
+            <div class="modeBox">
+
+                <button class="modeBtn active"
+                        onclick="set2D()">
+                    🗺️<br>2D
+                </button>
+
+                <button class="modeBtn"
+                        onclick="set3D()">
+                    ◇<br>3D
+                </button>
+
+                <button class="modeBtn"
+                        onclick="toggleNight()">
+                    🌙<br>Noturna
+                </button>
+
+            </div>
+
+        </div>
+
+        <footer id="footer">
+
+            <span id="gpsStatus">
+                🟢 Conectado ao GPS do aparelho
+            </span>
+
+            <span>
+                Portal Sat GPS • Agricultura de Precisão
+            </span>
+
+        </footer>
+
+    </main>
+
+</div>
+
+<!-- MODAL -->
+
+<div id="modal">
+
+    <div class="modalBox">
+
+        <h2 id="modalTitle">
+            Configuração
+        </h2>
+
+        <div id="modalContent"></div>
+
+        <div class="modalActions">
+
+            <button onclick="closeModal()">
+                Cancelar
+            </button>
+
+            <button onclick="applyModal()">
+                Aplicar
+            </button>
+
+        </div>
+
     </div>
 
-    <div class="row">
-     <label>Sobreposição (m)</label>
-     <input id="overlap" type="number" step=".01" value="0.00">
-    </div>
-
-    <div class="row">
-     <label>Offset esquerda (+/-)</label>
-     <input id="offsetLR" type="number" step=".01" value="0">
-    </div>
-
-    <div class="row">
-     <label>Offset frente/trás</label>
-     <input id="offsetFB" type="number" step=".01" value="0">
-    </div>
-
-    <div class="row">
-     <label>Seções</label>
-     <input id="sections" type="number" min="1" value="6">
-    </div>
-
-    <div class="row">
-     <label>Distância entre seções</label>
-     <input id="sectionDelay" type="number" step=".1" value="0">
-    </div>
-   </div>
-
-   <button class="full" onclick="applyImplement()">
-    Aplicar implemento
-   </button>
-
-   <h3>Controle de seções</h3>
-   <div id="sectionButtons" class="action"></div>
-
-   <h3>Controle automático</h3>
-   <div class="action">
-    <button onclick="toggleSectionControl()">Section Control</button>
-    <button onclick="toggleAutoCoverage()">Auto Coverage</button>
-   </div>
-
-   <h3>Taxa / Aplicação</h3>
-   <div class="grid">
-    <div class="row">
-     <label>Produto</label>
-     <input id="product" value="Produto 01">
-    </div>
-    <div class="row">
-     <label>Taxa</label>
-     <input id="rate" type="number" value="100">
-    </div>
-   </div>
-
-  </div>
-
-  <div id="cfgGPS" class="hidden">
-
-   <h3>Fonte de posição</h3>
-   <div class="notice">
-    O navegador utiliza o GPS do Android quando disponível.
-    Uma antena externa pode alimentar a posição do sistema ou de um
-    aplicativo intermediário.
-   </div>
-
-   <div class="action">
-    <button onclick="startGPS()">📡 Iniciar GPS</button>
-    <button onclick="stopGPS()">■ Parar GPS</button>
-   </div>
-
-   <h3>Precisão</h3>
-   <div class="row">
-    <label>Precisão máxima aceita (m)</label>
-    <input id="accuracyLimit" type="number" value="10">
-   </div>
-
-   <h3>Bússola</h3>
-   <button onclick="startCompass()" class="full">
-    🧭 Ativar bússola
-   </button>
-
-   <h3>Dados atuais</h3>
-   <div class="notice">
-    Latitude: <b id="lat">--</b><br>
-    Longitude: <b id="lon">--</b><br>
-    Altitude: <b id="alt">--</b><br>
-    Precisão: <b id="acc">--</b><br>
-    Direção: <b id="compass">--</b>
-   </div>
-
-  </div>
-
-  <div id="cfgView" class="hidden">
-
-   <h3>Visualização</h3>
-
-   <div class="action">
-    <button onclick="setView('2D')">Mapa 2D</button>
-    <button onclick="setView('3D')">Vista 3D</button>
-   </div>
-
-   <h3>Orientação da tela</h3>
-   <button onclick="fullscreen()" class="full">Tela cheia</button>
-
-   <h3>Zoom</h3>
-   <div class="action">
-    <button onclick="zoom(-1)">−</button>
-    <button onclick="zoom(1)">+</button>
-   </div>
-
-   <h3>Mapa</h3>
-   <div class="action">
-    <button onclick="toggleGrid()">Grade</button>
-    <button onclick="centerVehicle()">Centralizar</button>
-   </div>
-
-  </div>
- </section>
-
- <!-- FLUTUANTES -->
- <div id="floating">
-  <button onclick="setA()">A</button>
-  <button onclick="setB()">B</button>
-  <button onclick="toggleCoverage()">🟩</button>
-  <button onclick="togglePanel('leftPanel')">☰</button>
- </div>
-
- <div id="rightFloat">
-  <button onclick="centerVehicle()">🎯</button>
-  <button onclick="zoom(1)">＋</button>
-  <button onclick="zoom(-1)">−</button>
- </div>
-
-</main>
-
-<!-- RODAPÉ -->
-<footer id="bottom">
- <button class="bottomBtn" onclick="togglePanel('leftPanel')">
-  <b>🗺️ CAMPO</b>Talhão
- </button>
-
- <button class="bottomBtn" onclick="togglePanel('rightPanel')">
-  <b>⚙ CONFIG</b>Configurações
- </button>
-
- <button class="bottomBtn" onclick="toggleGuidance()">
-  <b>🧭 GUIA</b>Orientação
- </button>
-
- <button class="bottomBtn" onclick="toggleCoverage()">
-  <b>🟩 COBERTURA</b>Aplicação
- </button>
-
- <button class="bottomBtn" onclick="openData()">
-  <b>💾 DADOS</b>Exportar
- </button>
-</footer>
-
-<!-- MODAL DADOS -->
-<div id="dataModal" class="modal hidden">
- <div class="modalBox">
-  <h2>Dados do Portal Sat GPS</h2>
-
-  <div class="notice">
-   Os dados são armazenados localmente no dispositivo.
-  </div>
-
-  <button onclick="exportJSON()" class="full">
-   Exportar trabalho JSON
-  </button><br><br>
-
-  <button onclick="exportCSV()" class="full">
-   Exportar pontos CSV
-  </button><br><br>
-
-  <button onclick="document.getElementById('dataModal').classList.add('hidden')"
-          class="full">Fechar</button>
- </div>
 </div>
 
 <script>
-/* =========================================================
-   PORTAL SAT GPS
-   MOTOR DE GPS AGRÍCOLA
-========================================================= */
 
-const canvas=document.getElementById("map");
-const ctx=canvas.getContext("2d");
+/* =====================================================
+   PORTAL SAT GPS AGRÍCOLA
+   MOTOR PRINCIPAL
+===================================================== */
 
-let state={
- lat:null,lon:null,alt:null,accuracy:null,
- speed:0,heading:0,
- gpsWatch:null,
- compass:0,
+let state = {
 
- A:null,
- B:null,
- lines:[],
- currentLine:0,
- nudge:0,
+    spacing:12,
+    implementWidth:12,
+    rate:85,
 
- coverage:false,
- autoCoverage:false,
- sectionControl:false,
+    heading:0,
 
- boundary:false,
- boundaryPoints:[],
- coveragePoints:[],
- track:[],
+    speed:8.4,
 
- width:3.6,
- overlap:0,
- offsetLR:0,
- offsetFB:0,
- sections:6,
- sectionState:[],
- grid:true,
- zoom:1,
- view:"2D",
- guidance:true
+    coverage:true,
+
+    mode3D:false,
+
+    night:false,
+
+    zoom:1,
+
+    areaWorked:0,
+
+    fieldArea:0,
+
+    workSeconds:0,
+
+    tractorX:50,
+
+    tractorY:58,
+
+    pointA:null,
+
+    pointB:null,
+
+    fieldName:"Talhão 01",
+
+    running:true
+
 };
 
-let lastPosition=null;
-let lastTime=null;
+let gpsWatch=null;
 
-function resize(){
- canvas.width=canvas.clientWidth*devicePixelRatio;
- canvas.height=canvas.clientHeight*devicePixelRatio;
- ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
- draw();
-}
-window.addEventListener("resize",resize);
+let lastTime=Date.now();
 
-/* ---------- INTERFACE ---------- */
+let modalMode="";
 
-function togglePanel(id){
- document.getElementById(id).classList.toggle("hidden");
-}
+/* =====================================================
+   ELEMENTOS
+===================================================== */
 
-function showConfig(type){
- document.getElementById("cfgImplement").classList.add("hidden");
- document.getElementById("cfgGPS").classList.add("hidden");
- document.getElementById("cfgView").classList.add("hidden");
+const tractor=document.getElementById("tractor");
+const field=document.getElementById("field");
+const canvas=document.getElementById("coverageCanvas");
+const ctx=canvas.getContext("2d");
 
- if(type==="implement")
-   document.getElementById("cfgImplement").classList.remove("hidden");
- if(type==="gps")
-   document.getElementById("cfgGPS").classList.remove("hidden");
- if(type==="view")
-   document.getElementById("cfgView").classList.remove("hidden");
-}
+/* =====================================================
+   RELÓGIO
+===================================================== */
 
-function openData(){
- document.getElementById("dataModal").classList.remove("hidden");
-}
+function updateClock(){
 
-function fullscreen(){
- if(document.documentElement.requestFullscreen)
-   document.documentElement.requestFullscreen();
-}
+    const d=new Date();
 
-/* ---------- GPS ---------- */
+    document.getElementById("clock")
+        .textContent=
+        d.toLocaleTimeString("pt-BR",
+        {
+            hour:"2-digit",
+            minute:"2-digit"
+        });
 
-function startGPS(){
-
- if(!navigator.geolocation){
-   alert("Este dispositivo/navegador não oferece Geolocalização.");
-   return;
- }
-
- stopGPS();
-
- state.gpsWatch=navigator.geolocation.watchPosition(
-   onPosition,
-   onGPSError,
-   {
-    enableHighAccuracy:true,
-    maximumAge:100,
-    timeout:5000
-   }
- );
-
- document.getElementById("gpsText").innerText="GPS ON";
-}
-
-function stopGPS(){
- if(state.gpsWatch!==null){
-  navigator.geolocation.clearWatch(state.gpsWatch);
-  state.gpsWatch=null;
- }
-}
-
-function onPosition(pos){
-
- const c=pos.coords;
-
- state.lat=c.latitude;
- state.lon=c.longitude;
- state.alt=c.altitude||0;
- state.accuracy=c.accuracy||0;
-
- if(c.speed!==null && c.speed>=0)
-   state.speed=c.speed*3.6;
-
- if(c.heading!==null && !isNaN(c.heading))
-   state.heading=c.heading;
-
- if(lastPosition){
-   const d=distance(
-     lastPosition.lat,lastPosition.lon,
-     state.lat,state.lon
-   );
-
-   const dt=(Date.now()-lastTime)/1000;
-
-   if(dt>0 && d>0.3 && (c.speed===null||c.speed<0)){
-     state.speed=d/dt*3.6;
-   }
- }
-
- lastPosition={
-  lat:state.lat,
-  lon:state.lon
- };
- lastTime=Date.now();
-
- document.getElementById("gpsDot").className=
-   "dot "+(state.accuracy<=5?"ok":"warn");
-
- document.getElementById("gpsText").innerText=
-   "GPS ±"+state.accuracy.toFixed(1)+"m";
-
- document.getElementById("lat").innerText=state.lat.toFixed(7);
- document.getElementById("lon").innerText=state.lon.toFixed(7);
- document.getElementById("alt").innerText=
-   state.alt.toFixed(1)+" m";
- document.getElementById("acc").innerText=
-   state.accuracy.toFixed(1)+" m";
-
- updateTrack();
- updateGuidance();
- draw();
-}
-
-function onGPSError(e){
- document.getElementById("gpsDot").className="dot bad";
- document.getElementById("gpsText").innerText="GPS ERRO";
-}
-
-/* ---------- BÚSSOLA ---------- */
-
-async function startCompass(){
-
- try{
-  if(typeof DeviceOrientationEvent!=="undefined" &&
-     typeof DeviceOrientationEvent.requestPermission==="function"){
-    const p=await DeviceOrientationEvent.requestPermission();
-    if(p!=="granted")return;
-  }
-
-  window.addEventListener(
-   "deviceorientationabsolute",
-   compassHandler,true
-  );
-
-  window.addEventListener(
-   "deviceorientation",
-   compassHandler,true
-  );
-
- }catch(e){
-  alert("Bússola não disponível neste dispositivo.");
- }
-}
-
-function compassHandler(e){
-
- let h=null;
-
- if(e.webkitCompassHeading!==undefined)
-   h=e.webkitCompassHeading;
- else if(e.absolute && e.alpha!==null)
-   h=360-e.alpha;
- else if(e.alpha!==null)
-   h=360-e.alpha;
-
- if(h!==null){
-   state.compass=(h+360)%360;
-
-   if(state.speed<1)
-     state.heading=state.compass;
-
-   document.getElementById("compass").innerText=
-     state.compass.toFixed(0)+"°";
-
-   document.getElementById("heading").innerText=
-     state.heading.toFixed(0)+"°";
-
-   draw();
- }
-}
-
-/* ---------- DISTÂNCIA ---------- */
-
-function distance(lat1,lon1,lat2,lon2){
-
- const R=6378137;
- const p1=lat1*Math.PI/180;
- const p2=lat2*Math.PI/180;
- const dp=(lat2-lat1)*Math.PI/180;
- const dl=(lon2-lon1)*Math.PI/180;
-
- const a=Math.sin(dp/2)**2+
-  Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
-
- return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
-function bearing(lat1,lon1,lat2,lon2){
-
- const p1=lat1*Math.PI/180;
- const p2=lat2*Math.PI/180;
- const dl=(lon2-lon1)*Math.PI/180;
-
- const y=Math.sin(dl)*Math.cos(p2);
- const x=Math.cos(p1)*Math.sin(p2)-
-  Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
-
- return (Math.atan2(y,x)*180/Math.PI+360)%360;
-}
-
-/* ---------- A / B ---------- */
-
-function setA(){
-
- if(state.lat===null){
-  alert("Aguardando GPS.");
-  return;
- }
-
- state.A={
-  lat:state.lat,
-  lon:state.lon
- };
-
- state.B=null;
- state.lines=[];
- state.currentLine=0;
-
- alert("Ponto A marcado.");
- draw();
-}
-
-function setB(){
-
- if(!state.A){
-  alert("Marque primeiro o ponto A.");
-  return;
- }
-
- if(state.lat===null){
-  alert("Aguardando GPS.");
-  return;
- }
-
- state.B={
-  lat:state.lat,
-  lon:state.lon
- };
-
- generateAB();
-
- alert("Ponto B marcado e linhas paralelas geradas.");
-}
-
-function generateAB(){
-
- if(!state.A||!state.B)return;
-
- const br=bearing(
-  state.A.lat,state.A.lon,
-  state.B.lat,state.B.lon
- );
-
- const spacing=Math.max(
-  0.1,
-  state.width-state.overlap
- );
-
- state.lines=[];
-
- for(let i=-100;i<=100;i++){
-
-   state.lines.push({
-    index:i,
-    bearing:br,
-    offset:i*spacing+state.nudge
-   });
-
- }
-
- state.currentLine=0;
- draw();
-}
-
-/* ---------- NUDGE ---------- */
-
-function nudge(dir){
-
- state.nudge+=dir*0.025;
-
- if(state.A&&state.B)
-   generateAB();
+    document.getElementById("date")
+        .textContent=
+        d.toLocaleDateString("pt-BR");
 
 }
 
-function resetNudge(){
+setInterval(updateClock,1000);
 
- state.nudge=0;
+updateClock();
 
- if(state.A&&state.B)
-   generateAB();
-}
+/* =====================================================
+   CANVAS
+===================================================== */
 
-/* ---------- ORIENTAÇÃO ---------- */
+function resizeCanvas(){
 
-function updateGuidance(){
-
- if(!state.guidance||!state.A||!state.B||
-    state.lat===null)return;
-
- const br=bearing(
-  state.A.lat,state.A.lon,
-  state.B.lat,state.B.lon
- );
-
- const d=distance(
-  state.A.lat,state.A.lon,
-  state.lat,state.lon
- );
-
- const b2=bearing(
-  state.A.lat,state.A.lon,
-  state.lat,state.lon
- );
-
- let diff=(b2-br+360)%360;
- if(diff>180)diff-=360;
-
- let cross=Math.sin(diff*Math.PI/180)*d;
-
- let spacing=Math.max(
-  0.1,state.width-state.overlap
- );
-
- let line=Math.round(
-  (cross-state.nudge)/spacing
- );
-
- state.currentLine=line;
-
- document.getElementById("cross").innerText=
-   cross.toFixed(2);
-
- document.getElementById("pass").innerText=
-   line===0?"A-B":
-   (line>0?"+"+line:line);
-
- updateLightbar(cross);
-
- if(state.autoCoverage &&
-    state.speed>0.3)
-   state.coverage=true;
-}
-
-/* ---------- BARRA DE LUZ ---------- */
-
-function updateLightbar(error){
-
- const cells=document.querySelectorAll(".lb");
-
- cells.forEach(x=>{
-  x.className="lb";
- });
-
- const n=Math.round(error);
-
- if(n===0){
-   cells[5].classList.add("center");
-   return;
- }
-
- if(n<0){
-   const i=Math.max(0,5-Math.min(5,Math.abs(n)));
-   cells[i].classList.add("left");
- }else{
-   const i=Math.min(10,5+Math.min(5,n));
-   cells[i].classList.add("right");
- }
-}
-
-/* ---------- COBERTURA ---------- */
-
-function startCoverage(){
- state.coverage=true;
-}
-
-function stopCoverage(){
- state.coverage=false;
-}
-
-function toggleCoverage(){
- state.coverage=!state.coverage;
-}
-
-function toggleAutoCoverage(){
- state.autoCoverage=!state.autoCoverage;
-}
-
-function clearCoverage(){
- if(confirm("Apagar toda a cobertura deste trabalho?")){
-  state.coveragePoints=[];
-  draw();
- }
-}
-
-/* ---------- TRACK / COBERTURA ---------- */
-
-function updateTrack(){
-
- if(state.lat===null)return;
-
- state.track.push({
-  lat:state.lat,
-  lon:state.lon,
-  time:new Date().toISOString()
- });
-
- if(state.track.length>50000)
-   state.track.shift();
-
- if(state.coverage && state.speed>0.2){
-
-  state.coveragePoints.push({
-   lat:state.lat,
-   lon:state.lon,
-   width:state.width,
-   time:new Date().toISOString()
-  });
-
-  if(state.coveragePoints.length>50000)
-    state.coveragePoints.shift();
- }
-
- if(state.boundary){
-  state.boundaryPoints.push({
-   lat:state.lat,
-   lon:state.lon
-  });
- }
+    canvas.width=field.clientWidth;
+    canvas.height=field.clientHeight;
 
 }
 
-/* ---------- LIMITE ---------- */
+window.addEventListener("resize",resizeCanvas);
 
-function startBoundary(){
- state.boundary=true;
- state.boundaryPoints=[];
-}
+resizeCanvas();
 
-function stopBoundary(){
- state.boundary=false;
- draw();
-}
+/* =====================================================
+   COBERTURA
+===================================================== */
 
-/* ---------- SEÇÕES ---------- */
-
-function applyImplement(){
-
- state.width=parseFloat(
-  document.getElementById("width").value
- )||3.6;
-
- state.overlap=parseFloat(
-  document.getElementById("overlap").value
- )||0;
-
- state.offsetLR=parseFloat(
-  document.getElementById("offsetLR").value
- )||0;
-
- state.offsetFB=parseFloat(
-  document.getElementById("offsetFB").value
- )||0;
-
- state.sections=parseInt(
-  document.getElementById("sections").value
- )||1;
-
- state.sectionState=
-   Array(state.sections).fill(true);
-
- buildSectionButtons();
-
- if(state.A&&state.B)
-   generateAB();
-
- draw();
-}
-
-function buildSectionButtons(){
-
- const box=document.getElementById("sectionButtons");
- box.innerHTML="";
-
- for(let i=0;i<state.sections;i++){
-
-  const b=document.createElement("button");
-
-  b.innerText="S"+(i+1);
-  b.onclick=()=>{
-    state.sectionState[i]=!state.sectionState[i];
-    b.style.background=
-      state.sectionState[i]?"#176f38":"#471b1b";
-  };
-
-  box.appendChild(b);
- }
-}
-
-function toggleSectionControl(){
- state.sectionControl=!state.sectionControl;
-}
-
-/* ---------- CAMPO ---------- */
-
-function newField(){
-
- if(!confirm("Criar novo campo?"))return;
-
- state.A=null;
- state.B=null;
- state.lines=[];
- state.track=[];
- state.coveragePoints=[];
- state.boundaryPoints=[];
- state.currentLine=0;
-
- draw();
-}
-
-function clearField(){
- newField();
-}
-
-function saveField(){
-
- const name=document.getElementById("fieldName").value;
-
- localStorage.setItem(
-  "PortalSatGPS_"+name,
-  JSON.stringify(state)
- );
-
- alert("Campo salvo no dispositivo.");
-}
-
-function loadField(){
-
- const name=document.getElementById("fieldName").value;
-
- const x=localStorage.getItem(
-  "PortalSatGPS_"+name
- );
-
- if(!x){
-  alert("Campo não encontrado.");
-  return;
- }
-
- try{
-  state=JSON.parse(x);
-  buildSectionButtons();
-  draw();
-  alert("Campo carregado.");
- }catch(e){
-  alert("Erro ao carregar.");
- }
-}
-
-/* ---------- VISUAL ---------- */
-
-function setView(v){
- state.view=v;
- draw();
-}
-
-function zoom(dir){
- state.zoom+=dir*.2;
- state.zoom=Math.max(.4,Math.min(5,state.zoom));
- draw();
-}
-
-function toggleGrid(){
- state.grid=!state.grid;
- draw();
-}
-
-function centerVehicle(){
- state.zoom=Math.max(state.zoom,1);
- draw();
-}
-
-/* ---------- PROJEÇÃO LOCAL ---------- */
-
-function project(lat,lon){
-
- if(state.lat===null)
-   return {x:canvas.clientWidth/2,y:canvas.clientHeight/2};
-
- const lat0=state.lat;
- const lon0=state.lon;
-
- const x=
-   (lon-lon0)*111320*
-   Math.cos(lat0*Math.PI/180);
-
- const y=
-   (lat-lat0)*110540;
-
- return {
-  x:canvas.clientWidth/2+x*state.zoom,
-  y:canvas.clientHeight/2-y*state.zoom
- };
-}
-
-/* ---------- LINHAS ---------- */
-
-function drawABLines(){
-
- if(!state.A||!state.B)return;
-
- const br=bearing(
-  state.A.lat,state.A.lon,
-  state.B.lat,state.B.lon
- );
-
- const rad=br*Math.PI/180;
-
- const ux=Math.sin(rad);
- const uy=Math.cos(rad);
-
- for(let l of state.lines){
-
-   const center=project(state.lat,state.lon);
-
-   const spacing=
-     l.offset*state.zoom;
-
-   const px=-uy*spacing;
-   const py=ux*spacing;
-
-   const len=3000;
-
-   const x1=center.x+px-ux*len;
-   const y1=center.y+py+uy*len;
-
-   const x2=center.x+px+ux*len;
-   const y2=center.y+py-uy*len;
-
-   ctx.beginPath();
-   ctx.moveTo(x1,y1);
-   ctx.lineTo(x2,y2);
-
-   ctx.lineWidth=
-     l.index===state.currentLine?3:1;
-
-   ctx.strokeStyle=
-     l.index===state.currentLine?
-       "#ffffff":
-       "rgba(104,220,130,.35)";
-
-   ctx.stroke();
- }
-}
-
-/* ---------- COBERTURA ---------- */
+let coverage=[];
 
 function drawCoverage(){
 
- if(state.coveragePoints.length<1)return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
- ctx.save();
+    if(!state.coverage) return;
 
- for(let p of state.coveragePoints){
+    coverage.forEach(c=>{
 
-   const q=project(p.lat,p.lon);
+        ctx.save();
 
-   const w=
-     Math.max(2,p.width*state.zoom);
+        ctx.translate(c.x,c.y);
 
-   ctx.fillStyle="rgba(38,220,91,.32)";
+        ctx.rotate(c.angle);
 
-   ctx.fillRect(
-    q.x-w/2,
-    q.y-3,
-    w,
-    6
-   );
- }
+        ctx.fillStyle="rgba(20,255,45,.38)";
 
- ctx.restore();
+        ctx.fillRect(
+            -c.width/2,
+            -c.length/2,
+            c.width,
+            c.length
+        );
+
+        ctx.restore();
+
+    });
+
+    document.getElementById("coveragePercent")
+        .textContent=
+        Math.min(
+            100,
+            Math.round(coverage.length/4)
+        )+"%";
+
 }
 
-/* ---------- LIMITE ---------- */
+/* =====================================================
+   REGISTRA COBERTURA
+===================================================== */
 
-function drawBoundary(){
+function addCoverage(){
 
- if(state.boundaryPoints.length<2)return;
+    if(!state.coverage) return;
 
- ctx.beginPath();
+    const x=
+        field.clientWidth*
+        state.tractorX/100;
 
- state.boundaryPoints.forEach((p,i)=>{
-   const q=project(p.lat,p.lon);
+    const y=
+        field.clientHeight*
+        state.tractorY/100;
 
-   if(i===0)ctx.moveTo(q.x,q.y);
-   else ctx.lineTo(q.x,q.y);
- });
+    const width=
+        Math.max(
+            20,
+            state.implementWidth*12
+        );
 
- ctx.strokeStyle="#ffcf33";
- ctx.lineWidth=3;
- ctx.setLineDash([8,5]);
- ctx.stroke();
- ctx.setLineDash([]);
+    coverage.push({
+
+        x:x,
+
+        y:y+45,
+
+        width:width,
+
+        length:Math.max(
+            15,
+            state.speed*1.2
+        ),
+
+        angle:
+            state.heading*Math.PI/180
+
+    });
+
+    if(coverage.length>1200){
+        coverage.shift();
+    }
+
+    drawCoverage();
+
 }
 
-/* ---------- GRADE ---------- */
+/* =====================================================
+   MOVIMENTO DO TRATOR
+===================================================== */
 
-function drawGrid(){
+function moveTractor(){
 
- if(!state.grid)return;
+    if(!state.running) return;
 
- const w=canvas.clientWidth;
- const h=canvas.clientHeight;
+    const now=Date.now();
 
- ctx.save();
+    const dt=(now-lastTime)/1000;
 
- ctx.strokeStyle="rgba(120,180,140,.09)";
- ctx.lineWidth=1;
+    lastTime=now;
 
- const step=50;
+    state.workSeconds+=dt;
 
- for(let x=w/2%step;x<w;x+=step){
-   ctx.beginPath();
-   ctx.moveTo(x,0);
-   ctx.lineTo(x,h);
-   ctx.stroke();
- }
- for(let y=h/2%step;y<h;y+=step){
-   ctx.beginPath();
-   ctx.moveTo(0,y);
-   ctx.lineTo(w,y);
-   ctx.stroke();
- }
+    const pixels=
+        state.speed*
+        0.0035*
+        dt;
 
- ctx.restore();
+    const rad=
+        state.heading*
+        Math.PI/180;
+
+    state.tractorX+=
+        Math.sin(rad)*pixels;
+
+    state.tractorY-=
+        Math.cos(rad)*pixels;
+
+    if(state.tractorX<15){
+        state.tractorX=15;
+    }
+
+    if(state.tractorX>85){
+        state.tractorX=85;
+    }
+
+    if(state.tractorY<15){
+        state.tractorY=15;
+    }
+
+    if(state.tractorY>80){
+        state.tractorY=80;
+    }
+
+    tractor.style.left=
+        state.tractorX+"%";
+
+    tractor.style.top=
+        state.tractorY+"%";
+
+    tractor.style.transform=
+        "translate(-50%,-50%) rotate("+state.heading+"deg)";
+
+    addCoverage();
+
+    updateStats();
+
+    requestAnimationFrame(moveTractor);
+
 }
 
-/* ---------- TRATOR ---------- */
+/* =====================================================
+   ESTATÍSTICAS
+===================================================== */
 
-function drawVehicle(){
+function updateStats(){
 
- const x=canvas.clientWidth/2;
- const y=canvas.clientHeight/2;
+    document.getElementById("speed")
+        .textContent=
+        state.speed.toFixed(1)
+        .replace(".",",")
+        +" km/h";
 
- ctx.save();
- ctx.translate(x,y);
- ctx.rotate(state.heading*Math.PI/180);
+    document.getElementById("heading")
+        .textContent=
+        Math.round(state.heading)+"°";
 
- ctx.fillStyle="#d7d7d7";
- ctx.fillRect(-13,-25,26,50);
+    document.getElementById("spacingDisplay")
+        .textContent=
+        state.spacing.toFixed(1)
+        .replace(".",",")+" m";
 
- ctx.fillStyle="#57a5ff";
- ctx.fillRect(-10,-17,20,13);
+    document.getElementById("widthDisplay")
+        .textContent=
+        state.implementWidth
+        .toFixed(1)
+        .replace(".",",")+" m";
 
- ctx.fillStyle="#111";
- ctx.fillRect(-17,-23,5,20);
- ctx.fillRect(12,-23,5,20);
- ctx.fillRect(-17,3,5,20);
- ctx.fillRect(12,3,5,20);
+    document.getElementById("rateDisplay")
+        .textContent=
+        state.rate
+        .toFixed(0)+" kg/ha";
 
- ctx.fillStyle="#f44336";
- ctx.beginPath();
- ctx.moveTo(0,-34);
- ctx.lineTo(-6,-24);
- ctx.lineTo(6,-24);
- ctx.closePath();
- ctx.fill();
+    document.getElementById("bottomRate")
+        .textContent=
+        state.rate
+        .toFixed(1)
+        .replace(".",",")+" kg/ha";
 
- ctx.restore();
+    document.getElementById("workedArea")
+        .textContent=
+        state.areaWorked
+        .toFixed(2)
+        .replace(".",",")+" ha";
+
+    document.getElementById("fieldArea")
+        .textContent=
+        state.fieldArea
+        .toFixed(2)
+        .replace(".",",")+" ha";
+
+    let h=
+        Math.floor(state.workSeconds/3600);
+
+    let m=
+        Math.floor(
+            (state.workSeconds%3600)/60
+        );
+
+    let s=
+        Math.floor(
+            state.workSeconds%60
+        );
+
+    document.getElementById("workTime")
+        .textContent=
+        String(h).padStart(2,"0")+":"+
+        String(m).padStart(2,"0")+":"+
+        String(s).padStart(2,"0");
+
+    document.getElementById("yield")
+        .textContent=
+        (
+            state.speed*
+            state.implementWidth/100
+        )
+        .toFixed(2)
+        .replace(".",",")
+        +" ha/h";
+
 }
 
-/* ---------- 3D ---------- */
+/* =====================================================
+   LINHA A/B
+===================================================== */
 
-function draw3DOverlay(){
+function createAB(){
 
- if(state.view!=="3D")return;
+    if(!state.pointA){
 
- const w=canvas.clientWidth;
- const h=canvas.clientHeight;
+        state.pointA={
+            x:state.tractorX,
+            y:state.tractorY,
+            heading:state.heading
+        };
 
- const g=ctx.createLinearGradient(0,0,0,h);
- g.addColorStop(0,"rgba(0,0,0,.10)");
- g.addColorStop(1,"rgba(0,0,0,.38)");
+        document.getElementById("pointA")
+            .textContent=
+            "A registrado";
 
- ctx.fillStyle=g;
- ctx.fillRect(0,0,w,h);
+        return;
 
- /* linhas de perspectiva */
- ctx.strokeStyle="rgba(160,220,180,.10)";
- ctx.lineWidth=1;
+    }
 
- for(let i=-12;i<=12;i++){
-   ctx.beginPath();
-   ctx.moveTo(w/2+i*45,h/2);
-   ctx.lineTo(w/2+i*130,h);
-   ctx.stroke();
- }
+    if(!state.pointB){
+
+        state.pointB={
+            x:state.tractorX,
+            y:state.tractorY,
+            heading:state.heading
+        };
+
+        document.getElementById("pointB")
+            .textContent=
+            "B registrado";
+
+        generateParallelLines();
+
+        return;
+
+    }
+
+    state.pointA=null;
+    state.pointB=null;
+
+    document.getElementById("pointA")
+        .textContent="0+00,000 m";
+
+    document.getElementById("pointB")
+        .textContent="0+00,000 m";
+
+    generateParallelLines();
+
 }
 
-/* ---------- A/B ---------- */
+/* =====================================================
+   LINHAS PARALELAS
+===================================================== */
 
-function drawABPoints(){
+function generateParallelLines(){
 
- if(state.A){
-  const q=project(state.A.lat,state.A.lon);
+    document.querySelectorAll(".guideline")
+        .forEach(e=>e.remove());
 
-  ctx.fillStyle="#00e676";
-  ctx.beginPath();
-  ctx.arc(q.x,q.y,8,0,Math.PI*2);
-  ctx.fill();
+    if(!state.pointA || !state.pointB) return;
 
-  ctx.fillStyle="#fff";
-  ctx.font="bold 14px Arial";
-  ctx.fillText("A",q.x+10,q.y);
- }
+    const angle=
+        Math.atan2(
+            state.pointB.x-state.pointA.x,
+            -(state.pointB.y-state.pointA.y)
+        );
 
- if(state.B){
-  const q=project(state.B.lat,state.B.lon);
+    state.heading=
+        angle*180/Math.PI;
 
-  ctx.fillStyle="#ff5252";
-  ctx.beginPath();
-  ctx.arc(q.x,q.y,8,0,Math.PI*2);
-  ctx.fill();
+    for(let i=-12;i<=12;i++){
 
-  ctx.fillStyle="#fff";
-  ctx.font="bold 14px Arial";
-  ctx.fillText("B",q.x+10,q.y);
- }
+        const line=
+            document.createElement("div");
+
+        line.className="guideline";
+
+        const spacing=
+            i*
+            state.spacing*
+            0.25;
+
+        line.style.left=
+            `calc(50% + ${spacing}%)`;
+
+        line.style.transform=
+            `rotate(${state.heading}deg)`;
+
+        field.appendChild(line);
+
+    }
+
+    document.getElementById("crossTrack")
+        .textContent=
+        "0,00 m";
+
 }
 
-/* ---------- DESENHO PRINCIPAL ---------- */
+/* =====================================================
+   PAINÉIS
+===================================================== */
 
-function draw(){
+function toggleLeft(){
 
- const w=canvas.clientWidth;
- const h=canvas.clientHeight;
+    document
+        .getElementById("leftPanel")
+        .classList.toggle("hidden");
 
- ctx.clearRect(0,0,w,h);
-
- /* fundo agrícola */
- ctx.fillStyle="#081810";
- ctx.fillRect(0,0,w,h);
-
- drawGrid();
-
- drawCoverage();
-
- drawBoundary();
-
- drawABLines();
-
- drawABPoints();
-
- drawVehicle();
-
- draw3DOverlay();
-
- /* direção */
- ctx.save();
- ctx.translate(w/2,h/2);
-
- ctx.strokeStyle="rgba(255,255,255,.45)";
- ctx.lineWidth=2;
-
- ctx.beginPath();
- ctx.moveTo(0,-40);
- ctx.lineTo(0,-75);
- ctx.stroke();
-
- ctx.restore();
 }
 
-/* ---------- EXPORTAÇÃO ---------- */
+function toggleRight(){
 
-function downloadFile(filename,data,type){
+    document
+        .getElementById("rightPanel")
+        .classList.toggle("hidden");
 
- const blob=new Blob([data],{type:type});
- const a=document.createElement("a");
-
- a.href=URL.createObjectURL(blob);
- a.download=filename;
-
- document.body.appendChild(a);
- a.click();
- a.remove();
-
- setTimeout(
-   ()=>URL.revokeObjectURL(a.href),
-   1000
- );
 }
 
-function exportJSON(){
+/* =====================================================
+   COBERTURA
+===================================================== */
 
- const data=JSON.stringify(state,null,2);
+function toggleCoverage(){
 
- downloadFile(
-  "PortalSatGPS_trabalho.json",
-  data,
-  "application/json"
- );
+    state.coverage=
+        !state.coverage;
+
+    drawCoverage();
+
 }
 
-function exportCSV(){
+/* =====================================================
+   3D
+===================================================== */
 
- let csv="latitude,longitude,data_hora\n";
+function set3D(){
 
- state.track.forEach(p=>{
-  csv+=`${p.lat},${p.lon},${p.time}\n`;
- });
+    state.mode3D=true;
 
- downloadFile(
-  "PortalSatGPS_pontos.csv",
-  csv,
-  "text/csv"
- );
+    field.classList.add("mode3d");
+
+    field.style.transform=
+        "perspective(850px) rotateX(48deg) scale(1.18)";
+
+    document
+        .querySelectorAll(".modeBtn")
+        .forEach(b=>b.classList.remove("active"));
+
+    document
+        .querySelectorAll(".modeBtn")[1]
+        .classList.add("active");
+
 }
 
-/* ---------- SALVAR AUTOMATICAMENTE ---------- */
+function set2D(){
+
+    state.mode3D=false;
+
+    field.classList.remove("mode3d");
+
+    field.style.transform=
+        "none";
+
+    document
+        .querySelectorAll(".modeBtn")
+        .forEach(b=>b.classList.remove("active"));
+
+    document
+        .querySelectorAll(".modeBtn")[0]
+        .classList.add("active");
+
+}
+
+function toggle3D(){
+
+    state.mode3D?
+        set2D():
+        set3D();
+
+}
+
+/* =====================================================
+   ZOOM
+===================================================== */
+
+function zoomIn(){
+
+    state.zoom=
+        Math.min(2.5,state.zoom+.15);
+
+    field.style.transform=
+        state.mode3D?
+        `perspective(850px) rotateX(48deg) scale(${state.zoom})`:
+        `scale(${state.zoom})`;
+
+}
+
+function zoomOut(){
+
+    state.zoom=
+        Math.max(.6,state.zoom-.15);
+
+    field.style.transform=
+        state.mode3D?
+        `perspective(850px) rotateX(48deg) scale(${state.zoom})`:
+        `scale(${state.zoom})`;
+
+}
+
+/* =====================================================
+   CENTRALIZAR
+===================================================== */
+
+function centerTractor(){
+
+    state.tractorX=50;
+    state.tractorY=58;
+
+    tractor.style.left="50%";
+    tractor.style.top="58%";
+
+}
+
+/* =====================================================
+   NOTURNO
+===================================================== */
+
+function toggleNight(){
+
+    state.night=
+        !state.night;
+
+    document.body.style.filter=
+        state.night?
+        "brightness(.65) contrast(1.1)":
+        "none";
+
+}
+
+/* =====================================================
+   TELA CHEIA
+===================================================== */
+
+function fullscreen(){
+
+    if(!document.fullscreenElement){
+
+        document.documentElement
+            .requestFullscreen()
+            .catch(()=>{});
+
+    }else{
+
+        document.exitFullscreen();
+
+    }
+
+}
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+function openModal(type){
+
+    modalMode=type;
+
+    const modal=
+        document.getElementById("modal");
+
+    const title=
+        document.getElementById("modalTitle");
+
+    const content=
+        document.getElementById("modalContent");
+
+    if(type==="config"){
+
+        title.textContent=
+            "⚙️ Configurações GPS";
+
+        content.innerHTML=`
+
+        <div class="formGroup">
+            <label>Velocidade simulada</label>
+            <input id="inputSpeed"
+                   type="number"
+                   step=".1"
+                   value="${state.speed}">
+        </div>
+
+        <div class="formGroup">
+            <label>Espaçamento entre linhas (m)</label>
+            <input id="inputSpacing"
+                   type="number"
+                   step=".1"
+                   value="${state.spacing}">
+        </div>
+
+        <div class="formGroup">
+            <label>Satélites</label>
+            <input id="inputSat"
+                   type="number"
+                   value="18">
+        </div>
+
+        `;
+
+    }
+
+    if(type==="implemento"){
+
+        title.textContent=
+            "🔧 Configuração do Implemento";
+
+        content.innerHTML=`
+
+        <div class="formGroup">
+            <label>Nome do implemento</label>
+            <input id="inputImplement"
+                   value="${document.getElementById("implementName").textContent.trim()}">
+        </div>
+
+        <div class="formGroup">
+            <label>Largura de trabalho (m)</label>
+            <input id="inputWidth"
+                   type="number"
+                   step=".1"
+                   value="${state.implementWidth}">
+        </div>
+
+        <div class="formGroup">
+            <label>Taxa de aplicação (kg/ha)</label>
+            <input id="inputRate"
+                   type="number"
+                   step=".1"
+                   value="${state.rate}">
+        </div>
+
+        `;
+
+    }
+
+    if(type==="talhao"){
+
+        title.textContent=
+            "🌾 Criar Talhão / Lote";
+
+        content.innerHTML=`
+
+        <div class="formGroup">
+            <label>Nome do talhão</label>
+            <input id="inputFieldName"
+                   value="${state.fieldName}">
+        </div>
+
+        <div class="formGroup">
+            <label>Área do talhão (ha)</label>
+            <input id="inputFieldArea"
+                   type="number"
+                   step=".01"
+                   value="${state.fieldArea}">
+        </div>
+
+        `;
+
+    }
+
+    modal.classList.add("show");
+
+}
+
+function closeModal(){
+
+    document
+        .getElementById("modal")
+        .classList.remove("show");
+
+}
+
+function applyModal(){
+
+    if(modalMode==="config"){
+
+        state.speed=
+            Number(
+                document.getElementById("inputSpeed").value
+            )||8.4;
+
+        state.spacing=
+            Number(
+                document.getElementById("inputSpacing").value
+            )||12;
+
+        document.getElementById("satellites")
+            .textContent=
+            document.getElementById("inputSat").value+
+            "/20";
+
+    }
+
+    if(modalMode==="implemento"){
+
+        state.implementWidth=
+            Number(
+                document.getElementById("inputWidth").value
+            )||12;
+
+        state.rate=
+            Number(
+                document.getElementById("inputRate").value
+            )||85;
+
+        document.getElementById("implementName")
+            .textContent=
+            document.getElementById("inputImplement").value
+            ||"Implemento";
+
+        if(state.pointA && state.pointB)
+            generateParallelLines();
+
+    }
+
+    if(modalMode==="talhao"){
+
+        state.fieldName=
+            document.getElementById("inputFieldName").value
+            ||"Talhão";
+
+        state.fieldArea=
+            Number(
+                document.getElementById("inputFieldArea").value
+            )||0;
+
+    }
+
+    updateStats();
+
+    closeModal();
+
+}
+
+/* =====================================================
+   SALVAR TALHÃO
+===================================================== */
+
+function saveField(){
+
+    const data={
+        state:state,
+        coverage:coverage
+    };
+
+    localStorage.setItem(
+        "portalSatGPSField",
+        JSON.stringify(data)
+    );
+
+    alert("Talhão salvo neste aparelho.");
+
+}
+
+/* =====================================================
+   CARREGAR TALHÃO
+===================================================== */
+
+function loadField(){
+
+    const raw=
+        localStorage.getItem(
+            "portalSatGPSField"
+        );
+
+    if(!raw){
+
+        alert("Nenhum talhão salvo.");
+
+        return;
+
+    }
+
+    try{
+
+        const data=
+            JSON.parse(raw);
+
+        state=data.state||state;
+
+        coverage=data.coverage||[];
+
+        updateStats();
+
+        drawCoverage();
+
+        alert("Talhão carregado.");
+
+    }catch(e){
+
+        alert("Erro ao carregar talhão.");
+
+    }
+
+}
+
+/* =====================================================
+   REGISTROS
+===================================================== */
+
+function openRecords(){
+
+    alert(
+        "REGISTROS\n\n"+
+        "Talhão: "+state.fieldName+
+        "\nÁrea trabalhada: "+
+        state.areaWorked.toFixed(2)+" ha"+
+        "\nCobertura: "+
+        coverage.length+" registros"
+    );
+
+}
+
+/* =====================================================
+   GPS DO APARELHO
+===================================================== */
+
+function startGPS(){
+
+    if(!navigator.geolocation){
+
+        document.getElementById("gpsStatus")
+            .textContent=
+            "🔴 GPS não disponível no navegador";
+
+        return;
+
+    }
+
+    gpsWatch=
+        navigator.geolocation.watchPosition(
+
+            position=>{
+
+                const accuracy=
+                    position.coords.accuracy;
+
+                document.getElementById("gpsStatus")
+                    .textContent=
+                    "🟢 GPS conectado • "+
+                    "±"+Math.round(accuracy)+" m";
+
+                if(position.coords.speed!=null){
+
+                    const kmh=
+                        Math.max(
+                            0,
+                            position.coords.speed*3.6
+                        );
+
+                    state.speed=
+                        kmh>0.2?
+                        kmh:
+                        state.speed;
+
+                }
+
+                if(position.coords.heading!=null &&
+                   !isNaN(position.coords.heading)){
+
+                    state.heading=
+                        position.coords.heading;
+
+                }
+
+            },
+
+            error=>{
+
+                document.getElementById("gpsStatus")
+                    .textContent=
+                    "🟠 GPS aguardando sinal";
+
+            },
+
+            {
+                enableHighAccuracy:true,
+                maximumAge:1000,
+                timeout:5000
+            }
+
+        );
+
+}
+
+/* =====================================================
+   ORIENTAÇÃO DO APARELHO
+===================================================== */
+
+window.addEventListener(
+    "deviceorientationabsolute",
+    e=>{
+
+        if(e.alpha!=null){
+
+            state.heading=
+                e.alpha;
+
+        }
+
+    }
+);
+
+/* =====================================================
+   CONTROLE POR TECLADO
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    e=>{
+
+        if(e.key==="ArrowLeft")
+            state.heading-=2;
+
+        if(e.key==="ArrowRight")
+            state.heading+=2;
+
+        if(e.key==="ArrowUp")
+            state.speed+=.2;
+
+        if(e.key==="ArrowDown")
+            state.speed=Math.max(
+                0,
+                state.speed-.2
+            );
+
+        if(e.key===" ")
+            toggleCoverage();
+
+    }
+);
+
+/* =====================================================
+   ÁREA TRABALHADA
+===================================================== */
 
 setInterval(()=>{
 
- try{
-  localStorage.setItem(
-   "PortalSatGPS_AUTO",
-   JSON.stringify(state)
-  );
- }catch(e){}
+    if(state.running){
 
-},5000);
+        state.areaWorked +=
+            state.speed*
+            state.implementWidth/
+            100000;
 
-/* ---------- INICIALIZAÇÃO ---------- */
+    }
 
-function init(){
+},1000);
 
- buildSectionButtons();
+/* =====================================================
+   INICIALIZAÇÃO
+===================================================== */
 
- /* barra de luz */
- const lb=document.getElementById("lightbar");
+updateStats();
 
- for(let i=0;i<11;i++){
-  const d=document.createElement("div");
-  d.className="lb";
-  lb.appendChild(d);
- }
+startGPS();
 
- resize();
-
- /* tenta iniciar GPS */
- if(navigator.geolocation)
-   startGPS();
-
-}
-
-init();
+requestAnimationFrame(moveTractor);
 
 </script>
+
 </body>
 </html>
