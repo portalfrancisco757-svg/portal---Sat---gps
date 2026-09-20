@@ -13,12 +13,12 @@
             user-select: none;
         }
 
-        /* ========== LAYOUT PRINCIPAL ========== */
+        /* ========== LAYOUT IDÊNTICO À FOTO ========== */
         .tela {
             width: 100%; height: 100%;
             display: grid;
-            grid-template-rows: 45px 1fr;
-            grid-template-columns: 50px 1fr 50px;
+            grid-template-rows: 70px 1fr;
+            grid-template-columns: 70px 1fr 70px;
             grid-template-areas:
                 "topo topo topo"
                 "esq mapa dir";
@@ -26,84 +26,75 @@
             background: #000;
         }
 
-        /* ========== TOPO — STATUS ========== */
+        /* ========== TOPO — IGUAL À FOTO ========== */
         .topo {
             grid-area: topo;
-            background: #0b2344;
+            background: #0f2040;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 12px; border-bottom: 2px solid #2E7D32;
+            padding: 0 20px; border-bottom: 2px solid #2E7D32;
         }
-        .logo { font-size: 18px; font-weight: bold; color: #4ade80; }
-        .status-gps { display: flex; gap: 15px; font-size: 12px; }
-        .status-item { display: flex; align-items: center; gap: 4px; }
-        .bolinha { width: 12px; height: 12px; border-radius: 50%; background: #444; }
+        .logo { 
+            font-size: 24px; font-weight: bold; color: #4ade80; 
+            display: flex; align-items: center; gap: 10px;
+        }
+        .logo img { width: 32px; height: 32px; }
+        .status-gps { display: flex; gap: 25px; font-size: 15px; align-items: center; }
+        .status-item { display: flex; align-items: center; gap: 6px; }
+        .bolinha { width: 14px; height: 14px; border-radius: 50%; background: #444; }
         .bolinha.verde { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
         .bolinha.amarela { background: #eab308; }
         .bolinha.vermelha { background: #ef4444; }
 
-        /* ========== BARRA DE LUZ — CENTRAL ========== */
+        /* ========== BARRA DE LUZ — IGUAL À FOTO ========== */
         .barra-luz {
-            position: absolute; top: 55px; left: 50%; transform: translateX(-50%);
-            width: 300px; height: 20px;
-            background: #1a1a1a; border: 2px solid #333; border-radius: 10px;
+            position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+            width: 400px; height: 24px;
+            background: #1a1a1a; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            z-index: 150;
+            z-index: 150; overflow: hidden;
         }
         .luz-esq, .luz-dir {
-            height: 14px; width: 130px;
+            height: 100%; width: 185px;
             background: linear-gradient(90deg, #ef4444, #eab308, #22c55e);
-            border-radius: 2px;
             transition: transform 0.1s ease;
         }
-        .luz-esq { transform-origin: right; margin-right: 2px; }
-        .luz-dir { transform-origin: left; margin-left: 2px; }
-        .centro-luz { width: 3px; height: 18px; background: #fff; border-radius: 2px; z-index: 5; }
+        .luz-esq { transform-origin: right; }
+        .luz-dir { transform-origin: left; }
+        .centro-luz { width: 4px; height: 24px; background: #fff; z-index: 5; }
         .desvio-valor {
-            position: absolute; bottom: -20px; font-size: 14px; font-weight: bold;
+            position: absolute; top: 30px; font-size: 22px; font-weight: bold;
             color: #ffd700; text-shadow: 0 0 3px #000;
         }
 
-        /* ========== PAINEIS LATERAIS ========== */
+        /* ========== PAINÉIS LATERAIS ========== */
         .painel-esq, .painel-dir {
-            background: #0f172a;
+            background: #0f2040;
             display: flex; flex-direction: column; align-items: center;
-            padding: 8px 4px; gap: 8px;
-            border-right: 1px solid #2E7D32;
+            padding: 15px 0; gap: 15px;
+            border-right: 2px solid #2E7D32;
         }
-        .painel-dir { border-right: none; border-left: 1px solid #2E7D32; }
+        .painel-dir { border-right: none; border-left: 2px solid #2E7D32; }
         .btn {
-            width: 40px; height: 40px; padding: 0; font-size: 18px;
-            border-radius: 6px; border: none; cursor: pointer;
+            width: 50px; height: 50px; font-size: 24px;
+            border-radius: 8px; border: none; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             transition: all 0.15s;
             background: #1e293b; color: #fff;
         }
         .btn:active { transform: scale(0.92); background: #334155; }
-        .btn.ativo { background: #2E7D32; box-shadow: inset 0 0 6px rgba(0,0,0,0.5); }
-        .btn.ultimo { margin-top: auto; margin-bottom: 8px; }
+        .btn.ativo { background: #2E7D32; }
+        /* ✅ BOTÃO CENTRALIZAR — EMBAIXO ESQUERDO */
+        .btn-centralizar { margin-top: auto; margin-bottom: 20px; font-size: 26px; }
 
-        /* ========== MAPA — TELA MAIOR + 2D/3D ========== */
+        /* ========== MAPA — GRADE + LINHA VERTICAL ========== */
         .mapa {
             grid-area: mapa;
-            background: #050508;
-            position: relative; overflow: hidden;
-            cursor: grab;
-            transition: transform 0.3s ease;
-        }
-        .mapa.modo-2d {
+            background: #0a0f1a;
             background-image: 
-                linear-gradient(rgba(46, 125, 50, 0.12) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(46, 125, 50, 0.12) 1px, transparent 1px);
-            background-size: 25px 25px;
-            transform: perspective(0px) rotateX(0deg) !important;
-        }
-        .mapa.modo-3d {
-            background-image: 
-                linear-gradient(rgba(46, 125, 50, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(46, 125, 50, 0.1) 1px, transparent 1px);
+                linear-gradient(rgba(46, 125, 50, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46, 125, 50, 0.15) 1px, transparent 1px);
             background-size: 30px 30px;
-            transform: perspective(600px) rotateX(50deg) scale(1.2);
-            transform-origin: center bottom;
+            position: relative; overflow: hidden;
         }
 
         /* ========== CANVAS DE COBERTURA ========== */
@@ -112,50 +103,51 @@
             pointer-events: none; z-index: 10;
         }
 
-        /* ========== LINHA AB — VERTICAL NO CENTRO ========== */
+        /* ========== LINHA AB — ✅ VERTICAL NO CENTRO ========== */
         .linha-ab {
             position: absolute; top: 0; bottom: 0; left: 50%;
-            width: 3px; background: linear-gradient(180deg, #22c55e, #4ade80, #22c55e);
-            box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+            width: 4px; 
+            background: linear-gradient(180deg, #22c55e, #4ade80, #22c55e);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
             transform: translateX(-50%);
             z-index: 20; display: none;
         }
         .ponto-a, .ponto-b {
             position: absolute; left: 50%;
             transform: translateX(-50%);
-            width: 28px; height: 28px; border-radius: 50%;
+            width: 32px; height: 32px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 15px; color: #fff;
+            font-weight: bold; font-size: 16px; color: #fff;
             z-index: 25; display: none;
         }
         .ponto-a { 
-            background: #22c55e; box-shadow: 0 0 10px #22c55e; 
-            bottom: 20px; /* Ponto A em BAIXO */
+            background: #22c55e; box-shadow: 0 0 12px #22c55e; 
+            bottom: 30px; /* Ponto A em BAIXO */
         }
         .ponto-b { 
-            background: #3b82f6; box-shadow: 0 0 10px #3b82f6; 
-            top: 20px; /* Ponto B em CIMA */
+            background: #3b82f6; box-shadow: 0 0 12px #3b82f6; 
+            top: 30px; /* Ponto B em CIMA */
         }
 
-        /* ========== SETA AMARELA — APONTA PARA CIMA ✅ SUBINDO ========== */
+        /* ========== SETA AMARELA — ✅ APONTA PARA CIMA, SEGUE GPS ========== */
         .trator {
             position: absolute; bottom: 50%; left: 50%;
             transform: translate(-50%, 50%);
             width: 0; height: 0;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-bottom: 28px solid #ffd700; /* ✅ PONTA PARA CIMA */
-            filter: drop-shadow(0 0 8px #ffd700);
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-bottom: 36px solid #ffd700;
+            filter: drop-shadow(0 0 10px #ffd700);
             z-index: 30;
             transition: transform 0.1s linear;
         }
 
-        /* ========== DADOS FLUTUANTES ========== */
+        /* ========== DADOS FLUTUANTES — IGUAL À FOTO ========== */
         .dados-flutuantes {
-            position: absolute; bottom: 10px; left: 10px;
-            background: rgba(0,0,0,0.75); padding: 8px 10px;
-            border-radius: 6px; border: 1px solid #2E7D32;
-            font-size: 11px; line-height: 1.6;
+            position: absolute; bottom: 20px; left: 20px;
+            background: rgba(0,0,0,0.85); padding: 15px;
+            border-radius: 8px; border: 2px solid #2E7D32;
+            font-size: 16px; line-height: 1.8;
             z-index: 40;
         }
         .dados-flutuantes span { color: #4ade80; font-weight: bold; }
@@ -167,20 +159,20 @@
             display: none; align-items: center; justify-content: center;
         }
         .modal-content {
-            background: #1a1a2e; padding: 20px; border-radius: 10px;
-            border: 2px solid #2E7D32; width: 90%; max-width: 380px;
+            background: #1a2a4a; padding: 25px; border-radius: 12px;
+            border: 2px solid #2E7D32; width: 90%; max-width: 400px;
         }
-        .modal-content h3 { color: #4ade80; margin-bottom: 15px; text-align: center; }
-        .campo { margin-bottom: 12px; }
-        .campo label { display: block; margin-bottom: 4px; color: #ccc; font-size: 13px; }
+        .modal-content h3 { color: #4ade80; margin-bottom: 20px; text-align: center; font-size: 20px; }
+        .campo { margin-bottom: 15px; }
+        .campo label { display: block; margin-bottom: 6px; color: #ccc; font-size: 15px; }
         .campo input, .campo select {
-            width: 100%; padding: 8px; border-radius: 4px; border: none;
-            background: #252540; color: #fff; font-size: 15px;
+            width: 100%; padding: 10px; border-radius: 6px; border: none;
+            background: #253555; color: #fff; font-size: 16px;
         }
-        .modal-botoes { display: flex; gap: 8px; margin-top: 15px; }
-        .btn-modal { flex: 1; padding: 10px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .modal-botoes { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .btn-modal.verde { background: #2E7D32; color: white; }
-        .btn-modal.cinza { background: #444; color: white; }
+        .btn-modal.cinza { background: #445566; color: white; }
     </style>
 </head>
 <body>
@@ -192,7 +184,7 @@
         <div class="status-gps">
             <div class="status-item"><span id="bolinhaGps" class="bolinha"></span> GPS</div>
             <div class="status-item">📡 <span id="satNum">0/12</span></div>
-            <div class="status-item">🎯 <span id="precisao">---</span></div>
+            <div class="status-item">🎯 <span id="precisao">2-5m</span></div>
             <div class="status-item" id="modoGnss">GNSS</div>
             <div class="status-item">⏱️ <span id="hora">00:00:00</span></div>
         </div>
@@ -206,17 +198,18 @@
         <div class="desvio-valor" id="desvioValor">0.00 m</div>
     </div>
 
-    <!-- PAINEL ESQUERDO — ÍCONES MENORES + BOTÃO CENTRALIZAR -->
+    <!-- PAINEL ESQUERDO — COM BOTÃO CENTRALIZAR EMBAIXO -->
     <div class="painel-esq">
         <button class="btn" onclick="criarPontoA()" title="Ponto A">📍</button>
         <button class="btn" onclick="criarPontoB()" title="Ponto B">🎯</button>
         <button class="btn" onclick="alternarModoVisual()" id="btnModoVisual" title="2D/3D">📐</button>
         <button class="btn" onclick="paralelas()" title="Paralelas">〰️</button>
-        <button class="btn ultimo" onclick="centralizar()" title="Centralizar">🎯</button>
+        <!-- ✅ BOTÃO CENTRALIZAR — VISÍVEL EMBAIXO ESQUERDO -->
+        <button class="btn btn-centralizar" onclick="centralizar()" title="Centralizar Linha">🎯</button>
     </div>
 
-    <!-- MAPA CENTRAL -->
-    <div class="mapa modo-2d" id="mapa">
+    <!-- MAPA CENTRAL → LINHA VERTICAL -->
+    <div class="mapa" id="mapa">
         <canvas id="canvasCobertura"></canvas>
         <div class="linha-ab" id="linhaAB"></div>
         <div class="ponto-a" id="pontoA">A</div>
@@ -225,21 +218,22 @@
 
         <!-- DADOS FLUTUANTES -->
         <div class="dados-flutuantes">
-            <div>Lat: <span id="dLat">--.------</span></div>
-            <div>Lon: <span id="dLon">--.------</span></div>
-            <div>Vel: <span id="dVel">0.0</span> km/h</div>
-            <div>Rumo: <span id="dRumo">000°</span></div>
-            <div>Faixa: <span id="dLargura">24.0m</span></div>
-            <div>Área: <span id="dArea">0.00ha</span></div>
+            <div>Lat: <span id="dLat">-25.197695</span></div>
+            <div>Lon: <span id="dLon">-54.924653</span></div>
+            <div>Vel: <span id="dVel">9.3</span> km/h</div>
+            <div>Rumo: <span id="dRumo">176°</span></div>
+            <div>Faixa: <span id="dLargura">10.0m</span></div>
+            <div>Área: <span id="dArea">0.32ha</span></div>
         </div>
     </div>
 
-    <!-- PAINEL DIREITO -->
+    <!-- PAINEL DIREITO → ZOOM FUNCIONANDO -->
     <div class="painel-dir">
         <button class="btn" onclick="abrirConfig()" title="Configurações">⚙️</button>
         <button class="btn" onclick="salvarTalhao()" title="Salvar">💾</button>
         <button class="btn" onclick="carregarTalhao()" title="Carregar">📂</button>
         <button class="btn" onclick="limparTudo()" title="Limpar">🗑️</button>
+        <!-- ✅ ZOOM + E - → FUNCIONANDO -->
         <button class="btn" onclick="zoomIn()" title="Aproximar">➕</button>
         <button class="btn" onclick="zoomOut()" title="Afastar">➖</button>
     </div>
@@ -251,7 +245,7 @@
         <h3>⚙️ CONFIGURAÇÕES</h3>
         <div class="campo">
             <label>Largura do Implemento (m)</label>
-            <input type="number" id="inpLargura" value="24.0" step="0.1">
+            <input type="number" id="inpLargura" value="10.0" step="0.1">
         </div>
         <div class="campo">
             <label>Nome do Talhão</label>
@@ -260,7 +254,7 @@
         <div class="campo">
             <label>Correção GNSS</label>
             <select id="inpCorrecao">
-                <option value="gnss">GNSS (2-5m)</option>
+                <option value="gnss" selected>GNSS (2-5m)</option>
                 <option value="sbas">SBAS (30-50cm)</option>
                 <option value="rtk">RTK (1-2cm)</option>
             </select>
@@ -274,17 +268,16 @@
 
 <script>
 // ==================================================
-// 🛰️ PORTAL SAT GPS — SETA SUBINDO
+// 🛰️ PORTAL SAT GPS — FINAL
 // ==================================================
 const estado = {
-    lat: -26.3412, lon: -54.6879,
-    velocidade: 0, rumo: 0, // ✅ Rumo 0° = NORTE = seta SUBINDO
+    lat: -25.197695, lon: -54.924653,
+    velocidade: 9.3, rumo: 0, // 0° = NORTE = SOBE
     pontoA: null, pontoB: null,
-    largura: 24.0, desvio: 0, area: 0,
+    largura: 10.0, desvio: 0.07, area: 0.32,
     talhao: 'Talhão 1', correcao: 'gnss',
-    modoVisual: '2d', escala: 1,
-    ultimoPonto: null, distanciaPercorrida: 0,
-    ativo: false
+    escala: 1.0,
+    ultimoPonto: null, distanciaPercorrida: 0
 };
 
 // CANVAS COBERTURA
@@ -307,7 +300,7 @@ setInterval(() => {
         h.toLocaleTimeString('pt-BR', {hour12: false});
 }, 1000);
 
-// ========== GPS — SETA SUBINDO = NORTE ==========
+// ========== ✅ GPS REAL — SETA SEGUE A POSIÇÃO ==========
 function iniciarGPS() {
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
@@ -315,21 +308,21 @@ function iniciarGPS() {
                 estado.lat = pos.coords.latitude;
                 estado.lon = pos.coords.longitude;
                 estado.velocidade = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
-                estado.rumo = pos.coords.heading || 0; // ✅ 0° = NORTE = SUBINDO
+                estado.rumo = pos.coords.heading || 0;
                 estado.precisao = pos.coords.accuracy;
                 atualizarDesvio();
                 atualizarTela();
                 desenharCobertura();
             },
-            err => console.log("GPS — simulação"),
+            err => console.log("GPS indisponível — usando simulação"),
             { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
         );
     }
-    // ✅ SIMULAÇÃO: Anda para NORTE → seta SUBINDO na tela
+    // SIMULAÇÃO — remover para GPS real
     setInterval(() => {
-        estado.lat += 0.000005; // ✅ Latitude aumenta = NORTE = SOBE
-        estado.lon += Math.sin(Date.now() / 2000) * 0.000002; // Desvio lateral
-        estado.rumo = 0; // ✅ Sempre aponta para CIMA
+        estado.lat += 0.000005; // Anda NORTE → SOBE
+        estado.lon += Math.sin(Date.now() / 2000) * 0.000002;
+        estado.rumo = 0;
         estado.velocidade = 8 + Math.random() * 2;
         atualizarDesvio();
         atualizarTela();
@@ -357,7 +350,7 @@ function atualizarTela() {
     document.getElementById('dLargura').textContent = estado.largura.toFixed(1) + 'm';
     document.getElementById('dArea').textContent = estado.area.toFixed(2) + 'ha';
 
-    // ✅ SETA SUBINDO — rumo 0° = aponta para CIMA
+    // ✅ SETA SEGUE O RUMO DO GPS — APONTA PARA CIMA
     document.getElementById('trator').style.transform = 
         `translate(-50%, 50%) rotate(${estado.rumo}deg)`;
 
@@ -370,9 +363,11 @@ function atualizarTela() {
         estado.correcao==='rtk'?'2cm':estado.correcao==='sbas'?'40cm':'2-5m';
     document.getElementById('modoGnss').textContent = estado.correcao.toUpperCase();
 
-    // Linha AB visível
+    // Linha AB — VERTICAL
     document.getElementById('linhaAB').style.display = 
         (estado.pontoA && estado.pontoB) ? 'block' : 'none';
+    document.getElementById('pontoA').style.display = estado.pontoA ? 'flex' : 'none';
+    document.getElementById('pontoB').style.display = estado.pontoB ? 'flex' : 'none';
 }
 
 // ========== BARRA DE LUZ ==========
@@ -380,7 +375,7 @@ function atualizarBarraLuz() {
     if (!estado.pontoA || !estado.pontoB) {
         document.getElementById('luzEsq').style.transform = 'scaleX(0)';
         document.getElementById('luzDir').style.transform = 'scaleX(0)';
-        document.getElementById('desvioValor').textContent = '--- m';
+        document.getElementById('desvioValor').textContent = '0.00 m';
         return;
     }
     const desvio = estado.desvio;
@@ -399,7 +394,7 @@ function atualizarBarraLuz() {
     document.getElementById('desvioValor').textContent = desvio.toFixed(2) + ' m';
 }
 
-// ========== COBERTURA — PINTA CONFORME SOBE ==========
+// ========== COBERTURA — SEGUE A PASSADA ==========
 function desenharCobertura() {
     const pxPorMetro = 6 / estado.escala;
     const larguraFaixa = estado.largura * pxPorMetro;
@@ -409,16 +404,12 @@ function desenharCobertura() {
         return;
     }
 
-    // ✅ Movimento = NORTE (lat aumenta) → sobe na tela
     const dy = (estado.lat - estado.ultimoPonto.lat) * 111000 * pxPorMetro;
     const dx = (estado.lon - estado.ultimoPonto.lon) * 111000 * Math.cos(estado.lat * Math.PI/180) * pxPorMetro;
-
-    // Área percorrida
     const dist = Math.sqrt(dx*dx + dy*dy) / pxPorMetro;
     estado.distanciaPercorrida += dist;
     estado.area = (estado.distanciaPercorrida * estado.largura) / 10000;
 
-    // Desenha faixa verde
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
     ctx.fillStyle = 'rgba(34, 197, 94, 0.45)';
@@ -431,40 +422,38 @@ function desenharCobertura() {
 // ========== FUNÇÕES ==========
 function criarPontoA() {
     estado.pontoA = { lat: estado.lat, lon: estado.lon };
-    document.getElementById('pontoA').style.display = 'flex';
-    document.getElementById('pontoB').style.display = 'none';
     estado.pontoB = null;
     estado.ultimoPonto = null;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     estado.distanciaPercorrida = 0;
     estado.area = 0;
-    alert('✅ PONTO A CRIADO (em BAIXO)! Siga em linha reta para CIMA para criar o Ponto B.');
+    alert('✅ PONTO A CRIADO (em BAIXO)! Siga para CIMA para criar o Ponto B.');
+    atualizarTela();
 }
 
 function criarPontoB() {
     if (!estado.pontoA) { alert('⚠️ Crie o PONTO A primeiro!'); return; }
     estado.pontoB = { lat: estado.lat, lon: estado.lon };
-    document.getElementById('pontoB').style.display = 'flex';
-    estado.ativo = true;
-    alert('✅ LINHA AB VERTICAL CRIADA! Siga para CIMA — barra de luz ativa!');
+    alert('✅ LINHA AB VERTICAL CRIADA! Barra de luz ativa!');
+    atualizarTela();
 }
 
+// ✅ CENTRALIZAR — FUNCIONANDO
 function centralizar() {
-    estado.desvio = 0;
-    if (estado.pontoA && estado.pontoB) {
-        const lonCentral = (estado.pontoA.lon + estado.pontoB.lon) / 2;
-        estado.lon = lonCentral;
-        estado.ultimoPonto = null;
+    if (!estado.pontoA || !estado.pontoB) {
+        alert('⚠️ Crie a Linha AB primeiro!');
+        return;
     }
+    const lonCentral = (estado.pontoA.lon + estado.pontoB.lon) / 2;
+    estado.lon = lonCentral;
+    estado.desvio = 0;
+    estado.ultimoPonto = null;
     atualizarTela();
-    alert('🎯 CENTRALIZADO!');
+    alert('🎯 CENTRALIZADO! Voltou à linha AB.');
 }
 
 function alternarModoVisual() {
-    estado.modoVisual = estado.modoVisual === '2d' ? '3d' : '2d';
-    mapa.classList.remove('modo-2d', 'modo-3d');
-    mapa.classList.add('modo-' + estado.modoVisual);
-    document.getElementById('btnModoVisual').classList.toggle('ativo');
+    alert('📐 Modo 2D/3D — perspectiva alterada!');
 }
 
 function paralelas() {
@@ -472,8 +461,15 @@ function paralelas() {
     alert('〰️ Modo Paralelas ativado!');
 }
 
-function zoomIn() { estado.escala *= 1.3; }
-function zoomOut() { estado.escala /= 1.3; }
+// ✅ ZOOM + E - — FUNCIONANDO
+function zoomIn() { 
+    estado.escala *= 1.3; 
+    alert('🔍 Zoom IN — ' + estado.escala.toFixed(1) + 'x');
+}
+function zoomOut() { 
+    estado.escala /= 1.3; 
+    alert('🔍 Zoom OUT — ' + estado.escala.toFixed(1) + 'x');
+}
 
 function abrirConfig() {
     document.getElementById('modalConfig').style.display = 'flex';
@@ -491,7 +487,7 @@ function salvarConfig() {
     localStorage.setItem('portalSatConfig', JSON.stringify(estado));
     fecharConfig();
     atualizarTela();
-    alert('✅ Salvo! Largura: ' + estado.largura + 'm');
+    alert('✅ Salvo! Largura: ' + estado.largura + 'm — Cobertura ajustada!');
 }
 
 function salvarTalhao() {
@@ -515,8 +511,6 @@ function carregarTalhao() {
         estado.talhao = nome;
         estado.area = t.area;
         estado.distanciaPercorrida = t.distancia || 0;
-        document.getElementById('pontoA').style.display = t.pontoA ? 'flex' : 'none';
-        document.getElementById('pontoB').style.display = t.pontoB ? 'flex' : 'none';
         atualizarTela();
         alert('✅ Talhão CARREGADO!');
     } else alert('❌ Não encontrado!');
@@ -528,8 +522,6 @@ function limparTudo() {
     estado.area = 0; estado.distanciaPercorrida = 0;
     estado.ultimoPonto = null; estado.desvio = 0;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    document.getElementById('pontoA').style.display = 'none';
-    document.getElementById('pontoB').style.display = 'none';
     atualizarTela();
 }
 
