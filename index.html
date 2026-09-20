@@ -104,7 +104,6 @@
             pointer-events: none; z-index: 10;
         }
 
-        /* ========== LINHA AB — AGORA VERTICAL ↕️ ========== */
         .linha-ab {
             position: absolute; top: 0; bottom: 0; left: 50%;
             width: 3px; background: linear-gradient(180deg, #22c55e, #4ade80, #22c55e);
@@ -120,19 +119,20 @@
             font-weight: bold; font-size: 15px; color: #fff;
             z-index: 25; display: none;
         }
-        .ponto-a { background: #22c55e; box-shadow: 0 0 10px #22c55e; bottom: 30px; } /* PONTO A — EM BAIXO */
-        .ponto-b { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; top: 30px; }    /* PONTO B — EM CIMA */
+        .ponto-a { background: #22c55e; box-shadow: 0 0 10px #22c55e; bottom: 30px; }
+        .ponto-b { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; top: 30px; }
 
+        /* ========== FLECHA — APONTA PARA PONTO B E SEGUE GPS ========== */
         .trator {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             width: 0; height: 0;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-bottom: 28px solid #ffd700;
-            filter: drop-shadow(0 0 8px #ffd700);
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-bottom: 32px solid #ffd700;
+            filter: drop-shadow(0 0 10px #ffd700);
             z-index: 30;
-            transition: transform 0.1s linear;
+            transition: transform 0.15s linear;
         }
 
         .dados-flutuantes {
@@ -284,7 +284,15 @@ function iniciarGPS() {
                 estado.lat = pos.coords.latitude;
                 estado.lon = pos.coords.longitude;
                 estado.velocidade = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
-                estado.rumo = pos.coords.heading || estado.rumo;
+                // ========== FLECHA APONTA PARA O PONTO B ==========
+                if (estado.pontoA && estado.pontoB) {
+                    // Calcula direção do ponto atual → Ponto B
+                    const dLat = estado.pontoB.lat - estado.lat;
+                    const dLon = estado.pontoB.lon - estado.lon;
+                    estado.rumo = (Math.atan2(dLon, dLat) * 180 / Math.PI + 360) % 360;
+                } else {
+                    estado.rumo = pos.coords.heading || estado.rumo;
+                }
                 atualizarDesvio();
                 atualizarTela();
                 if (estado.pintando) desenharCobertura();
@@ -296,7 +304,14 @@ function iniciarGPS() {
     setInterval(() => {
         estado.lat += 0.000003;
         estado.lon += 0.000001;
-        estado.rumo = 180 + Math.sin(Date.now()/5000) * 5;
+        // ========== FLECHA APONTA PARA PONTO B ==========
+        if (estado.pontoA && estado.pontoB) {
+            const dLat = estado.pontoB.lat - estado.lat;
+            const dLon = estado.pontoB.lon - estado.lon;
+            estado.rumo = (Math.atan2(dLon, dLat) * 180 / Math.PI + 360) % 360;
+        } else {
+            estado.rumo = (estado.rumo + 0.5) % 360;
+        }
         estado.velocidade = 8 + Math.random() * 2;
         atualizarDesvio();
         atualizarTela();
@@ -304,13 +319,11 @@ function iniciarGPS() {
     }, 500);
 }
 
-// ========== DESVIO PARA LINHA VERTICAL ==========
 function atualizarDesvio() {
     if (!estado.pontoA || !estado.pontoB) {
         estado.desvio = 0;
         return;
     }
-    // Linha vertical → desvio é na coordenada LESTE-OESTE (longitude)
     const lonCentral = (estado.pontoA.lon + estado.pontoB.lon) / 2;
     const metrosPorGrau = 111320 * Math.cos(estado.lat * Math.PI / 180);
     estado.desvio = (estado.lon - lonCentral) * metrosPorGrau;
@@ -324,6 +337,7 @@ function atualizarTela() {
     document.getElementById('dLargura').textContent = estado.largura.toFixed(1) + 'm';
     document.getElementById('dArea').textContent = estado.area.toFixed(2) + 'ha';
 
+    // ========== FLECHA GIRA CONFORME RUMO DO GPS ==========
     document.getElementById('trator').style.transform = 
         `translate(-50%, -50%) rotate(${estado.rumo}deg)`;
 
@@ -379,6 +393,7 @@ function alternarPintura() {
     }
 }
 
+// ========== COBERTURA ACOMPANHA A DIREÇÃO DA FLECHA ==========
 function desenharCobertura() {
     const pxPorMetro = 8 / estado.escala;
     const larguraFaixa = estado.largura * pxPorMetro;
@@ -394,10 +409,14 @@ function desenharCobertura() {
     estado.distanciaPercorrida += dist;
     estado.area = (estado.distanciaPercorrida * estado.largura) / 10000;
 
+    // ========== COBERTURA GIRA JUNTO COM A FLECHA ==========
+    const anguloRadar = estado.rumo * Math.PI / 180;
+
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(anguloRadar); // ← Cobertura acompanha a direção
     ctx.fillStyle = 'rgba(34, 197, 94, 0.45)';
-    ctx.fillRect(-larguraFaixa/2, -2, larguraFaixa, 4);
+    ctx.fillRect(-larguraFaixa/2, -dist/2, larguraFaixa, dist);
     ctx.restore();
 
     estado.ultimoPonto = { lat: estado.lat, lon: estado.lon };
