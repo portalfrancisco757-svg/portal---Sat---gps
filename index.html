@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>PORTAL SAT GPS 🛰️</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -13,14 +13,17 @@
             overflow: hidden; position: fixed;
             background: #000; color: #fff;
             user-select: none;
+            inset: 0; margin: 0; padding: 0;
         }
+        /* ✅ TELA CHEIA TOTAL — SEM ESPAÇOS */
         .tela {
-            width: 100%; height: 100%;
+            width: 100vw; height: 100vh; height: 100dvh;
             display: grid;
             grid-template-rows: 48px 1fr;
             grid-template-columns: 55px 1fr 55px;
             grid-template-areas: "topo topo topo" "esq mapa dir";
             gap: 0; background: #000;
+            position: absolute; inset: 0;
         }
         .topo {
             grid-area: topo; background: #0a1628;
@@ -50,6 +53,7 @@
         .painel-esq, .painel-dir {
             background: #0f172a; display: flex; flex-direction: column; align-items: center;
             padding: 6px 4px; gap: 8px; border-right: 1px solid #2E7D32;
+            height: 100%;
         }
         .painel-dir { border-right: none; border-left: 1px solid #2E7D32; }
         .btn {
@@ -62,10 +66,18 @@
         .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
         .btn.pintando { background: #16a34a; animation: piscar 1s infinite; }
         @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
-        .mapa { grid-area: mapa; position: relative; overflow: hidden; }
-        #mapaReal { width: 100%; height: 100%; z-index: 1; transition: transform 0.3s ease; }
+        .mapa { 
+            grid-area: mapa; position: relative; overflow: hidden; 
+            width: 100%; height: 100%;
+        }
+        #mapaReal { 
+            width: 100%; height: 100%; z-index: 1; transition: transform 0.3s ease;
+            position: absolute; inset: 0;
+        }
+        /* ✅ CORREÇÃO CRÍTICA: Cobertura com z-index correto e visível */
+        .leaflet-overlay-pane { z-index: 400 !important; }
         .controle-mapa {
-            position: absolute; top: 10px; right: 10px; z-index: 100;
+            position: absolute; top: 10px; right: 10px; z-index: 500;
             background: rgba(0,0,0,0.7); border-radius: 8px; padding: 5px; border: 1px solid #2E7D32;
         }
         .btn-mapa {
@@ -78,7 +90,7 @@
         .ponto-a, .ponto-b {
             position: absolute; width: 32px; height: 32px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; font-weight: bold;
-            font-size: 14px; color: #fff; z-index: 6; display: none; border: 2px solid #fff;
+            font-size: 14px; color: #fff; z-index: 600; display: none; border: 2px solid #fff;
             transform: translate(-50%, -50%);
         }
         .ponto-a { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
@@ -86,17 +98,17 @@
         .dados {
             position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85);
             padding: 10px 12px; border-radius: 8px; border: 1px solid #2E7D32;
-            font-size: 11px; line-height: 1.8; z-index: 30; min-width: 170px;
+            font-size: 11px; line-height: 1.8; z-index: 500; min-width: 170px;
         }
         .dados span { color: #4ade80; font-weight: bold; }
         .aviso-distancia {
             position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
             background: rgba(234,179,8,0.95); color: #000; padding: 8px 18px;
-            border-radius: 25px; font-weight: bold; font-size: 14px; z-index: 160; display: none;
+            border-radius: 25px; font-weight: bold; font-size: 14px; z-index: 600; display: none;
         }
         .modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.92); z-index: 200; display: none;
+            background: rgba(0,0,0,0.92); z-index: 999; display: none;
             align-items: center; justify-content: center; padding: 20px;
         }
         .modal-content {
@@ -124,6 +136,8 @@
         .btn-modal.verde { background: #2E7D32; color: white; }
         .btn-modal.vermelho { background: #dc2626; color: white; }
         .btn-modal.cinza { background: #334155; color: white; }
+        /* ✅ Botão tela cheia */
+        .btn-tela-cheia { position: absolute; top: 10px; left: 10px; z-index: 500; }
     </style>
 </head>
 <body>
@@ -158,6 +172,9 @@
     </div>
 
     <div class="mapa" id="mapa">
+        <div class="btn-tela-cheia">
+            <button class="btn-mapa" onclick="ativarTelaCheia()" title="Tela Cheia">⛶</button>
+        </div>
         <div class="controle-mapa">
             <button class="btn-mapa ativo" onclick="trocarCamada('padrao')">🗺️</button>
             <button class="btn-mapa" onclick="trocarCamada('satelite')">🛰️</button>
@@ -242,6 +259,18 @@ setInterval(() => {
     document.getElementById('hora').textContent = h.toLocaleTimeString('pt-BR', {hour12: false});
 }, 1000);
 
+// ✅ TELA CHEIA NATIVA
+function ativarTelaCheia() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log("Tela cheia automática:", err);
+            alert("Clique novamente para tela cheia ⛶");
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
 function iniciarMapa() {
     camadaPadrao = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 20, attribution: '© OpenStreetMap'});
     camadaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom: 19, attribution: '© Esri'});
@@ -251,7 +280,8 @@ function iniciarMapa() {
         center: [ESTADO.lat, ESTADO.lon],
         zoom: 18, 
         zoomControl: false, 
-        attributionControl: false
+        attributionControl: false,
+        fullscreenControl: true
     });
     camadaPadrao.addTo(mapaReal);
 
@@ -260,6 +290,10 @@ function iniciarMapa() {
         className: '', iconSize: [24, 28], iconAnchor: [12, 28]
     });
     marcadorTrator = L.marker([ESTADO.lat, ESTADO.lon], {icon: icone, rotationAngle: 0}).addTo(mapaReal);
+    
+    // ✅ Garante que o mapa ocupa tudo
+    setTimeout(() => { mapaReal.invalidateSize(); }, 100);
+    setTimeout(() => { mapaReal.invalidateSize(); }, 500);
 }
 
 function trocarCamada(tipo) {
@@ -274,7 +308,6 @@ function trocarCamada(tipo) {
     marcadorTrator.addTo(mapaReal);
 }
 
-// ✅ 2D / 3D FUNCIONANDO DE VERDADE
 function alternar3D() {
     modo3D = !modo3D;
     const btn = document.getElementById('btn3d');
@@ -310,7 +343,6 @@ function metrosParaGraus(lat, metros) {
     return { dLat: metros / mLat, dLon: metros / mLon };
 }
 
-// ✅ FLECHA SE MOVE COM GPS E BUSSOLA
 function atualizarFlecha() {
     marcadorTrator.setLatLng([ESTADO.lat, ESTADO.lon]);
     const rumoFinal = ESTADO.velocidade > 0.5 ? ESTADO.rumo : ESTADO.rumoBussola;
@@ -331,7 +363,6 @@ function atualizarFlecha() {
     }
 }
 
-// ✅ LINHA A-B GERADA NA DIREÇÃO DA FLECHA (BÚSSOLA)
 function criarLinhaGuia() {
     if (linhaGuia) { mapaReal.removeLayer(linhaGuia); linhaGuia = null; }
     paralelas.forEach(l => mapaReal.removeLayer(l));
@@ -377,13 +408,14 @@ function criarLinhaGuia() {
     }
 }
 
-// ✅ COBERTURA PINTA EXATAMENTE ONDE O APARELHO PASSA
+// ✅ COBERTURA CORRIGIDA — AGORA APARECE DE VERDADE
 function desenharCobertura() {
     if (!ESTADO.pintando) return;
     
     if (!ESTADO.ultimoPonto) {
         ESTADO.ultimoPonto = {lat: ESTADO.lat, lon: ESTADO.lon};
         ESTADO.caminho.push([ESTADO.lat, ESTADO.lon]);
+        console.log("🟢 Cobertura iniciada! Largura:", ESTADO.larguraLinha + "m");
         return;
     }
     
@@ -395,18 +427,20 @@ function desenharCobertura() {
         ESTADO.caminho.push([ESTADO.lat, ESTADO.lon]);
         ESTADO.ultimoPonto = {lat: ESTADO.lat, lon: ESTADO.lon};
         
+        // ✅ Largura VISÍVEL e proporcional ao zoom
         const zoom = mapaReal.getZoom();
-        const escalaZoom = Math.pow(2, 18 - zoom);
-        const pesoLinha = Math.max(8, ESTADO.larguraLinha * 2.5 / escalaZoom);
+        const pesoLinha = Math.max(15, ESTADO.larguraLinha * (zoom / 4));
         
         if (!cobertura) {
             cobertura = L.polyline([], {
-                color: '#15803d',
+                color: '#16a34a',
                 weight: pesoLinha,
-                opacity: 0.55,
+                opacity: 0.65,
                 lineJoin: 'round',
-                lineCap: 'round'
+                lineCap: 'round',
+                interactive: false
             }).addTo(mapaReal);
+            console.log("✅ Cobertura criada! Peso:", pesoLinha);
         }
         cobertura.setStyle({weight: pesoLinha});
         cobertura.setLatLngs(ESTADO.caminho);
@@ -414,7 +448,6 @@ function desenharCobertura() {
     }
 }
 
-// ✅ PONTO A E B NA DIREÇÃO DA FLECHA
 function criarPontoA() {
     ESTADO.pontoA = {lat: ESTADO.lat, lon: ESTADO.lon};
     ESTADO.pontoB = null;
@@ -453,10 +486,13 @@ function alternarPintura() {
         btn.innerHTML = '⏹';
         ESTADO.caminho = [[ESTADO.lat, ESTADO.lon]];
         ESTADO.ultimoPonto = {lat: ESTADO.lat, lon: ESTADO.lon};
+        console.log("🖌️ Pintura ATIVADA! Ande para pintar a cobertura.");
+        alert("🖌️ Cobertura ATIVADA! Comece a andar para pintar.");
     } else {
         btn.classList.remove('pintando');
         btn.innerHTML = '🖌️';
         ESTADO.ultimoPonto = null;
+        console.log("🛑 Pintura parada.");
     }
 }
 
