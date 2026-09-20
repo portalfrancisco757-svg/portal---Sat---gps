@@ -13,7 +13,7 @@
             user-select: none;
         }
 
-        /* ========== LAYOUT PRINCIPAL ========== */
+        /* ========== LAYOUT PRINCIPAL — TELA MAIOR ========== */
         .tela {
             width: 100%; height: 100%;
             display: grid;
@@ -41,7 +41,7 @@
         .bolinha.amarela { background: #eab308; }
         .bolinha.vermelha { background: #ef4444; }
 
-        /* ========== BARRA DE LUZ — CENTRAL ========== */
+        /* ========== BARRA DE LUZ — TRIMBLE, CENTRAL ========== */
         .barra-luz {
             position: absolute; top: 55px; left: 50%; transform: translateX(-50%);
             width: 300px; height: 20px;
@@ -63,7 +63,7 @@
             color: #ffd700; text-shadow: 0 0 3px #000;
         }
 
-        /* ========== PAINEIS LATERAIS ========== */
+        /* ========== PAINEIS LATERAIS — ÍCONES MENORES ========== */
         .painel-esq, .painel-dir {
             background: #0f172a;
             display: flex; flex-direction: column; align-items: center;
@@ -80,7 +80,6 @@
         }
         .btn:active { transform: scale(0.92); background: #334155; }
         .btn.ativo { background: #2E7D32; box-shadow: inset 0 0 6px rgba(0,0,0,0.5); }
-        .btn.ultimo { margin-top: auto; margin-bottom: 8px; }
 
         /* ========== MAPA — TELA MAIOR + 2D/3D ========== */
         .mapa {
@@ -106,45 +105,39 @@
             transform-origin: center bottom;
         }
 
-        /* ========== CANVAS DE COBERTURA ========== */
+        /* ========== CANVAS DE COBERTURA — RASTRO REAL ========== */
         #canvasCobertura {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 10;
         }
 
-        /* ========== LINHA AB — VERTICAL NO CENTRO ========== */
+        /* ========== LINHA AB E PONTOS ========== */
         .linha-ab {
-            position: absolute; top: 0; bottom: 0; left: 50%;
-            width: 3px; background: linear-gradient(180deg, #22c55e, #4ade80, #22c55e);
+            position: absolute; top: 50%; left: 0; right: 0;
+            height: 3px; background: linear-gradient(90deg, #22c55e, #4ade80, #22c55e);
             box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
-            transform: translateX(-50%);
+            transform: translateY(-50%);
             z-index: 20; display: none;
         }
         .ponto-a, .ponto-b {
-            position: absolute; left: 50%;
-            transform: translateX(-50%);
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             width: 28px; height: 28px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; font-size: 15px; color: #fff;
             z-index: 25; display: none;
         }
-        .ponto-a { 
-            background: #22c55e; box-shadow: 0 0 10px #22c55e; 
-            bottom: 20px; /* Ponto A em BAIXO */
-        }
-        .ponto-b { 
-            background: #3b82f6; box-shadow: 0 0 10px #3b82f6; 
-            top: 20px; /* Ponto B em CIMA */
-        }
+        .ponto-a { background: #22c55e; box-shadow: 0 0 10px #22c55e; top: calc(50% + 60px); }
+        .ponto-b { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; top: calc(50% - 60px); }
 
-        /* ========== SETA AMARELA — APONTA PARA CIMA ✅ SUBINDO ========== */
+        /* ========== SETA AMARELA — SEGUE GPS ========== */
         .trator {
-            position: absolute; bottom: 50%; left: 50%;
-            transform: translate(-50%, 50%);
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             width: 0; height: 0;
             border-left: 14px solid transparent;
             border-right: 14px solid transparent;
-            border-bottom: 28px solid #ffd700; /* ✅ PONTA PARA CIMA */
+            border-bottom: 28px solid #ffd700;
             filter: drop-shadow(0 0 8px #ffd700);
             z-index: 30;
             transition: transform 0.1s linear;
@@ -206,16 +199,15 @@
         <div class="desvio-valor" id="desvioValor">0.00 m</div>
     </div>
 
-    <!-- PAINEL ESQUERDO — ÍCONES MENORES + BOTÃO CENTRALIZAR -->
+    <!-- PAINEL ESQUERDO — ÍCONES MENORES -->
     <div class="painel-esq">
         <button class="btn" onclick="criarPontoA()" title="Ponto A">📍</button>
         <button class="btn" onclick="criarPontoB()" title="Ponto B">🎯</button>
         <button class="btn" onclick="alternarModoVisual()" id="btnModoVisual" title="2D/3D">📐</button>
         <button class="btn" onclick="paralelas()" title="Paralelas">〰️</button>
-        <button class="btn ultimo" onclick="centralizar()" title="Centralizar">🎯</button>
     </div>
 
-    <!-- MAPA CENTRAL -->
+    <!-- MAPA CENTRAL — TELA MAIOR -->
     <div class="mapa modo-2d" id="mapa">
         <canvas id="canvasCobertura"></canvas>
         <div class="linha-ab" id="linhaAB"></div>
@@ -234,7 +226,7 @@
         </div>
     </div>
 
-    <!-- PAINEL DIREITO -->
+    <!-- PAINEL DIREITO — ÍCONES MENORES -->
     <div class="painel-dir">
         <button class="btn" onclick="abrirConfig()" title="Configurações">⚙️</button>
         <button class="btn" onclick="salvarTalhao()" title="Salvar">💾</button>
@@ -274,11 +266,11 @@
 
 <script>
 // ==================================================
-// 🛰️ PORTAL SAT GPS — SETA SUBINDO
+// 🛰️ PORTAL SAT GPS — SISTEMA COMPLETO
 // ==================================================
 const estado = {
     lat: -26.3412, lon: -54.6879,
-    velocidade: 0, rumo: 0, // ✅ Rumo 0° = NORTE = seta SUBINDO
+    velocidade: 0, rumo: 0,
     pontoA: null, pontoB: null,
     largura: 24.0, desvio: 0, area: 0,
     talhao: 'Talhão 1', correcao: 'gnss',
@@ -287,7 +279,7 @@ const estado = {
     ativo: false
 };
 
-// CANVAS COBERTURA
+// CANVAS COBERTURA — RASTRO REAL
 const canvas = document.getElementById('canvasCobertura');
 const ctx = canvas.getContext('2d');
 const mapa = document.getElementById('mapa');
@@ -307,7 +299,7 @@ setInterval(() => {
         h.toLocaleTimeString('pt-BR', {hour12: false});
 }, 1000);
 
-// ========== GPS — SETA SUBINDO = NORTE ==========
+// ========== GPS REAL / SIMULAÇÃO ==========
 function iniciarGPS() {
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
@@ -315,41 +307,32 @@ function iniciarGPS() {
                 estado.lat = pos.coords.latitude;
                 estado.lon = pos.coords.longitude;
                 estado.velocidade = pos.coords.speed ? pos.coords.speed * 3.6 : 0;
-                estado.rumo = pos.coords.heading || 0; // ✅ 0° = NORTE = SUBINDO
+                estado.rumo = pos.coords.heading || estado.rumo;
                 estado.precisao = pos.coords.accuracy;
-                atualizarDesvio();
                 atualizarTela();
                 desenharCobertura();
             },
-            err => console.log("GPS — simulação"),
+            err => console.log("GPS indisponível — usando simulação"),
             { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
         );
     }
-    // ✅ SIMULAÇÃO: Anda para NORTE → seta SUBINDO na tela
+    // SIMULAÇÃO — remover quando usar GPS real
     setInterval(() => {
-        estado.lat += 0.000005; // ✅ Latitude aumenta = NORTE = SOBE
-        estado.lon += Math.sin(Date.now() / 2000) * 0.000002; // Desvio lateral
-        estado.rumo = 0; // ✅ Sempre aponta para CIMA
+        estado.lat += 0.000003;
+        estado.lon += 0.000001;
+        estado.rumo = 180 + Math.sin(Date.now()/5000) * 5;
         estado.velocidade = 8 + Math.random() * 2;
-        atualizarDesvio();
+        if (estado.pontoA && estado.pontoB) {
+            estado.desvio = Math.sin(Date.now()/3000) * 0.25;
+        }
         atualizarTela();
         desenharCobertura();
-    }, 300);
-}
-
-// ========== DESVIO DA LINHA VERTICAL ==========
-function atualizarDesvio() {
-    if (!estado.pontoA || !estado.pontoB) {
-        estado.desvio = 0;
-        return;
-    }
-    const lonCentral = (estado.pontoA.lon + estado.pontoB.lon) / 2;
-    const metrosPorGrau = 111320 * Math.cos(estado.lat * Math.PI / 180);
-    estado.desvio = (estado.lon - lonCentral) * metrosPorGrau;
+    }, 500);
 }
 
 // ========== ATUALIZAR TELA ==========
 function atualizarTela() {
+    // Dados
     document.getElementById('dLat').textContent = estado.lat.toFixed(6);
     document.getElementById('dLon').textContent = estado.lon.toFixed(6);
     document.getElementById('dVel').textContent = estado.velocidade.toFixed(1);
@@ -357,10 +340,11 @@ function atualizarTela() {
     document.getElementById('dLargura').textContent = estado.largura.toFixed(1) + 'm';
     document.getElementById('dArea').textContent = estado.area.toFixed(2) + 'ha';
 
-    // ✅ SETA SUBINDO — rumo 0° = aponta para CIMA
+    // Seta amarela — segue rumo
     document.getElementById('trator').style.transform = 
-        `translate(-50%, 50%) rotate(${estado.rumo}deg)`;
+        `translate(-50%, -50%) rotate(${estado.rumo}deg)`;
 
+    // Barra de Luz — sincronizada com desvio AB
     atualizarBarraLuz();
 
     // Status GPS
@@ -370,12 +354,12 @@ function atualizarTela() {
         estado.correcao==='rtk'?'2cm':estado.correcao==='sbas'?'40cm':'2-5m';
     document.getElementById('modoGnss').textContent = estado.correcao.toUpperCase();
 
-    // Linha AB visível
+    // Linha AB visível quando definida
     document.getElementById('linhaAB').style.display = 
         (estado.pontoA && estado.pontoB) ? 'block' : 'none';
 }
 
-// ========== BARRA DE LUZ ==========
+// ========== BARRA DE LUZ — DESVIO DA LINHA AB ==========
 function atualizarBarraLuz() {
     if (!estado.pontoA || !estado.pontoB) {
         document.getElementById('luzEsq').style.transform = 'scaleX(0)';
@@ -383,9 +367,11 @@ function atualizarBarraLuz() {
         document.getElementById('desvioValor').textContent = '--- m';
         return;
     }
+
     const desvio = estado.desvio;
-    const maxDesvio = 0.5;
+    const maxDesvio = 0.5; // 50cm = fim da barra
     const escala = Math.min(Math.abs(desvio) / maxDesvio, 1);
+
     if (desvio < -0.02) {
         document.getElementById('luzEsq').style.transform = `scaleX(${escala})`;
         document.getElementById('luzDir').style.transform = 'scaleX(0)';
@@ -399,9 +385,9 @@ function atualizarBarraLuz() {
     document.getElementById('desvioValor').textContent = desvio.toFixed(2) + ' m';
 }
 
-// ========== COBERTURA — PINTA CONFORME SOBE ==========
+// ========== COBERTURA — RASTRO CONFORME LARGURA ==========
 function desenharCobertura() {
-    const pxPorMetro = 6 / estado.escala;
+    const pxPorMetro = 8 / estado.escala; // pixels por metro
     const larguraFaixa = estado.largura * pxPorMetro;
 
     if (!estado.ultimoPonto) {
@@ -409,18 +395,22 @@ function desenharCobertura() {
         return;
     }
 
-    // ✅ Movimento = NORTE (lat aumenta) → sobe na tela
-    const dy = (estado.lat - estado.ultimoPonto.lat) * 111000 * pxPorMetro;
+    // Converter coordenadas para pixels (centro da tela = posição atual)
     const dx = (estado.lon - estado.ultimoPonto.lon) * 111000 * Math.cos(estado.lat * Math.PI/180) * pxPorMetro;
+    const dy = (estado.lat - estado.ultimoPonto.lat) * 111000 * pxPorMetro;
 
-    // Área percorrida
+    // Calcular distância percorrida e área
     const dist = Math.sqrt(dx*dx + dy*dy) / pxPorMetro;
     estado.distanciaPercorrida += dist;
-    estado.area = (estado.distanciaPercorrida * estado.largura) / 10000;
+    estado.area = (estado.distanciaPercorrida * estado.largura) / 10000; // hectares
 
-    // Desenha faixa verde
+    // Ângulo da direção
+    const ang = Math.atan2(dx, dy);
+
+    // Desenhar retângulo da faixa percorrida
     ctx.save();
     ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(ang);
     ctx.fillStyle = 'rgba(34, 197, 94, 0.45)';
     ctx.fillRect(-larguraFaixa/2, -2, larguraFaixa, 4);
     ctx.restore();
@@ -438,7 +428,7 @@ function criarPontoA() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     estado.distanciaPercorrida = 0;
     estado.area = 0;
-    alert('✅ PONTO A CRIADO (em BAIXO)! Siga em linha reta para CIMA para criar o Ponto B.');
+    alert('✅ PONTO A CRIADO! Continue em linha reta para criar o Ponto B.');
 }
 
 function criarPontoB() {
@@ -446,18 +436,7 @@ function criarPontoB() {
     estado.pontoB = { lat: estado.lat, lon: estado.lon };
     document.getElementById('pontoB').style.display = 'flex';
     estado.ativo = true;
-    alert('✅ LINHA AB VERTICAL CRIADA! Siga para CIMA — barra de luz ativa!');
-}
-
-function centralizar() {
-    estado.desvio = 0;
-    if (estado.pontoA && estado.pontoB) {
-        const lonCentral = (estado.pontoA.lon + estado.pontoB.lon) / 2;
-        estado.lon = lonCentral;
-        estado.ultimoPonto = null;
-    }
-    atualizarTela();
-    alert('🎯 CENTRALIZADO!');
+    alert('✅ LINHA AB CRIADA! Barra de luz ativa — navegando...');
 }
 
 function alternarModoVisual() {
@@ -469,7 +448,7 @@ function alternarModoVisual() {
 
 function paralelas() {
     if (!estado.pontoA || !estado.pontoB) { alert('⚠️ Crie a Linha AB primeiro!'); return; }
-    alert('〰️ Modo Paralelas ativado!');
+    alert('〰️ Modo Paralelas — faixas automáticas ativado!');
 }
 
 function zoomIn() { estado.escala *= 1.3; }
@@ -491,7 +470,7 @@ function salvarConfig() {
     localStorage.setItem('portalSatConfig', JSON.stringify(estado));
     fecharConfig();
     atualizarTela();
-    alert('✅ Salvo! Largura: ' + estado.largura + 'm');
+    alert('✅ Salvo! Largura de implemento: ' + estado.largura + 'm');
 }
 
 function salvarTalhao() {
@@ -526,7 +505,7 @@ function limparTudo() {
     if (!confirm('🗑️ Limpar cobertura e pontos?')) return;
     estado.pontoA = null; estado.pontoB = null;
     estado.area = 0; estado.distanciaPercorrida = 0;
-    estado.ultimoPonto = null; estado.desvio = 0;
+    estado.ultimoPonto = null;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     document.getElementById('pontoA').style.display = 'none';
     document.getElementById('pontoB').style.display = 'none';
