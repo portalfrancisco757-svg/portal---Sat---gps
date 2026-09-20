@@ -1,37 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport"
-content="width=device-width,
-initial-scale=1,
-maximum-scale=1,
-user-scalable=no">
-
-<meta name="theme-color"
-content="#050912">
-
-<meta name="mobile-web-app-capable"
-content="yes">
-
-<meta name="apple-mobile-web-app-capable"
-content="yes">
-
-<meta name="orientation"
-content="landscape">
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
 <title>PORTAL SAT GPS</title>
 
 <style>
-
-/* =====================================================
-   PORTAL SAT GPS
-   GPS AGRÍCOLA - INTERFACE LANDSCAPE
-===================================================== */
-
 *{
     box-sizing:border-box;
     margin:0;
@@ -39,1164 +15,595 @@ content="landscape">
     -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body{
-
+html,body{
     width:100%;
     height:100%;
-
     overflow:hidden;
-
     background:#000;
-
-    font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
-    color:#fff;
-
+    font-family:Arial,sans-serif;
+    touch-action:none;
 }
 
 body{
-
-    touch-action:none;
-
+    color:white;
 }
-
-button,
-input,
-select,
-textarea{
-
-    font-family:inherit;
-
-}
-
-button{
-
-    cursor:pointer;
-
-}
-
-
-/* =====================================================
-   APLICAÇÃO
-===================================================== */
 
 #app{
-
     width:100%;
     height:100vh;
-
     display:flex;
     flex-direction:column;
-
-    background:#050912;
-
+    background:#050a11;
 }
 
+/* CABEÇALHO */
 
-/* =====================================================
-   TOPO
-===================================================== */
-
-#topbar{
-
-    height:68px;
-
+header{
+    height:65px;
     flex-shrink:0;
-
+    background:#050a11;
+    border-bottom:3px solid #28743e;
     display:flex;
     align-items:center;
-
-    padding:
-    0 18px;
-
-    background:#050912;
-
-    border-bottom:
-    3px solid #28683c;
-
+    padding:0 18px;
 }
 
 .logo{
-
-    color:#46e276;
-
+    color:#45ed79;
     font-size:25px;
-
     font-weight:bold;
-
-    white-space:nowrap;
-
-}
-
-.statusbar{
-
-    margin-left:auto;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:16px;
-
-    font-size:15px;
-
 }
 
 .status{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    font-size:15px;
+}
 
-    padding:
-    9px 14px;
-
+.pill{
+    padding:9px 15px;
+    border:1px solid #39784b;
     border-radius:22px;
-
-    background:#111e31;
-
-    border:
-    1px solid #367a4b;
-
+    background:#101c2b;
 }
 
-#gnssStatus{
-
+#fixStatus{
     color:#ffd400;
-
     font-weight:bold;
-
 }
 
-
-/* =====================================================
-   CORPO
-===================================================== */
+/* ÁREA PRINCIPAL */
 
 #main{
-
     flex:1;
-
     min-height:0;
-
     display:flex;
-
 }
 
+/* BARRAS LATERAIS */
 
-/* =====================================================
-   BARRA LATERAL
-===================================================== */
-
-.sidebar{
-
-    width:86px;
-
+.rail{
+    width:78px;
     flex-shrink:0;
-
+    background:#07111e;
     display:flex;
-
     flex-direction:column;
-
     align-items:center;
-
-    gap:11px;
-
-    padding:10px 6px;
-
-    background:#07101d;
-
+    gap:8px;
+    padding:9px 5px;
 }
 
-.sidebar.right{
-
-    border-left:
-    1px solid #18342b;
-
-}
-
-.sidebar.left{
-
-    border-right:
-    1px solid #18342b;
-
-}
-
-.sideBtn{
-
-    width:72px;
-
-    height:67px;
-
-    border:none;
-
-    border-radius:13px;
-
-    color:#fff;
-
+.rail button{
+    width:65px;
+    height:60px;
+    border:0;
+    border-radius:11px;
     background:#122239;
-
-    font-size:29px;
-
+    color:white;
+    font-size:26px;
 }
 
-.sideBtn:active{
-
-    transform:scale(.94);
-
+.rail button:active{
+    background:#1c5632;
 }
 
-.sideBtn.active{
-
-    background:#173b27;
-
-    outline:
-    2px solid #38c969;
-
+.rail button.active{
+    background:#18562f;
+    outline:2px solid #42df72;
 }
 
-
-/* =====================================================
-   MAPA
-===================================================== */
+/* MAPA */
 
 #map{
-
-    flex:1;
-
-    min-width:0;
-
-    min-height:0;
-
     position:relative;
-
+    flex:1;
     overflow:hidden;
-
-    background:#dfe2e2;
-
+    background:#dfe3e3;
 }
 
-#mapCanvas{
-
+#canvas{
     position:absolute;
-
     inset:0;
-
     width:100%;
-
     height:100%;
-
 }
 
-
-/* =====================================================
-   DISTÂNCIA
-===================================================== */
+/* DISTÂNCIA */
 
 #distance{
-
     position:absolute;
-
-    top:7px;
-
+    top:10px;
     left:50%;
-
-    transform:
-    translateX(-50%);
-
+    transform:translateX(-50%);
     color:#ffd400;
-
-    font-size:27px;
-
+    font-size:30px;
     font-weight:bold;
-
-    pointer-events:none;
-
+    z-index:5;
 }
 
+/* LIGHTBAR */
 
-/* =====================================================
-   MODO
-===================================================== */
+#lightbar{
+    position:absolute;
+    top:76px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:3px;
+    z-index:5;
+}
+
+.light{
+    width:13px;
+    height:19px;
+    background:#303b42;
+    border-radius:2px;
+}
+
+.light.center{
+    height:28px;
+    background:white;
+}
+
+.light.on{
+    background:#ffd400;
+}
+
+/* MODO */
 
 #modebar{
-
     position:absolute;
-
-    right:18px;
-
-    top:17px;
-
+    top:12px;
+    right:15px;
     display:flex;
-
     gap:7px;
-
-    padding:8px;
-
-    background:
-    rgba(5,12,20,.92);
-
-    border:
-    2px solid #2c613e;
-
+    padding:7px;
+    background:#07111de8;
+    border:2px solid #2e6943;
     border-radius:14px;
-
+    z-index:5;
 }
 
-.modeBtn{
-
+#modebar button{
     width:58px;
-
     height:55px;
-
-    border:none;
-
-    border-radius:10px;
-
-    background:#14243b;
-
+    border:0;
+    border-radius:9px;
+    background:#122239;
     color:white;
-
-    font-size:26px;
-
+    font-size:25px;
 }
 
-
-/* =====================================================
-   VEÍCULO
-===================================================== */
-
-#vehicle{
-
-    position:absolute;
-
-    left:50%;
-
-    top:50%;
-
-    width:0;
-
-    height:0;
-
-    transform:
-    translate(-50%,-50%);
-
-    pointer-events:none;
-
-    filter:
-    drop-shadow(
-    0 0 15px #0877ff
-    );
-
-}
-
-#vehicleArrow{
-
-    width:0;
-
-    height:0;
-
-    border-left:
-    27px solid transparent;
-
-    border-right:
-    27px solid transparent;
-
-    border-bottom:
-    65px solid #0877ff;
-
-}
-
-#vehicleCenter{
-
-    position:absolute;
-
-    left:-4px;
-
-    top:28px;
-
-    width:8px;
-
-    height:27px;
-
-    background:white;
-
-    border-radius:2px;
-
-}
-
-
-/* =====================================================
-   HUD
-===================================================== */
+/* HUD */
 
 #hud{
-
     position:absolute;
-
-    left:17px;
-
-    bottom:15px;
-
-    width:335px;
-
-    padding:
-    14px 19px;
-
-    border:
-    2px solid #28683e;
-
-    border-radius:14px;
-
-    background:
-    rgba(5,10,14,.91);
-
-    font-size:16px;
-
-    line-height:1.58;
-
+    left:18px;
+    bottom:17px;
+    width:355px;
+    padding:14px 17px;
+    background:#05090edb;
+    border:2px solid #2d7045;
+    border-radius:15px;
+    z-index:5;
+    font-size:15px;
+    line-height:1.55;
 }
 
 #hud b{
-
-    color:#49ed7a;
-
+    color:#45ed79;
 }
 
-#fixValue{
-
-    color:#ffd400;
-
+.yellow{
+    color:#ffd400!important;
 }
 
+/* MENU INFERIOR */
 
-/* =====================================================
-   MENU INFERIOR
-===================================================== */
-
-#bottomBar{
-
+#bottom{
     position:absolute;
-
-    left:50%;
-
     bottom:15px;
-
-    transform:
-    translateX(-50%);
-
-    display:flex;
-
-    gap:7px;
-
-    padding:8px;
-
-    background:
-    rgba(5,12,20,.92);
-
-    border:
-    1px solid #2d6541;
-
-    border-radius:14px;
-
-}
-
-.bottomBtn{
-
-    padding:
-    10px 13px;
-
-    border:
-    1px solid #315c43;
-
-    border-radius:9px;
-
-    background:#14243b;
-
-    color:#fff;
-
-}
-
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-#toast{
-
-    position:absolute;
-
-    z-index:1000;
-
-    top:78px;
-
     left:50%;
-
-    transform:
-    translateX(-50%);
-
-    display:none;
-
-    padding:
-    11px 18px;
-
-    border-radius:10px;
-
-    background:#07101d;
-
-    border:
-    1px solid #3d8d55;
-
+    transform:translateX(-50%);
+    display:flex;
+    gap:7px;
+    padding:7px;
+    background:#07111de8;
+    border:1px solid #316845;
+    border-radius:13px;
+    z-index:5;
 }
 
+#bottom button{
+    border:1px solid #356b48;
+    border-radius:9px;
+    padding:10px 13px;
+    background:#132b20;
+    color:white;
+}
 
-/* =====================================================
-   PAINEL
-===================================================== */
+/* PAINEL */
 
 #panel{
-
-    position:absolute;
-
-    inset:0;
-
-    z-index:500;
-
     display:none;
-
+    position:absolute;
+    inset:0;
+    z-index:20;
+    background:#03070cf7;
     overflow:auto;
-
     padding:18px;
-
-    background:
-    rgba(3,8,14,.97);
-
 }
 
 #panel.open{
-
     display:block;
-
 }
 
 .panelHeader{
-
     display:flex;
-
-    justify-content:space-between;
-
     align-items:center;
-
-    padding-bottom:13px;
-
-    border-bottom:
-    1px solid #315340;
-
+    justify-content:space-between;
+    border-bottom:1px solid #31533e;
+    padding-bottom:12px;
 }
 
 .panelHeader h2{
-
-    color:#47e879;
-
+    color:#45ed79;
 }
 
-.closeBtn{
-
-    width:44px;
-
-    height:44px;
-
-    border:none;
-
-    border-radius:10px;
-
-    background:#7c2222;
-
+.close{
+    width:43px;
+    height:43px;
+    border:0;
+    border-radius:9px;
+    background:#822828;
     color:white;
-
-    font-size:21px;
-
+    font-size:20px;
 }
 
-.grid{
-
+.cards{
     display:grid;
-
     grid-template-columns:
-    repeat(
-    auto-fit,
-    minmax(200px,1fr)
-    );
-
+    repeat(auto-fit,minmax(220px,1fr));
     gap:12px;
-
-    margin-top:14px;
-
+    margin-top:15px;
 }
 
 .card{
-
-    padding:14px;
-
-    border:
-    1px solid #2a513e;
-
+    background:#0b1726;
+    border:1px solid #28513c;
     border-radius:12px;
-
-    background:#0d1929;
-
+    padding:14px;
 }
 
 .card h3{
-
+    color:#45ed79;
     margin-bottom:10px;
-
-    color:#48e879;
-
-}
-
-.card p{
-
-    margin:
-    7px 0;
-
 }
 
 .card label{
-
     display:block;
-
+    color:#a8b5ba;
+    font-size:12px;
     margin-top:9px;
-
-    color:#a9b8bd;
-
-    font-size:13px;
-
 }
 
 .card input,
 .card select,
 .card textarea{
-
     width:100%;
-
     margin-top:4px;
-
     padding:9px;
-
-    border:
-    1px solid #355243;
-
+    border:1px solid #355541;
     border-radius:8px;
-
-    background:#07101d;
-
-    color:#fff;
-
+    background:#07101a;
+    color:white;
 }
 
 .card textarea{
-
-    min-height:180px;
-
-    resize:none;
-
+    height:170px;
 }
 
 .actions{
-
     display:flex;
-
     flex-wrap:wrap;
-
     gap:8px;
-
     margin-top:14px;
-
 }
 
-.actionBtn{
-
-    padding:
-    10px 14px;
-
-    border:
-    1px solid #36774b;
-
+.actions button{
+    padding:10px 14px;
+    background:#14301f;
+    border:1px solid #39764c;
     border-radius:9px;
-
-    background:#142d20;
-
-    color:#fff;
-
+    color:white;
 }
 
-.bigNumber{
+/* MENSAGEM */
 
-    font-size:26px;
-
-    font-weight:bold;
-
-    color:#4bea78;
-
+#toast{
+    display:none;
+    position:absolute;
+    top:75px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:50;
+    background:#06111a;
+    border:1px solid #3d8953;
+    border-radius:9px;
+    padding:10px 16px;
 }
 
+/* AVISO RETRATO */
 
-/* =====================================================
-   LANDSCAPE
-===================================================== */
+#portrait{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:#050a11;
+    color:white;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:22px;
+    padding:30px;
+}
 
-@media(max-width:800px){
+/* TABLET */
 
-    #topbar{
+@media(max-width:850px){
 
-        height:60px;
-
-        padding:0 10px;
-
+    header{
+        height:58px;
+        padding:0 9px;
     }
 
     .logo{
-
         font-size:18px;
-
-    }
-
-    .statusbar{
-
-        gap:5px;
-
-        font-size:10px;
-
     }
 
     .status{
-
-        padding:6px 8px;
-
+        gap:5px;
+        font-size:10px;
     }
 
-    .sidebar{
-
+    .rail{
         width:58px;
-
-        gap:8px;
-
-        padding:8px 5px;
-
     }
 
-    .sideBtn{
-
+    .rail button{
         width:48px;
-
-        height:52px;
-
-        font-size:21px;
-
+        height:50px;
+        font-size:20px;
     }
 
     #hud{
-
-        width:275px;
-
-        font-size:13px;
-
-        line-height:1.45;
-
+        width:285px;
+        font-size:12px;
     }
 
-    .bottomBtn{
-
-        padding:
-        7px 8px;
-
-        font-size:11px;
-
+    #bottom button{
+        padding:8px;
+        font-size:10px;
     }
-
 }
-
 </style>
-
 </head>
-
 
 <body>
 
+<div id="portrait">
+    🔄<br><br>
+    Gire o tablet para usar o<br>
+    <b>PORTAL SAT GPS</b><br>
+    em modo paisagem.
+</div>
 
 <div id="app">
 
-
-<!-- ===================================================
-     TOPO
-=================================================== -->
-
-<header id="topbar">
+<header>
 
 <div class="logo">
-
 🛰️ PORTAL SAT GPS
-
 </div>
 
+<div class="status">
 
-<div class="statusbar">
-
-<div class="status"
-id="sourceStatus">
-
+<div class="pill" id="source">
 📱 GNSS Android
-
 </div>
 
-
 <div>
-
 GNSS:
-<span id="gnssStatus">
-● SEM SINAL
-</span>
-
+<span id="fixStatus">● SEM SINAL</span>
 </div>
 
-
 <div>
-
-🕒
-<span id="clock">
---:--:--
-</span>
-
+🕒 <span id="clock">--:--:--</span>
 </div>
 
 </div>
 
 </header>
 
-
-
-<!-- ===================================================
-     CORPO
-=================================================== -->
-
 <div id="main">
 
+<!-- LADO ESQUERDO -->
 
-<!-- ================= ESQUERDA ================= -->
+<div class="rail">
 
-<nav class="sidebar left">
+<button onclick="markPoint()">📍</button>
 
-
-<button
-class="sideBtn"
-title="Marcar ponto"
-onclick="markPoint()">
-
-📍
-
-</button>
-
-
-<button
-class="sideBtn"
-id="trackingButton"
-title="Cobertura"
-onclick="toggleTracking()">
-
+<button id="coverageBtn"
+        onclick="toggleCoverage()">
 🎯
-
 </button>
 
+<button onclick="setA()">A</button>
 
-<button
-class="sideBtn"
-title="Definir A"
-onclick="setA()">
+<button onclick="setB()">B</button>
 
-A
+<button onclick="nudge(-1)">↢</button>
 
-</button>
+<button onclick="nudge(1)">↣</button>
 
+<button onclick="zoom(-1)">−</button>
 
-<button
-class="sideBtn"
-title="Definir B"
-onclick="setB()">
-
-B
-
-</button>
-
-
-<button
-class="sideBtn"
-title="Configuração"
-onclick="openPanel('setup')">
-
-＋
-
-</button>
-
-
-<button
-class="sideBtn"
-title="Zoom menos"
-onclick="zoom(-1)">
-
-−
-
-</button>
-
-
-</nav>
-
-
-
-<!-- ================= MAPA ================= -->
-
-<main id="map">
-
-
-<canvas id="mapCanvas"></canvas>
-
-
-<div id="distance">
-
-0.00 m
+<button onclick="zoom(1)">+</button>
 
 </div>
 
+<!-- MAPA -->
+
+<div id="map">
+
+<canvas id="canvas"></canvas>
+
+<div id="distance">
+0.00 m
+</div>
+
+<div id="lightbar"></div>
+
+<!-- MODO -->
 
 <div id="modebar">
 
+<button onclick="centerMap()">🗺️</button>
 
-<button
-class="modeBtn"
-onclick="centerMap()"
-title="Centralizar">
+<button onclick="openGNSS()">🛰️</button>
 
-🗺️
+<button onclick="openGuidance()">⛰️</button>
 
-</button>
-
-
-<button
-class="modeBtn"
-onclick="openPanel('gnss')"
-title="GNSS">
-
-🛰️
-
-</button>
-
-
-<button
-class="modeBtn"
-onclick="openPanel('guidance')"
-title="Guiamento">
-
-⛰️
-
-</button>
-
-
-<button
-class="modeBtn"
-id="viewButton"
-onclick="toggleView()"
-title="2D/3D">
-
-2D
-
-</button>
-
+<button id="viewButton"
+        onclick="toggle3D()">3D</button>
 
 </div>
 
-
-
-<!-- VEÍCULO -->
-
-<div id="vehicle">
-
-<div
-id="vehicleArrow">
-</div>
-
-<div
-id="vehicleCenter">
-</div>
-
-</div>
-
-
-
-<!-- ================= HUD ================= -->
+<!-- HUD -->
 
 <div id="hud">
 
-
 <div>
-
 Lat:
-<b id="lat">
---.------
-</b>°
-
+<b id="lat">--.------</b>°
 </div>
 
-
 <div>
-
 Lon:
-<b id="lon">
---.------
-</b>°
-
+<b id="lon">--.------</b>°
 </div>
 
-
 <div>
-
 Vel:
-<b id="speed">
-0.0 km/h
-</b>
-
+<b id="speed">0.0 km/h</b>
 </div>
 
-
 <div>
-
 Rumo:
-<b id="heading">
----°
-</b>
-
+<b id="heading">---°</b>
 </div>
 
-
 <div>
-
 Faixa:
-<b id="swath">
-24.0 m
-</b>
-
+<b id="pass">--</b>
 </div>
 
+<div>
+Erro:
+<b id="cross">0.00 m</b>
+</div>
 
 <div>
+Largura:
+<b id="widthHUD">24.0 m</b>
+</div>
 
+<div>
 Área:
-<b id="area">
-0.00 ha
-</b>
-
+<b id="area">0.00 ha</b>
 </div>
 
-
 <div>
-
 Precisão:
-<b id="accuracy">
--- m
-</b>
-
+<b id="accuracy">-- m</b>
 </div>
 
-
 <div>
-
 Satélites:
-<b id="satellites">
---
-</b>
-
+<b id="satellites">--</b>
 </div>
 
-
 <div>
-
 Fix:
-<b id="fixValue">
----
-</b>
-
+<b id="fix">---</b>
 </div>
-
 
 <div>
-
 HDOP:
-<b id="hdop">
---
-</b>
+<b id="hdop">--</b>
+</div>
+
+<div>
+Cobertura:
+<b id="coverageArea">0.00 ha</b>
+</div>
 
 </div>
 
+<!-- MENU -->
 
-</div>
+<div id="bottom">
 
-
-
-<!-- ================= MENU INFERIOR ================= -->
-
-<div id="bottomBar">
-
-
-<button
-class="bottomBtn"
-onclick="openPanel('field')">
-
+<button onclick="openField()">
 🌾 Campo
-
 </button>
 
-
-<button
-class="bottomBtn"
-onclick="toggleTracking()">
-
+<button onclick="toggleCoverage()">
 ▶ Cobertura
-
 </button>
 
-
-<button
-class="bottomBtn"
-onclick="openPanel('setup')">
-
+<button onclick="openConfig()">
 ⚙ Config
-
 </button>
 
-
-<button
-class="bottomBtn"
-onclick="exportJSON()">
-
-💾 Exportar
-
+<button onclick="exportJSON()">
+💾 JSON
 </button>
 
+<button onclick="exportKML()">
+📍 KML
+</button>
 
 </div>
 
+<div id="toast"></div>
 
+<!-- PAINEL -->
 
-<div id="toast">
-</div>
-
-
-
-<!-- ===================================================
-     PAINEL
-=================================================== -->
-
-<section id="panel">
-
+<div id="panel">
 
 <div class="panelHeader">
 
@@ -1204,170 +611,2465 @@ onclick="exportJSON()">
 PORTAL SAT GPS
 </h2>
 
-
-<button
-class="closeBtn"
-onclick="closePanel()">
-
+<button class="close"
+        onclick="closePanel()">
 ✕
-
 </button>
 
 </div>
 
-
-<div id="panelContent">
-</div>
-
-
-</section>
-
-
-</main>
-
-
-
-<!-- ================= DIREITA ================= -->
-
-<nav class="sidebar right">
-
-
-<button
-class="sideBtn"
-onclick="openPanel('setup')">
-
-⚙️
-
-</button>
-
-
-<button
-class="sideBtn"
-onclick="saveSession()">
-
-💾
-
-</button>
-
-
-<button
-class="sideBtn"
-onclick="exportJSON()">
-
-📂
-
-</button>
-
-
-<button
-class="sideBtn"
-onclick="openPanel('field')">
-
-🖌️
-
-</button>
-
-
-<button
-class="sideBtn"
-onclick="clearSession()">
-
-🗑️
-
-</button>
-
-
-</nav>
-
+<div id="panelContent"></div>
 
 </div>
 
 </div>
 
+<!-- DIREITA -->
 
+<div class="rail">
+
+<button onclick="openConfig()">⚙️</button>
+
+<button onclick="save()">💾</button>
+
+<button onclick="openGNSS()">📂</button>
+
+<button onclick="openField()">🖌️</button>
+
+<button onclick="clearData()">🗑️</button>
+
+</div>
+
+</div>
+</div>
 
 <script>
 
 /* =====================================================
-   ESTADO DO SISTEMA
+PORTAL SAT GPS
+Motor agrícola em HTML
 ===================================================== */
 
-const GPS = {
+const G={
 
-    lat:null,
+lat:null,
+lon:null,
+alt:null,
+accuracy:null,
 
-    lon:null,
+speed:0,
+heading:null,
 
-    altitude:null,
+fix:"---",
+satellites:null,
+hdop:null,
 
-    accuracy:null,
+width:24,
+overlap:0,
 
-    speed:0,
+nudgeValue:0,
+nudgeStep:0.025,
 
-    heading:null,
+A:null,
+B:null,
 
-    satellites:null,
+pass:0,
+cross:0,
 
-    hdop:null,
+coverage:false,
 
-    fix:"---",
+track:[],
+coveragePolys:[],
+marks:[],
+field:[],
 
-    source:"Android",
+area:0,
+coverageArea:0,
 
-    swath:24,
+zoom:1,
 
-    overlap:0,
-
-    offset:0,
-
-    antennaHeight:0,
-
-    tracking:false,
-
-    points:[],
-
-    coverage:[],
-
-    marks:[],
-
-    field:[],
-
-    A:null,
-
-    B:null,
-
-    area:0,
-
-    zoom:1,
-
-    view3D:false
+view3D:false
 
 };
 
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+let gpsWatch=null;
+let lastPosition=null;
 
 
 /* =====================================================
-   CANVAS
+UTILIDADES
 ===================================================== */
 
-const canvas =
-document.getElementById(
-    "mapCanvas"
+function $(id){
+    return document.getElementById(id);
+}
+
+function toast(text){
+
+    const t=$("toast");
+
+    t.textContent=text;
+    t.style.display="block";
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer=setTimeout(()=>{
+        t.style.display="none";
+    },2500);
+}
+
+
+/* =====================================================
+DISTÂNCIA GPS
+===================================================== */
+
+function distance(a,b){
+
+    const R=6371000;
+
+    const p=Math.PI/180;
+
+    const dLat=(b.lat-a.lat)*p;
+
+    const dLon=(b.lon-a.lon)*p;
+
+    const x=
+    Math.sin(dLat/2)**2+
+    Math.cos(a.lat*p)*
+    Math.cos(b.lat*p)*
+    Math.sin(dLon/2)**2;
+
+    return 2*R*Math.asin(Math.sqrt(x));
+}
+
+
+/* =====================================================
+AZIMUTE
+===================================================== */
+
+function bearing(a,b){
+
+    const p=Math.PI/180;
+
+    const y=
+    Math.sin((b.lon-a.lon)*p)*
+    Math.cos(b.lat*p);
+
+    const x=
+    Math.cos(a.lat*p)*
+    Math.sin(b.lat*p)
+    -
+    Math.sin(a.lat*p)*
+    Math.cos(b.lat*p)*
+    Math.cos((b.lon-a.lon)*p);
+
+    return(
+        Math.atan2(y,x)/p+360
+    )%360;
+}
+
+
+/* =====================================================
+DESTINO
+===================================================== */
+
+function destination(p,angle,meters){
+
+    const R=6378137;
+
+    const q=Math.PI/180;
+
+    const a=angle*q;
+
+    const d=meters/R;
+
+    const lat=p.lat*q;
+
+    const lon=p.lon*q;
+
+    const newLat=Math.asin(
+        Math.sin(lat)*Math.cos(d)+
+        Math.cos(lat)*Math.sin(d)*Math.cos(a)
+    );
+
+    const newLon=
+    lon+
+    Math.atan2(
+        Math.sin(a)*Math.sin(d)*Math.cos(lat),
+        Math.cos(d)-Math.sin(lat)*Math.sin(newLat)
+    );
+
+    return{
+
+        lat:newLat/q,
+
+        lon:((newLon/q+540)%360)-180
+
+    };
+
+}
+
+
+/* =====================================================
+COORDENADAS LOCAIS
+===================================================== */
+
+function xy(p,ref){
+
+    const R=6378137;
+
+    const q=Math.PI/180;
+
+    return{
+
+        x:
+        (p.lon-ref.lon)*
+        q*
+        R*
+        Math.cos(ref.lat*q),
+
+        y:
+        (p.lat-ref.lat)*
+        q*
+        R
+
+    };
+
+}
+
+
+/* =====================================================
+ÁREA
+===================================================== */
+
+function polygonArea(points){
+
+    if(points.length<3)
+        return 0;
+
+    const ref=points[0];
+
+    let total=0;
+
+    for(let i=1;i<points.length-1;i++){
+
+        const a=xy(points[i],ref);
+
+        const b=xy(points[i+1],ref);
+
+        total+=
+        a.x*b.y-
+        b.x*a.y;
+
+    }
+
+    return Math.abs(total/2);
+
+}
+
+
+/* =====================================================
+POSIÇÃO -> TELA
+===================================================== */
+
+function screenPoint(p,ref,w,h){
+
+    const z=xy(p,ref);
+
+    const scale=5*G.zoom;
+
+    if(G.view3D){
+
+        const depth=
+        Math.max(
+            .35,
+            1+(-z.y)/500
+        );
+
+        return{
+
+            x:
+            w/2+
+            z.x*scale/depth,
+
+            y:
+            h*.52-
+            z.y*scale/depth
+
+        };
+
+    }
+
+    return{
+
+        x:w/2+z.x*scale,
+
+        y:h/2-z.y*scale
+
+    };
+
+}
+
+
+/* =====================================================
+GNSS ANDROID
+===================================================== */
+
+function startGPS(){
+
+    if(!navigator.geolocation){
+
+        toast(
+        "GPS não disponível no Android"
+        );
+
+        return;
+    }
+
+    gpsWatch=
+    navigator.geolocation.watchPosition(
+
+        gpsPosition,
+
+        gpsError,
+
+        {
+            enableHighAccuracy:true,
+            maximumAge:300,
+            timeout:10000
+        }
+
+    );
+
+    $("source").textContent=
+    "📱 GNSS Android";
+
+}
+
+
+/* =====================================================
+POSIÇÃO RECEBIDA
+===================================================== */
+
+function gpsPosition(pos){
+
+    const c=pos.coords;
+
+    const previous=
+    G.lat!==null
+    ?
+    {
+        lat:G.lat,
+        lon:G.lon
+    }
+    :
+    null;
+
+    G.lat=c.latitude;
+
+    G.lon=c.longitude;
+
+    G.alt=c.altitude;
+
+    G.accuracy=c.accuracy;
+
+    if(c.speed!==null &&
+       c.speed>=0){
+
+        G.speed=
+        c.speed*3.6;
+
+    }
+
+    if(c.heading!==null &&
+       c.heading>=0){
+
+        G.heading=c.heading;
+
+    }
+
+    if(
+        previous &&
+        G.heading===null
+    ){
+
+        const d=
+        distance(
+            previous,
+            G
+        );
+
+        if(d>.3){
+
+            G.heading=
+            bearing(
+                previous,
+                G
+            );
+
+        }
+
+    }
+
+    if(previous){
+
+        recordTrack(
+            previous,
+            {
+                lat:G.lat,
+                lon:G.lon
+            }
+        );
+
+    }
+
+    updateHUD();
+
+    draw();
+
+}
+
+
+/* =====================================================
+ERRO GPS
+===================================================== */
+
+function gpsError(error){
+
+    G.fix="SEM SINAL";
+
+    updateHUD();
+
+}
+
+
+/* =====================================================
+TRILHA E COBERTURA
+===================================================== */
+
+function recordTrack(prev,p){
+
+    const d=distance(prev,p);
+
+    if(d<.2)
+        return;
+
+    G.track.push({
+
+        lat:p.lat,
+        lon:p.lon,
+
+        speed:G.speed,
+
+        heading:G.heading,
+
+        accuracy:G.accuracy,
+
+        time:new Date().toISOString()
+
+    });
+
+    if(
+        G.coverage
+    ){
+
+        const width=
+        G.width*
+        (1-G.overlap/100);
+
+        const ang=
+        G.heading!==null
+        ?
+        G.heading
+        :
+        bearing(prev,p);
+
+        const left1=
+        destination(
+            prev,
+            ang+90,
+            width/2
+        );
+
+        const right1=
+        destination(
+            prev,
+            ang-90,
+            width/2
+        );
+
+        const left2=
+        destination(
+            p,
+            ang+90,
+            width/2
+        );
+
+        const right2=
+        destination(
+            p,
+            ang-90,
+            width/2
+        );
+
+        const poly=[
+            left1,
+            left2,
+            right2,
+            right1
+        ];
+
+        G.coveragePolys.push(poly);
+
+        G.coverageArea+=
+        polygonArea(poly)/10000;
+
+    }
+
+    if(G.A && G.B){
+
+        calculateGuidance(p);
+
+    }
+
+}
+
+
+/* =====================================================
+GUIAMENTO A-B
+===================================================== */
+
+function calculateGuidance(p){
+
+    const ref=p;
+
+    const A=xy(G.A,ref);
+
+    const B=xy(G.B,ref);
+
+    const vx=B.x-A.x;
+
+    const vy=B.y-A.y;
+
+    const len=
+    Math.hypot(vx,vy)||1;
+
+    const wx=-A.x;
+
+    const wy=-A.y;
+
+    const cross=
+    (
+        vx*wy-
+        vy*wx
+    )/len;
+
+    const spacing=
+    G.width*
+    (1-G.overlap/100);
+
+    G.cross=
+    cross-
+    G.nudgeValue;
+
+    G.pass=
+    Math.round(
+        G.cross/spacing
+    );
+
+    $("distance").textContent=
+    Math.abs(G.cross).toFixed(2)+
+    " m";
+
+}
+
+
+/* =====================================================
+A
+===================================================== */
+
+function setA(){
+
+    if(G.lat===null){
+
+        toast(
+        "Aguardando posição GPS"
+        );
+
+        return;
+
+    }
+
+    G.A={
+        lat:G.lat,
+        lon:G.lon
+    };
+
+    G.B=null;
+
+    G.pass=0;
+
+    toast("Ponto A definido");
+
+    draw();
+
+}
+
+
+/* =====================================================
+B
+===================================================== */
+
+function setB(){
+
+    if(!G.A){
+
+        toast(
+        "Primeiro marque A"
+        );
+
+        return;
+
+    }
+
+    if(G.lat===null){
+
+        toast(
+        "Aguardando GPS"
+        );
+
+        return;
+
+    }
+
+    G.B={
+        lat:G.lat,
+        lon:G.lon
+    };
+
+    toast(
+    "Linha AB criada"
+    );
+
+    draw();
+
+}
+
+
+/* =====================================================
+NUDGE
+===================================================== */
+
+function nudge(direction){
+
+    G.nudgeValue+=
+    direction*
+    G.nudgeStep;
+
+    draw();
+
+    toast(
+    "Nudge: "+
+    G.nudgeValue.toFixed(3)+
+    " m"
+    );
+
+}
+
+
+/* =====================================================
+COBERTURA
+===================================================== */
+
+function toggleCoverage(){
+
+    G.coverage=
+    !G.coverage;
+
+    const b=
+    $("coverageBtn");
+
+    if(G.coverage){
+
+        b.classList.add("active");
+
+        b.textContent="⏸";
+
+        toast(
+        "Cobertura ligada"
+        );
+
+    }else{
+
+        b.classList.remove("active");
+
+        b.textContent="🎯";
+
+        toast(
+        "Cobertura pausada"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+MARCADOR
+===================================================== */
+
+function markPoint(){
+
+    if(G.lat===null){
+
+        toast(
+        "Aguardando GPS"
+        );
+
+        return;
+
+    }
+
+    G.marks.push({
+
+        lat:G.lat,
+
+        lon:G.lon,
+
+        name:
+        "Ponto "+
+        (G.marks.length+1),
+
+        time:
+        new Date().toISOString()
+
+    });
+
+    draw();
+
+}
+
+
+/* =====================================================
+DESENHO
+===================================================== */
+
+function draw(){
+
+    const w=canvas.clientWidth;
+
+    const h=canvas.clientHeight;
+
+    ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+    );
+
+    drawBackground(w,h);
+
+    if(G.lat===null)
+        return;
+
+    const ref={
+        lat:G.lat,
+        lon:G.lon
+    };
+
+
+    /* CAMPO */
+
+    if(G.field.length>=3){
+
+        ctx.beginPath();
+
+        G.field.forEach(
+        (p,i)=>{
+
+            const z=
+            screenPoint(
+                p,
+                ref,
+                w,
+                h
+            );
+
+            if(i===0)
+                ctx.moveTo(z.x,z.y);
+            else
+                ctx.lineTo(z.x,z.y);
+
+        });
+
+        ctx.closePath();
+
+        ctx.fillStyle=
+        "rgba(30,160,70,.18)";
+
+        ctx.fill();
+
+        ctx.strokeStyle=
+        "#27854c";
+
+        ctx.lineWidth=3;
+
+        ctx.stroke();
+
+    }
+
+
+    /* COBERTURA */
+
+    G.coveragePolys.forEach(
+    poly=>{
+
+        ctx.beginPath();
+
+        poly.forEach(
+        (p,i)=>{
+
+            const z=
+            screenPoint(
+                p,
+                ref,
+                w,
+                h
+            );
+
+            if(i===0)
+                ctx.moveTo(z.x,z.y);
+            else
+                ctx.lineTo(z.x,z.y);
+
+        });
+
+        ctx.closePath();
+
+        ctx.fillStyle=
+        "rgba(255,190,0,.36)";
+
+        ctx.fill();
+
+    });
+
+
+    /* TRILHA */
+
+    if(G.track.length>1){
+
+        ctx.beginPath();
+
+        G.track.forEach(
+        (p,i)=>{
+
+            const z=
+            screenPoint(
+                p,
+                ref,
+                w,
+                h
+            );
+
+            if(i===0)
+                ctx.moveTo(z.x,z.y);
+            else
+                ctx.lineTo(z.x,z.y);
+
+        });
+
+        ctx.strokeStyle=
+        "#087cff";
+
+        ctx.lineWidth=3;
+
+        ctx.stroke();
+
+    }
+
+
+    /* LINHAS AB */
+
+    if(G.A && G.B){
+
+        drawGuidanceLines(
+            ref,
+            w,
+            h
+        );
+
+    }
+
+
+    /* MARCADORES */
+
+    G.marks.forEach(
+    (m,i)=>{
+
+        const z=
+        screenPoint(
+            m,
+            ref,
+            w,
+            h
+        );
+
+        ctx.fillStyle=
+        "#00bb4d";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            z.x,
+            z.y,
+            7,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+        ctx.fillStyle="#111";
+
+        ctx.font=
+        "bold 13px Arial";
+
+        ctx.fillText(
+            i+1,
+            z.x+9,
+            z.y-8
+        );
+
+    });
+
+
+    /* VEÍCULO */
+
+    drawVehicle(w,h);
+
+    updateLightbar();
+
+}
+
+
+/* =====================================================
+FUNDO 2D / 3D
+===================================================== */
+
+function drawBackground(w,h){
+
+    if(G.view3D){
+
+        ctx.fillStyle=
+        "#cfd4d6";
+
+        ctx.fillRect(
+            0,
+            0,
+            w,
+            h
+        );
+
+        ctx.fillStyle=
+        "#bdc5c9";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            h*.35
+        );
+
+        ctx.lineTo(
+            w,
+            h*.35
+        );
+
+        ctx.lineTo(
+            w,
+            h
+        );
+
+        ctx.lineTo(
+            0,
+            h
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+        ctx.strokeStyle=
+        "#aeb7bc";
+
+        for(
+            let i=-15;
+            i<=15;
+            i++
+        ){
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                w/2,
+                h*.35
+            );
+
+            ctx.lineTo(
+                w/2+i*90,
+                h
+            );
+
+            ctx.stroke();
+
+        }
+
+        for(
+            let y=0;
+            y<12;
+            y++
+        ){
+
+            const yy=
+            h*.35+
+            y*y*5+
+            15;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                0,
+                yy
+            );
+
+            ctx.lineTo(
+                w,
+                yy
+            );
+
+            ctx.stroke();
+
+        }
+
+    }else{
+
+        ctx.fillStyle=
+        "#dfe3e3";
+
+        ctx.fillRect(
+            0,
+            0,
+            w,
+            h
+        );
+
+        const grid=
+        Math.max(
+            30,
+            60*G.zoom
+        );
+
+        ctx.strokeStyle=
+        "#c6cbcd";
+
+        ctx.lineWidth=1;
+
+        for(
+            let x=0;
+            x<w;
+            x+=grid
+        ){
+
+            ctx.beginPath();
+
+            ctx.moveTo(x,0);
+
+            ctx.lineTo(x,h);
+
+            ctx.stroke();
+
+        }
+
+        for(
+            let y=0;
+            y<h;
+            y+=grid
+        ){
+
+            ctx.beginPath();
+
+            ctx.moveTo(0,y);
+
+            ctx.lineTo(w,y);
+
+            ctx.stroke();
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+LINHAS DE ORIENTAÇÃO
+===================================================== */
+
+function drawGuidanceLines(ref,w,h){
+
+    const ang=
+    bearing(
+        G.A,
+        G.B
+    );
+
+    const spacing=
+    G.width*
+    (1-G.overlap/100);
+
+    for(
+        let i=-20;
+        i<=20;
+        i++
+    ){
+
+        const start=
+        destination(
+            G.A,
+            ang+90,
+            i*spacing+
+            G.nudgeValue
+        );
+
+        const p1=
+        destination(
+            start,
+            ang,
+            -3000
+        );
+
+        const p2=
+        destination(
+            start,
+            ang,
+            3000
+        );
+
+        const z1=
+        screenPoint(
+            p1,
+            ref,
+            w,
+            h
+        );
+
+        const z2=
+        screenPoint(
+            p2,
+            ref,
+            w,
+            h
+        );
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            z1.x,
+            z1.y
+        );
+
+        ctx.lineTo(
+            z2.x,
+            z2.y
+        );
+
+        ctx.setLineDash(
+            i===G.pass
+            ? []
+            : [7,7]
+        );
+
+        ctx.strokeStyle=
+        i===G.pass
+        ? "#ff2020"
+        : "#7e8b91";
+
+        ctx.lineWidth=
+        i===G.pass
+        ? 3
+        : 1;
+
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+
+    }
+
+
+    /* A */
+
+    let a=
+    screenPoint(
+        G.A,
+        ref,
+        w,
+        h
+    );
+
+    ctx.fillStyle=
+    "#00bd52";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        a.x,
+        a.y,
+        8,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /* B */
+
+    let b=
+    screenPoint(
+        G.B,
+        ref,
+        w,
+        h
+    );
+
+    ctx.fillStyle=
+    "#ef3030";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        b.x,
+        b.y,
+        8,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =====================================================
+VEÍCULO
+===================================================== */
+
+function drawVehicle(w,h){
+
+    ctx.save();
+
+    ctx.translate(
+        w/2,
+        h/2
+    );
+
+    let angle=
+    G.heading===null
+    ?0
+    :G.heading*Math.PI/180;
+
+    ctx.rotate(angle);
+
+    if(G.view3D)
+        ctx.scale(1,.8);
+
+    ctx.shadowColor=
+    "#087cff";
+
+    ctx.shadowBlur=18;
+
+    ctx.fillStyle=
+    "#087cff";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        -36
+    );
+
+    ctx.lineTo(
+        25,
+        31
+    );
+
+    ctx.lineTo(
+        -25,
+        31
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.shadowBlur=0;
+
+    ctx.fillStyle="white";
+
+    ctx.fillRect(
+        -4,
+        4,
+        8,
+        25
+    );
+
+    ctx.restore();
+
+}
+
+
+/* =====================================================
+LIGHTBAR
+===================================================== */
+
+function updateLightbar(){
+
+    const bar=
+    $("lightbar");
+
+    bar.innerHTML="";
+
+    for(
+        let i=-4;
+        i<=4;
+        i++
+    ){
+
+        const e=
+        document.createElement("span");
+
+        e.className=
+        "light"+
+        (i===0?" center":"");
+
+        const error=
+        G.cross;
+
+        if(
+            Math.abs(error)>.1 &&
+            (
+                error>0&&i>0 ||
+                error<0&&i<0
+            )
+        ){
+
+            e.classList.add("on");
+
+        }
+
+        bar.appendChild(e);
+
+    }
+
+}
+
+
+/* =====================================================
+HUD
+===================================================== */
+
+function updateHUD(){
+
+    $("lat").textContent=
+    G.lat===null
+    ?"--.------"
+    :G.lat.toFixed(6);
+
+    $("lon").textContent=
+    G.lon===null
+    ?"--.------"
+    :G.lon.toFixed(6);
+
+    $("speed").textContent=
+    G.speed.toFixed(1)+
+    " km/h";
+
+    $("heading").textContent=
+    G.heading===null
+    ?"---°"
+    :G.heading.toFixed(0)+"°";
+
+    $("pass").textContent=
+    G.pass===0
+    ?"--"
+    :G.pass;
+
+    $("cross").textContent=
+    G.cross.toFixed(2)+
+    " m";
+
+    $("widthHUD").textContent=
+    G.width.toFixed(1)+
+    " m";
+
+    $("area").textContent=
+    G.area.toFixed(2)+
+    " ha";
+
+    $("coverageArea").textContent=
+    G.coverageArea.toFixed(2)+
+    " ha";
+
+    $("accuracy").textContent=
+    G.accuracy===null
+    ?"-- m"
+    :G.accuracy.toFixed(2)+" m";
+
+    $("satellites").textContent=
+    G.satellites===null
+    ?"--"
+    :G.satellites;
+
+    $("fix").textContent=
+    G.fix;
+
+    $("hdop").textContent=
+    G.hdop===null
+    ?"--"
+    :G.hdop;
+
+    let status="SEM SINAL";
+
+    if(
+        G.accuracy!==null &&
+        G.accuracy<=.05
+    )
+        status="RTK FIX";
+
+    else if(
+        G.accuracy!==null &&
+        G.accuracy<=.30
+    )
+        status="RTK FLOAT";
+
+    else if(
+        G.accuracy!==null &&
+        G.accuracy<=3
+    )
+        status="GNSS";
+
+    $("fixStatus").textContent=
+    "● "+status;
+
+    $("fixStatus").style.color=
+    status==="RTK FIX"
+    ?"lime"
+    :
+    status==="SEM SINAL"
+    ?"red"
+    :
+    "#ffd400";
+
+}
+
+
+/* =====================================================
+CAMPO
+===================================================== */
+
+function openField(){
+
+    openPanel(
+        "🌾 CAMPO / TALHÃO",
+        `
+
+        <div class="cards">
+
+        <div class="card">
+
+        <h3>Limite do talhão</h3>
+
+        <p>
+        Pontos:
+        <b>${G.field.length}</b>
+        </p>
+
+        <p>
+        Área:
+        <b>${G.area.toFixed(2)} ha</b>
+        </p>
+
+        <div class="actions">
+
+        <button onclick="addBoundary()">
+        ➕ Adicionar ponto
+        </button>
+
+        <button onclick="closeBoundary()">
+        ✓ Fechar talhão
+        </button>
+
+        </div>
+
+        </div>
+
+        <div class="card">
+
+        <h3>Marcação</h3>
+
+        <p>
+        Pontos marcados:
+        <b>${G.marks.length}</b>
+        </p>
+
+        <div class="actions">
+
+        <button onclick="markPoint()">
+        📍 Marcar posição
+        </button>
+
+        </div>
+
+        </div>
+
+        </div>
+
+        `
+    );
+
+}
+
+
+/* =====================================================
+ADICIONAR LIMITE
+===================================================== */
+
+function addBoundary(){
+
+    if(G.lat===null){
+
+        toast(
+        "Aguardando GPS"
+        );
+
+        return;
+
+    }
+
+    G.field.push({
+
+        lat:G.lat,
+
+        lon:G.lon
+
+    });
+
+    draw();
+
+    openField();
+
+}
+
+
+/* =====================================================
+FECHAR LIMITE
+===================================================== */
+
+function closeBoundary(){
+
+    if(
+        G.field.length<3
+    ){
+
+        toast(
+        "Necessário pelo menos 3 pontos"
+        );
+
+        return;
+
+    }
+
+    G.area=
+    polygonArea(
+        G.field
+    )/10000;
+
+    draw();
+
+    toast(
+    "Talhão calculado"
+    );
+
+}
+
+
+/* =====================================================
+CONFIGURAÇÃO
+===================================================== */
+
+function openConfig(){
+
+    openPanel(
+        "⚙ CONFIGURAÇÃO",
+        `
+
+        <div class="cards">
+
+        <div class="card">
+
+        <h3>Implemento</h3>
+
+        <label>
+        Largura do implemento
+        </label>
+
+        <input
+        id="inputWidth"
+        type="number"
+        step=".01"
+        value="${G.width}"
+        >
+
+        <label>
+        Sobreposição %
+        </label>
+
+        <input
+        id="inputOverlap"
+        type="number"
+        step=".1"
+        value="${G.overlap}"
+        >
+
+        <label>
+        Nudge
+        </label>
+
+        <input
+        id="inputNudge"
+        type="number"
+        step=".01"
+        value="${G.nudgeStep}"
+        >
+
+        </div>
+
+
+        <div class="card">
+
+        <h3>Guiamento</h3>
+
+        <p>
+        • Straight AB
+        </p>
+
+        <p>
+        • A+
+        </p>
+
+        <p>
+        • Identical Curve
+        </p>
+
+        <p>
+        • Adaptive Curve
+        </p>
+
+        <p>
+        • Pivot
+        </p>
+
+        <p>
+        • Headland
+        </p>
+
+        <p>
+        • FreeForm
+        </p>
+
+        </div>
+
+
+        <div class="card">
+
+        <h3>Cobertura</h3>
+
+        <p>
+        Área coberta:
+        <b>
+        ${G.coverageArea.toFixed(2)}
+        ha
+        </b>
+        </p>
+
+        <p>
+        Faixas registradas:
+        <b>
+        ${G.coveragePolys.length}
+        </b>
+        </p>
+
+        </div>
+
+        </div>
+
+
+        <div class="actions">
+
+        <button onclick="applyConfig()">
+        ✓ Aplicar
+        </button>
+
+        <button onclick="clearCoverage()">
+        🗑 Limpar cobertura
+        </button>
+
+        </div>
+
+        `
+    );
+
+}
+
+
+/* =====================================================
+APLICAR CONFIG
+===================================================== */
+
+function applyConfig(){
+
+    G.width=
+    parseFloat(
+        $("inputWidth").value
+    )||24;
+
+    G.overlap=
+    parseFloat(
+        $("inputOverlap").value
+    )||0;
+
+    G.nudgeStep=
+    parseFloat(
+        $("inputNudge").value
+    )||.025;
+
+    updateHUD();
+
+    draw();
+
+    closePanel();
+
+    toast(
+    "Configuração aplicada"
+    );
+
+}
+
+
+/* =====================================================
+GNSS / ANTENA EXTERNA
+===================================================== */
+
+function openGNSS(){
+
+    openPanel(
+        "🛰️ GNSS / ANTENA EXTERNA",
+        `
+
+        <div class="cards">
+
+        <div class="card">
+
+        <h3>GNSS Android</h3>
+
+        <p>
+        Latitude:
+        <b>${G.lat??"--"}</b>
+        </p>
+
+        <p>
+        Longitude:
+        <b>${G.lon??"--"}</b>
+        </p>
+
+        <p>
+        Precisão:
+        <b>${G.accuracy??"--"} m</b>
+        </p>
+
+        <div class="actions">
+
+        <button onclick="startGPS()">
+        📱 Usar GNSS Android
+        </button>
+
+        </div>
+
+        </div>
+
+
+        <div class="card">
+
+        <h3>USB / OTG</h3>
+
+        <p>
+        Antenas que enviam NMEA
+        podem ser lidas através
+        de uma porta serial
+        compatível.
+        </p>
+
+        <label>
+        Baud rate
+        </label>
+
+        <select id="baud">
+
+        <option>4800</option>
+        <option>9600</option>
+        <option>19200</option>
+        <option>38400</option>
+        <option>57600</option>
+        <option selected>
+        115200
+        </option>
+
+        </select>
+
+        <div class="actions">
+
+        <button onclick="connectSerial()">
+        🛰️ Conectar antena
+        </button>
+
+        </div>
+
+        </div>
+
+
+        <div class="card">
+
+        <h3>NMEA</h3>
+
+        <textarea
+        id="nmea"
+        placeholder="$GNGGA,...
+$GNRMC,..."
+        ></textarea>
+
+        <div class="actions">
+
+        <button onclick="processNMEA()">
+        ▶ Processar NMEA
+        </button>
+
+        </div>
+
+        </div>
+
+        </div>
+
+        `
+    );
+
+}
+
+
+/* =====================================================
+NMEA
+===================================================== */
+
+function nmeaCoord(value,hem){
+
+    if(!value)
+        return null;
+
+    const n=
+    parseFloat(value);
+
+    const deg=
+    Math.floor(n/100);
+
+    const min=
+    n-deg*100;
+
+    let result=
+    deg+min/60;
+
+    if(
+        hem==="S"||
+        hem==="W"
+    )
+        result=-result;
+
+    return result;
+
+}
+
+
+function parseNMEA(line){
+
+    const p=
+    line.trim().split(",");
+
+    if(p.length<2)
+        return;
+
+    const type=
+    p[0].slice(-3);
+
+    if(type==="GGA"){
+
+        const lat=
+        nmeaCoord(
+            p[2],
+            p[3]
+        );
+
+        const lon=
+        nmeaCoord(
+            p[4],
+            p[5]
+        );
+
+        if(lat!==null &&
+           lon!==null){
+
+            G.lat=lat;
+
+            G.lon=lon;
+
+        }
+
+        G.fix=p[6]||"---";
+
+        G.satellites=
+        parseInt(p[7])||0;
+
+        G.hdop=
+        parseFloat(p[8])||null;
+
+        G.alt=
+        parseFloat(p[9])||null;
+
+    }
+
+
+    if(type==="RMC"){
+
+        const knots=
+        parseFloat(p[7]);
+
+        if(!isNaN(knots))
+            G.speed=
+            knots*1.852;
+
+        const course=
+        parseFloat(p[8]);
+
+        if(!isNaN(course))
+            G.heading=course;
+
+    }
+
+    $("source").textContent=
+    "🛰️ ANTENA EXTERNA";
+
+    updateHUD();
+
+    draw();
+
+}
+
+
+/* =====================================================
+SERIAL USB
+===================================================== */
+
+async function connectSerial(){
+
+    if(!("serial" in navigator)){
+
+        alert(
+        "Este navegador não oferece Web Serial. Para USB/OTG direto no Android, use um navegador/app compatível ou APK Android nativo."
+        );
+
+        return;
+
+    }
+
+    try{
+
+        const port=
+        await navigator.serial.requestPort();
+
+        const baud=
+        parseInt(
+            $("baud")?.value||
+            115200
+        );
+
+        await port.open({
+            baudRate:baud
+        });
+
+        $("source").textContent=
+        "🛰️ ANTENA EXTERNA";
+
+        toast(
+        "Antena conectada"
+        );
+
+        const decoder=
+        new TextDecoder();
+
+        const reader=
+        port.readable.getReader();
+
+        let buffer="";
+
+        while(true){
+
+            const {
+                value,
+                done
+            }=
+            await reader.read();
+
+            if(done)
+                break;
+
+            buffer+=
+            decoder.decode(
+                value,
+                {
+                    stream:true
+                }
+            );
+
+            const lines=
+            buffer.split(/\r?\n/);
+
+            buffer=
+            lines.pop();
+
+            lines.forEach(
+                parseNMEA
+            );
+
+        }
+
+    }catch(e){
+
+        console.log(e);
+
+        toast(
+        "Falha na conexão USB"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+PROCESSAR NMEA MANUAL
+===================================================== */
+
+function processNMEA(){
+
+    const text=
+    $("nmea").value;
+
+    text
+    .split(/\r?\n/)
+    .forEach(
+        parseNMEA
+    );
+
+    toast(
+    "NMEA processado"
+    );
+
+}
+
+
+/* =====================================================
+PAINEL GENÉRICO
+===================================================== */
+
+function openPanel(title,content){
+
+    $("panelTitle").textContent=
+    title;
+
+    $("panelContent").innerHTML=
+    content;
+
+    $("panel").classList.add(
+        "open"
+    );
+
+}
+
+
+function closePanel(){
+
+    $("panel").classList.remove(
+        "open"
+    );
+
+}
+
+
+/* =====================================================
+3D
+===================================================== */
+
+function toggle3D(){
+
+    G.view3D=
+    !G.view3D;
+
+    $("viewButton").textContent=
+    G.view3D
+    ?"2D"
+    :"3D";
+
+    draw();
+
+    toast(
+    G.view3D
+    ?"Visão 3D ativada"
+    :"Visão 2D ativada"
+    );
+
+}
+
+
+/* =====================================================
+ZOOM
+===================================================== */
+
+function zoom(value){
+
+    G.zoom+=
+    value*.25;
+
+    G.zoom=
+    Math.max(
+        .4,
+        Math.min(
+            5,
+            G.zoom
+        )
+    );
+
+    draw();
+
+}
+
+
+/* =====================================================
+CENTRALIZAR
+===================================================== */
+
+function centerMap(){
+
+    G.zoom=1;
+
+    draw();
+
+    toast(
+    "Mapa centralizado"
+    );
+
+}
+
+
+/* =====================================================
+LIMPAR COBERTURA
+===================================================== */
+
+function clearCoverage(){
+
+    if(
+        !confirm(
+        "Limpar toda a cobertura?"
+        )
+    )
+        return;
+
+    G.coveragePolys=[];
+
+    G.coverageArea=0;
+
+    draw();
+
+    updateHUD();
+
+    toast(
+    "Cobertura apagada"
+    );
+
+}
+
+
+/* =====================================================
+SALVAR
+===================================================== */
+
+function save(){
+
+    localStorage.setItem(
+        "PORTAL_SAT_GPS",
+        JSON.stringify(G)
+    );
+
+    toast(
+    "Sessão salva no tablet"
+    );
+
+}
+
+
+/* =====================================================
+EXPORTAR JSON
+===================================================== */
+
+function download(
+    filename,
+    data,
+    type
+){
+
+    const blob=
+    new Blob(
+        [data],
+        {type:type}
+    );
+
+    const url=
+    URL.createObjectURL(
+        blob
+    );
+
+    const a=
+    document.createElement(
+        "a"
+    );
+
+    a.href=url;
+
+    a.download=filename;
+
+    a.click();
+
+    setTimeout(
+        ()=>{
+            URL.revokeObjectURL(url);
+        },
+        1000
+    );
+
+}
+
+
+function exportJSON(){
+
+    const data=
+    JSON.stringify(
+        G,
+        null,
+        2
+    );
+
+    download(
+        "portal_sat_gps.json",
+        data,
+        "application/json"
+    );
+
+}
+
+
+/* =====================================================
+EXPORTAR KML
+===================================================== */
+
+function exportKML(){
+
+    let content="";
+
+    if(
+        G.field.length>=3
+    ){
+
+        const coords=
+        G.field
+        .map(
+            p=>
+            `${p.lon},${p.lat},0`
+        )
+        .join(" ");
+
+        content+=`
+
+        <Placemark>
+
+        <name>Talhão</name>
+
+        <Polygon>
+
+        <outerBoundaryIs>
+
+        <LinearRing>
+
+        <coordinates>
+        ${coords}
+        </coordinates>
+
+        </LinearRing>
+
+        </outerBoundaryIs>
+
+        </Polygon>
+
+        </Placemark>
+
+        `;
+
+    }
+
+
+    if(
+        G.track.length>1
+    ){
+
+        const coords=
+        G.track
+        .map(
+            p=>
+            `${p.lon},${p.lat},0`
+        )
+        .join(" ");
+
+        content+=`
+
+        <Placemark>
+
+        <name>Trilha GPS</name>
+
+        <LineString>
+
+        <tessellate>1</tessellate>
+
+        <coordinates>
+        ${coords}
+        </coordinates>
+
+        </LineString>
+
+        </Placemark>
+
+        `;
+
+    }
+
+
+    const kml=`
+
+<?xml version="1.0"
+encoding="UTF-8"?>
+
+<kml
+xmlns="http://www.opengis.net/kml/2.2">
+
+<Document>
+
+<name>
+Portal Sat GPS
+</name>
+
+${content}
+
+</Document>
+
+</kml>
+
+`;
+
+    download(
+        "portal_sat_gps.kml",
+        kml,
+        "application/vnd.google-earth.kml+xml"
+    );
+
+}
+
+
+/* =====================================================
+RELÓGIO
+===================================================== */
+
+setInterval(
+()=>{
+
+    $("clock").textContent=
+    new Date()
+    .toLocaleTimeString(
+        "pt-BR"
+    );
+
+},
+1000
 );
 
-const ctx =
-canvas.getContext("2d");
 
+/* =====================================================
+TELA DEITADA
+===================================================== */
+
+function orientation(){
+
+    const portrait=
+    innerHeight>
+    innerWidth;
+
+    $("portrait").style.display=
+    portrait
+    ?"flex"
+    :"none";
+
+}
+
+addEventListener(
+"resize",
+orientation
+);
+
+addEventListener(
+"orientationchange",
+orientation
+);
+
+
+/* =====================================================
+RESIZE CANVAS
+===================================================== */
 
 function resizeCanvas(){
 
-    const dpr =
-    window.devicePixelRatio || 1;
+    const dpr=
+    devicePixelRatio||1;
 
-    canvas.width =
+    canvas.width=
     canvas.clientWidth*dpr;
 
-    canvas.height =
+    canvas.height=
     canvas.clientHeight*dpr;
 
     ctx.setTransform(
@@ -1384,3105 +3086,22 @@ function resizeCanvas(){
 }
 
 
-window.addEventListener(
-    "resize",
-    resizeCanvas
+/* =====================================================
+INICIAR
+===================================================== */
+
+addEventListener(
+"resize",
+resizeCanvas
 );
+
+orientation();
 
 resizeCanvas();
 
-
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-function toast(text){
-
-    const element =
-    document.getElementById(
-        "toast"
-    );
-
-    element.textContent=text;
-
-    element.style.display="block";
-
-    clearTimeout(
-        window.toastTimer
-    );
-
-    window.toastTimer =
-    setTimeout(
-        ()=>{
-            element.style.display="none";
-        },
-        2600
-    );
-
-}
-
-
-
-/* =====================================================
-   FORMATAR
-===================================================== */
-
-function formatNumber(value){
-
-    if(
-        value===null ||
-        value===undefined ||
-        Number.isNaN(value)
-    ){
-
-        return "--";
-
-    }
-
-    return Number(value)
-    .toFixed(6);
-
-}
-
-
-
-/* =====================================================
-   DISTÂNCIA
-===================================================== */
-
-function distance(a,b){
-
-    const R=6371000;
-
-    const p=Math.PI/180;
-
-    const dLat =
-    (b.lat-a.lat)*p;
-
-    const dLon =
-    (b.lon-a.lon)*p;
-
-    const x =
-
-    Math.sin(dLat/2)**2 +
-
-    Math.cos(a.lat*p) *
-
-    Math.cos(b.lat*p) *
-
-    Math.sin(dLon/2)**2;
-
-    return (
-
-        2*R*
-
-        Math.asin(
-            Math.sqrt(x)
-        )
-
-    );
-
-}
-
-
-
-/* =====================================================
-   RUMO
-===================================================== */
-
-function bearing(a,b){
-
-    const p=Math.PI/180;
-
-    const y =
-
-    Math.sin(
-        (b.lon-a.lon)*p
-    )*
-
-    Math.cos(
-        b.lat*p
-    );
-
-
-    const x =
-
-    Math.cos(
-        a.lat*p
-    )*
-
-    Math.sin(
-        b.lat*p
-    )
-
-    -
-
-    Math.sin(
-        a.lat*p
-    )*
-
-    Math.cos(
-        b.lat*p
-    )*
-
-    Math.cos(
-        (b.lon-a.lon)*p
-    );
-
-
-    return (
-
-        Math.atan2(y,x)/p+
-        360
-
-    )%360;
-
-}
-
-
-
-/* =====================================================
-   COORDENADAS LOCAIS
-===================================================== */
-
-function localXY(point,ref){
-
-    const R=6378137;
-
-    const p=Math.PI/180;
-
-    return {
-
-        x:
-
-        (point.lon-ref.lon)*
-
-        p*
-
-        R*
-
-        Math.cos(
-            ref.lat*p
-        ),
-
-        y:
-
-        (point.lat-ref.lat)*
-
-        p*
-
-        R
-
-    };
-
-}
-
-
-
-/* =====================================================
-   ÁREA EM HECTARES
-===================================================== */
-
-function calculateArea(points){
-
-    if(points.length<3)
-        return 0;
-
-    const ref=points[0];
-
-    let total=0;
-
-
-    for(
-        let i=1;
-        i<points.length-1;
-        i++
-    ){
-
-        const a=
-        localXY(
-            points[i],
-            ref
-        );
-
-        const b=
-        localXY(
-            points[i+1],
-            ref
-        );
-
-
-        total +=
-
-        a.x*b.y -
-        b.x*a.y;
-
-    }
-
-
-    return Math.abs(total/2)/10000;
-
-}
-
-
-
-/* =====================================================
-   HUD
-===================================================== */
-
-function updateHUD(){
-
-    document.getElementById(
-        "lat"
-    ).textContent=
-    formatNumber(GPS.lat);
-
-
-    document.getElementById(
-        "lon"
-    ).textContent=
-    formatNumber(GPS.lon);
-
-
-    document.getElementById(
-        "speed"
-    ).textContent=
-
-    (GPS.speed||0)
-    .toFixed(1)
-    +" km/h";
-
-
-    document.getElementById(
-        "heading"
-    ).textContent=
-
-    GPS.heading===null
-    ?"---°"
-    :
-    GPS.heading.toFixed(0)+"°";
-
-
-    document.getElementById(
-        "swath"
-    ).textContent=
-
-    GPS.swath.toFixed(1)
-    +" m";
-
-
-    document.getElementById(
-        "area"
-    ).textContent=
-
-    GPS.area.toFixed(2)
-    +" ha";
-
-
-    document.getElementById(
-        "accuracy"
-    ).textContent=
-
-    GPS.accuracy===null
-    ?"-- m"
-    :
-    GPS.accuracy.toFixed(2)+" m";
-
-
-    document.getElementById(
-        "satellites"
-    ).textContent=
-
-    GPS.satellites===null
-    ?"--"
-    :
-    GPS.satellites;
-
-
-    document.getElementById(
-        "fixValue"
-    ).textContent=
-    GPS.fix;
-
-
-    document.getElementById(
-        "hdop"
-    ).textContent=
-
-    GPS.hdop===null
-    ?"--"
-    :
-    GPS.hdop;
-
-}
-
-
-
-/* =====================================================
-   POSIÇÃO ANDROID
-===================================================== */
-
-let watchID=null;
-
-
-function receiveAndroidPosition(position){
-
-    const c=
-    position.coords;
-
-
-    const previous =
-
-    GPS.lat!==null
-    ?
-    {
-        lat:GPS.lat,
-        lon:GPS.lon
-    }
-    :
-    null;
-
-
-    GPS.lat=
-    c.latitude;
-
-    GPS.lon=
-    c.longitude;
-
-    GPS.accuracy=
-    c.accuracy;
-
-    GPS.altitude=
-    c.altitude;
-
-
-    if(
-        c.speed!==null &&
-        c.speed>=0
-    ){
-
-        GPS.speed=
-        c.speed*3.6;
-
-    }
-
-
-    if(
-        c.heading!==null &&
-        c.heading>=0
-    ){
-
-        GPS.heading=
-        c.heading;
-
-    }
-
-
-    if(
-        previous &&
-        (
-            GPS.heading===null ||
-            GPS.speed<0.2
-        )
-    ){
-
-        const d=
-        distance(
-            previous,
-            {
-                lat:GPS.lat,
-                lon:GPS.lon
-            }
-        );
-
-
-        if(d>0.3){
-
-            GPS.heading=
-            bearing(
-                previous,
-                {
-                    lat:GPS.lat,
-                    lon:GPS.lon
-                }
-            );
-
-        }
-
-    }
-
-
-    if(GPS.tracking){
-
-        const point={
-
-            lat:GPS.lat,
-
-            lon:GPS.lon,
-
-            time:
-            new Date().toISOString(),
-
-            speed:
-            GPS.speed,
-
-            heading:
-            GPS.heading,
-
-            accuracy:
-            GPS.accuracy
-
-        };
-
-
-        if(
-
-            GPS.points.length===0 ||
-
-            distance(
-                GPS.points[
-                    GPS.points.length-1
-                ],
-                point
-            )>=0.5
-
-        ){
-
-            GPS.points.push(point);
-
-            GPS.coverage.push(point);
-
-        }
-
-    }
-
-
-    updateGNSSStatus();
-
-    updateHUD();
-
-    draw();
-
-}
-
-
-
-/* =====================================================
-   GPS ANDROID
-===================================================== */
-
-function startAndroidGPS(){
-
-    if(
-        !navigator.geolocation
-    ){
-
-        toast(
-            "Geolocalização não disponível"
-        );
-
-        return;
-
-    }
-
-
-    if(watchID!==null){
-
-        navigator.geolocation.clearWatch(
-            watchID
-        );
-
-    }
-
-
-    watchID=
-    navigator.geolocation.watchPosition(
-
-        receiveAndroidPosition,
-
-        function(error){
-
-            document.getElementById(
-                "gnssStatus"
-            ).textContent=
-            "● SEM SINAL";
-
-            toast(
-                "GNSS Android: "+
-                error.message
-            );
-
-        },
-
-        {
-
-            enableHighAccuracy:true,
-
-            maximumAge:500,
-
-            timeout:10000
-
-        }
-
-    );
-
-
-    GPS.source=
-    "Android GNSS";
-
-
-    document.getElementById(
-        "sourceStatus"
-    ).textContent=
-    "📱 GNSS Android";
-
-}
-
-
-
-/* =====================================================
-   STATUS GNSS
-===================================================== */
-
-function updateGNSSStatus(){
-
-    let status="GNSS";
-
-
-    if(
-        GPS.fix==="RTK FIX"
-    ){
-
-        status="RTK FIX";
-
-    }
-    else if(
-        GPS.fix==="RTK FLOAT"
-    ){
-
-        status="RTK FLOAT";
-
-    }
-    else if(
-        GPS.accuracy!==null &&
-        GPS.accuracy<=0.05
-    ){
-
-        status="RTK FIX";
-
-    }
-    else if(
-        GPS.accuracy!==null &&
-        GPS.accuracy<=0.30
-    ){
-
-        status="RTK FLOAT";
-
-    }
-    else if(
-        GPS.accuracy!==null &&
-        GPS.accuracy<=3
-    ){
-
-        status="GNSS";
-
-    }
-    else{
-
-        status="BAIXA";
-
-    }
-
-
-    document.getElementById(
-        "gnssStatus"
-    ).textContent=
-    "● "+status;
-
-}
-
-
-
-/* =====================================================
-   NMEA
-===================================================== */
-
-function nmeaCoordinate(
-    value,
-    hemisphere
-){
-
-    if(
-        !value ||
-        !hemisphere
-    )
-        return null;
-
-
-    const n=
-    parseFloat(value);
-
-
-    if(Number.isNaN(n))
-        return null;
-
-
-    const degrees=
-    Math.floor(n/100);
-
-
-    const minutes=
-    n-
-    degrees*100;
-
-
-    let result=
-    degrees+
-    minutes/60;
-
-
-    if(
-        hemisphere==="S" ||
-        hemisphere==="W"
-    ){
-
-        result=-result;
-
-    }
-
-
-    return result;
-
-}
-
-
-
-/* =====================================================
-   PROCESSAR NMEA
-===================================================== */
-
-function processNMEA(line){
-
-    line=
-    line.trim();
-
-
-    if(!line)
-        return;
-
-
-    const p=
-    line.split(",");
-
-
-    if(!p[0])
-        return;
-
-
-    const type=
-    p[0].slice(-3);
-
-
-    /* ================= GGA ================= */
-
-    if(
-        type==="GGA" &&
-        p.length>=10
-    ){
-
-        const lat=
-        nmeaCoordinate(
-            p[2],
-            p[3]
-        );
-
-
-        const lon=
-        nmeaCoordinate(
-            p[4],
-            p[5]
-        );
-
-
-        if(
-            lat!==null &&
-            lon!==null
-        ){
-
-            GPS.lat=lat;
-
-            GPS.lon=lon;
-
-        }
-
-
-        const fixCode=
-        parseInt(p[6]);
-
-
-        const fixes={
-
-            0:"NO FIX",
-
-            1:"GPS",
-
-            2:"DGPS",
-
-            4:"RTK FIX",
-
-            5:"RTK FLOAT",
-
-            6:"ESTIMADO",
-
-            7:"MANUAL",
-
-            8:"SIMULAÇÃO"
-
-        };
-
-
-        GPS.fix=
-        fixes[fixCode] ||
-        String(fixCode);
-
-
-        GPS.satellites=
-        parseInt(p[7])||0;
-
-
-        GPS.hdop=
-        parseFloat(p[8]);
-
-
-        GPS.altitude=
-        parseFloat(p[9]);
-
-
-        /*
-          A precisão real do RTK deve ser
-          obtida do receptor quando disponível.
-        */
-
-        if(
-            GPS.accuracy===null &&
-            GPS.hdop
-        ){
-
-            GPS.accuracy=
-            GPS.hdop;
-
-        }
-
-    }
-
-
-    /* ================= RMC ================= */
-
-    if(
-        type==="RMC" &&
-        p.length>=9
-    ){
-
-        const knots=
-        parseFloat(p[7]);
-
-
-        if(
-            !Number.isNaN(knots)
-        ){
-
-            GPS.speed=
-            knots*1.852;
-
-        }
-
-
-        const heading=
-        parseFloat(p[8]);
-
-
-        if(
-            !Number.isNaN(heading)
-        ){
-
-            GPS.heading=
-            heading;
-
-        }
-
-    }
-
-
-    updateGNSSStatus();
-
-    updateHUD();
-
-    draw();
-
-}
-
-
-
-/* =====================================================
-   USB SERIAL
-===================================================== */
-
-let serialPort=null;
-
-let serialReader=null;
-
-
-async function connectExternalAntenna(){
-
-    /*
-      Necessário:
-      - Android compatível
-      - navegador com Web Serial
-      - receptor expondo porta serial
-      - receptor enviando NMEA
-    */
-
-
-    if(
-        !("serial" in navigator)
-    ){
-
-        alert(
-
-        "Web Serial não está disponível neste navegador.\n\n"+
-        "Para USB/OTG direto, utilize um navegador/app Android "+
-        "compatível com Web Serial ou transforme o projeto em APK nativo."
-
-        );
-
-        return;
-
-    }
-
-
-    try{
-
-        serialPort=
-        await navigator.serial.requestPort();
-
-
-        /*
-          Muitos receptores usam 115200.
-          Se sua antena usar outro baud rate,
-          altere aqui para 9600, 38400 etc.
-        */
-
-        await serialPort.open({
-
-            baudRate:115200
-
-        });
-
-
-        GPS.source=
-        "ANTENA EXTERNA";
-
-
-        document.getElementById(
-            "sourceStatus"
-        ).textContent=
-        "🛰️ ANTENA EXTERNA";
-
-
-        toast(
-            "Antena externa conectada"
-        );
-
-
-        readSerial();
-
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        toast(
-            "Erro ao conectar antena"
-        );
-
-    }
-
-}
-
-
-
-/* =====================================================
-   LEITOR SERIAL
-===================================================== */
-
-async function readSerial(){
-
-    if(!serialPort)
-        return;
-
-
-    const decoder=
-    new TextDecoder();
-
-
-    let buffer="";
-
-
-    try{
-
-        while(
-            serialPort.readable
-        ){
-
-            serialReader=
-            serialPort.readable.getReader();
-
-
-            try{
-
-                while(true){
-
-                    const result=
-                    await serialReader.read();
-
-
-                    if(result.done)
-                        break;
-
-
-                    if(result.value){
-
-                        buffer +=
-                        decoder.decode(
-                            result.value,
-                            {
-                                stream:true
-                            }
-                        );
-
-
-                        const lines=
-                        buffer.split(
-                            /\r?\n/
-                        );
-
-
-                        buffer=
-                        lines.pop();
-
-
-                        for(
-                            const line
-                            of lines
-                        ){
-
-                            if(
-                                line.startsWith("$")
-                            ){
-
-                                processNMEA(
-                                    line
-                                );
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            }
-            finally{
-
-                serialReader.releaseLock();
-
-            }
-
-        }
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        toast(
-            "Conexão da antena encerrada"
-        );
-
-    }
-
-}
-
-
-
-/* =====================================================
-   PROJEÇÃO DO MAPA
-===================================================== */
-
-function projectPoint(
-    point,
-    ref,
-    width,
-    height
-){
-
-    const xy=
-    localXY(
-        point,
-        ref
-    );
-
-
-    const scale=
-    5*GPS.zoom;
-
-
-    return {
-
-        x:
-        width/2+
-        xy.x*scale,
-
-        y:
-        height/2-
-        xy.y*scale
-
-    };
-
-}
-
-
-
-/* =====================================================
-   DESENHAR MAPA
-===================================================== */
-
-function draw(){
-
-    const width=
-    canvas.clientWidth;
-
-    const height=
-    canvas.clientHeight;
-
-
-    ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    ctx.fillStyle=
-    GPS.view3D
-    ?" #d6dadd"
-    :"#dfe2e2";
-
-
-    ctx.fillRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    /* GRID */
-
-    const grid=
-    Math.max(
-        35,
-        65*GPS.zoom
-    );
-
-
-    ctx.strokeStyle=
-    "#c6cacc";
-
-    ctx.lineWidth=1;
-
-
-    for(
-        let x=0;
-        x<width;
-        x+=grid
-    ){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            x,
-            0
-        );
-
-        ctx.lineTo(
-            x,
-            height
-        );
-
-        ctx.stroke();
-
-    }
-
-
-    for(
-        let y=0;
-        y<height;
-        y+=grid
-    ){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            0,
-            y
-        );
-
-        ctx.lineTo(
-            width,
-            y
-        );
-
-        ctx.stroke();
-
-    }
-
-
-    if(GPS.lat===null)
-        return;
-
-
-    const ref={
-
-        lat:GPS.lat,
-
-        lon:GPS.lon
-
-    };
-
-
-    /* ================= TALHÃO ================= */
-
-    if(
-        GPS.field.length>=2
-    ){
-
-        ctx.beginPath();
-
-
-        GPS.field.forEach(
-            (point,index)=>{
-
-                const p=
-                projectPoint(
-                    point,
-                    ref,
-                    width,
-                    height
-                );
-
-
-                if(index===0){
-
-                    ctx.moveTo(
-                        p.x,
-                        p.y
-                    );
-
-                }
-                else{
-
-                    ctx.lineTo(
-                        p.x,
-                        p.y
-                    );
-
-                }
-
-            }
-        );
-
-
-        ctx.closePath();
-
-
-        ctx.fillStyle=
-        "rgba(50,160,80,.18)";
-
-        ctx.fill();
-
-
-        ctx.strokeStyle=
-        "#258449";
-
-        ctx.lineWidth=3;
-
-        ctx.stroke();
-
-    }
-
-
-
-    /* ================= COBERTURA ================= */
-
-    for(
-        const point
-        of GPS.coverage
-    ){
-
-        const p=
-        projectPoint(
-            point,
-            ref,
-            width,
-            height
-        );
-
-
-        ctx.fillStyle=
-        "rgba(255,190,0,.40)";
-
-
-        ctx.fillRect(
-            p.x-3,
-            p.y-3,
-            6,
-            6
-        );
-
-    }
-
-
-
-    /* ================= TRILHA ================= */
-
-    if(
-        GPS.points.length>1
-    ){
-
-        ctx.beginPath();
-
-
-        GPS.points.forEach(
-            (point,index)=>{
-
-                const p=
-                projectPoint(
-                    point,
-                    ref,
-                    width,
-                    height
-                );
-
-
-                if(index===0){
-
-                    ctx.moveTo(
-                        p.x,
-                        p.y
-                    );
-
-                }
-                else{
-
-                    ctx.lineTo(
-                        p.x,
-                        p.y
-                    );
-
-                }
-
-            }
-        );
-
-
-        ctx.strokeStyle=
-        "#147cff";
-
-        ctx.lineWidth=4;
-
-        ctx.stroke();
-
-    }
-
-
-
-    /* ================= A ================= */
-
-    if(GPS.A){
-
-        const p=
-        projectPoint(
-            GPS.A,
-            ref,
-            width,
-            height
-        );
-
-
-        ctx.fillStyle=
-        "#00b84d";
-
-
-        ctx.beginPath();
-
-        ctx.arc(
-            p.x,
-            p.y,
-            9,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        ctx.fillStyle=
-        "#111";
-
-        ctx.font=
-        "bold 15px Arial";
-
-
-        ctx.fillText(
-            "A",
-            p.x+12,
-            p.y-10
-        );
-
-    }
-
-
-
-    /* ================= B ================= */
-
-    if(
-        GPS.A &&
-        GPS.B
-    ){
-
-        const A=
-        projectPoint(
-            GPS.A,
-            ref,
-            width,
-            height
-        );
-
-
-        const B=
-        projectPoint(
-            GPS.B,
-            ref,
-            width,
-            height
-        );
-
-
-        ctx.strokeStyle=
-        "#e53945";
-
-        ctx.lineWidth=3;
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            A.x,
-            A.y
-        );
-
-        ctx.lineTo(
-            B.x,
-            B.y
-        );
-
-        ctx.stroke();
-
-
-        ctx.fillStyle=
-        "#e53945";
-
-
-        ctx.beginPath();
-
-        ctx.arc(
-            B.x,
-            B.y,
-            9,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        ctx.fillStyle=
-        "#111";
-
-        ctx.font=
-        "bold 15px Arial";
-
-
-        ctx.fillText(
-            "B",
-            B.x+12,
-            B.y-10
-        );
-
-
-        /* ================= PARALELAS ================= */
-
-        const angle=
-        bearing(
-            GPS.A,
-            GPS.B
-        );
-
-
-        for(
-            let k=-10;
-            k<=10;
-            k++
-        ){
-
-            const base=
-            destination(
-                GPS.A,
-                angle+90,
-                k*GPS.swath
-            );
-
-
-            const p1=
-            destination(
-                base,
-                angle,
-                -2500
-            );
-
-
-            const p2=
-            destination(
-                base,
-                angle,
-                2500
-            );
-
-
-            const P1=
-            projectPoint(
-                p1,
-                ref,
-                width,
-                height
-            );
-
-
-            const P2=
-            projectPoint(
-                p2,
-                ref,
-                width,
-                height
-            );
-
-
-            ctx.beginPath();
-
-            ctx.moveTo(
-                P1.x,
-                P1.y
-            );
-
-            ctx.lineTo(
-                P2.x,
-                P2.y
-            );
-
-
-            ctx.strokeStyle=
-            k===0
-            ?"red"
-            :"#89999f";
-
-
-            ctx.lineWidth=
-            k===0
-            ?2
-            :1;
-
-
-            ctx.setLineDash(
-                k===0
-                ?[]
-                :[7,7]
-            );
-
-
-            ctx.stroke();
-
-            ctx.setLineDash([]);
-
-        }
-
-    }
-
-
-
-    /* ================= POSIÇÃO ================= */
-
-    ctx.fillStyle=
-    "#0877ff";
-
-
-    ctx.beginPath();
-
-    ctx.arc(
-        width/2,
-        height/2,
-        8,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    ctx.strokeStyle=
-    "#fff";
-
-    ctx.lineWidth=2;
-
-    ctx.stroke();
-
-}
-
-
-
-/* =====================================================
-   DESTINO GPS
-===================================================== */
-
-function destination(
-    point,
-    direction,
-    meters
-){
-
-    const R=6378137;
-
-    const q=Math.PI/180;
-
-    const angular=
-    meters/R;
-
-    const bearingRad=
-    direction*q;
-
-    const lat=
-    point.lat*q;
-
-    const lon=
-    point.lon*q;
-
-
-    const newLat=
-
-    Math.asin(
-
-        Math.sin(lat)*
-        Math.cos(angular)
-
-        +
-
-        Math.cos(lat)*
-        Math.sin(angular)*
-        Math.cos(bearingRad)
-
-    );
-
-
-    const newLon=
-
-    lon+
-
-    Math.atan2(
-
-        Math.sin(bearingRad)*
-        Math.sin(angular)*
-        Math.cos(lat),
-
-        Math.cos(angular)
-        -
-        Math.sin(lat)*
-        Math.sin(newLat)
-
-    );
-
-
-    return {
-
-        lat:
-        newLat/q,
-
-        lon:
-        (
-            newLon/q+
-            540
-        )%360-180
-
-    };
-
-}
-
-
-
-/* =====================================================
-   A / B
-===================================================== */
-
-function setA(){
-
-    if(GPS.lat===null){
-
-        toast(
-            "Aguardando GNSS"
-        );
-
-        return;
-
-    }
-
-
-    GPS.A={
-
-        lat:GPS.lat,
-
-        lon:GPS.lon
-
-    };
-
-
-    GPS.B=null;
-
-
-    draw();
-
-
-    toast(
-        "Ponto A definido"
-    );
-
-}
-
-
-function setB(){
-
-    if(!GPS.A){
-
-        toast(
-            "Defina A primeiro"
-        );
-
-        return;
-
-    }
-
-
-    if(GPS.lat===null){
-
-        toast(
-            "Aguardando GNSS"
-        );
-
-        return;
-
-    }
-
-
-    GPS.B={
-
-        lat:GPS.lat,
-
-        lon:GPS.lon
-
-    };
-
-
-    draw();
-
-
-    toast(
-        "Ponto B definido"
-    );
-
-}
-
-
-
-/* =====================================================
-   COBERTURA
-===================================================== */
-
-function toggleTracking(){
-
-    GPS.tracking=
-    !GPS.tracking;
-
-
-    const button=
-    document.getElementById(
-        "trackingButton"
-    );
-
-
-    button.classList.toggle(
-        "active",
-        GPS.tracking
-    );
-
-
-    button.textContent=
-    GPS.tracking
-    ?"⏸"
-    :"🎯";
-
-
-    toast(
-
-        GPS.tracking
-        ?"Cobertura iniciada"
-        :"Cobertura pausada"
-
-    );
-
-}
-
-
-
-/* =====================================================
-   MARCAR PONTO
-===================================================== */
-
-function markPoint(){
-
-    if(GPS.lat===null){
-
-        toast(
-            "Aguardando GNSS"
-        );
-
-        return;
-
-    }
-
-
-    GPS.marks.push({
-
-        lat:GPS.lat,
-
-        lon:GPS.lon,
-
-        time:
-        new Date().toISOString()
-
-    });
-
-
-    toast(
-        "Ponto marcado"
-    );
-
-}
-
-
-
-/* =====================================================
-   TALHÃO
-===================================================== */
-
-function addBoundaryPoint(){
-
-    if(GPS.lat===null){
-
-        toast(
-            "Aguardando GNSS"
-        );
-
-        return;
-
-    }
-
-
-    GPS.field.push({
-
-        lat:GPS.lat,
-
-        lon:GPS.lon
-
-    });
-
-
-    GPS.area=
-    calculateArea(
-        GPS.field
-    );
-
-
-    draw();
-
-    updateHUD();
-
-
-    openPanel("field");
-
-}
-
-
-function finishBoundary(){
-
-    if(
-        GPS.field.length<3
-    ){
-
-        toast(
-            "São necessários pelo menos 3 pontos"
-        );
-
-        return;
-
-    }
-
-
-    GPS.field.push({
-        ...GPS.field[0]
-    });
-
-
-    GPS.area=
-    calculateArea(
-        GPS.field
-    );
-
-
-    draw();
-
-    updateHUD();
-
-
-    toast(
-        "Talhão fechado"
-    );
-
-}
-
-
-
-/* =====================================================
-   CONFIGURAÇÃO
-===================================================== */
-
-function applySetup(){
-
-    const swath=
-    parseFloat(
-        document.getElementById(
-            "swathInput"
-        ).value
-    );
-
-
-    const overlap=
-    parseFloat(
-        document.getElementById(
-            "overlapInput"
-        ).value
-    );
-
-
-    const offset=
-    parseFloat(
-        document.getElementById(
-            "offsetInput"
-        ).value
-    );
-
-
-    const antennaHeight=
-    parseFloat(
-        document.getElementById(
-            "antennaInput"
-        ).value
-    );
-
-
-    GPS.swath=
-    swath>0
-    ?swath
-    :24;
-
-
-    GPS.overlap=
-    overlap>=0
-    ?overlap
-    :0;
-
-
-    GPS.offset=
-    Number.isFinite(offset)
-    ?offset
-    :0;
-
-
-    GPS.antennaHeight=
-    antennaHeight>=0
-    ?antennaHeight
-    :0;
-
-
-    updateHUD();
-
-    draw();
-
-    saveSession();
-
-    toast(
-        "Configuração aplicada"
-    );
-
-    closePanel();
-
-}
-
-
-
-/* =====================================================
-   PAINÉIS
-===================================================== */
-
-function openPanel(type){
-
-    const panel=
-    document.getElementById(
-        "panel"
-    );
-
-
-    const title=
-    document.getElementById(
-        "panelTitle"
-    );
-
-
-    const content=
-    document.getElementById(
-        "panelContent"
-    );
-
-
-    panel.classList.add(
-        "open"
-    );
-
-
-
-    /* ================= CONFIG ================= */
-
-    if(type==="setup"){
-
-        title.textContent=
-        "⚙ CONFIGURAÇÃO DO GPS";
-
-
-        content.innerHTML=`
-
-        <div class="grid">
-
-        <div class="card">
-
-        <h3>🚜 Implemento</h3>
-
-        <label>
-        Largura do implemento (m)
-        </label>
-
-        <input
-        id="swathInput"
-        type="number"
-        step="0.1"
-        value="${GPS.swath}"
-        >
-
-        <label>
-        Sobreposição (%)
-        </label>
-
-        <input
-        id="overlapInput"
-        type="number"
-        step="0.1"
-        value="${GPS.overlap}"
-        >
-
-        <label>
-        Deslocamento lateral (m)
-        </label>
-
-        <input
-        id="offsetInput"
-        type="number"
-        step="0.1"
-        value="${GPS.offset}"
-        >
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>🛰️ Antena</h3>
-
-        <label>
-        Altura da antena (m)
-        </label>
-
-        <input
-        id="antennaInput"
-        type="number"
-        step="0.1"
-        value="${GPS.antennaHeight}"
-        >
-
-        <p>
-        Fonte atual:
-        <b>${GPS.source}</b>
-        </p>
-
-        </div>
-
-        </div>
-
-
-        <div class="actions">
-
-        <button
-        class="actionBtn"
-        onclick="applySetup()">
-
-        ✓ Aplicar
-
-        </button>
-
-
-        <button
-        class="actionBtn"
-        onclick="connectExternalAntenna()">
-
-        🛰️ ANTENA USB/OTG
-
-        </button>
-
-
-        <button
-        class="actionBtn"
-        onclick="startAndroidGPS()">
-
-        📱 GNSS ANDROID
-
-        </button>
-
-
-        <button
-        class="actionBtn"
-        onclick="openPanel('nmea')">
-
-        📥 NMEA
-
-        </button>
-
-        </div>
-
-        `;
-
-    }
-
-
-
-    /* ================= GNSS ================= */
-
-    if(type==="gnss"){
-
-        title.textContent=
-        "🛰️ GNSS / RTK";
-
-
-        content.innerHTML=`
-
-        <div class="grid">
-
-        <div class="card">
-
-        <h3>📍 Posição</h3>
-
-        <p>
-        Latitude:
-        <b>
-        ${formatNumber(GPS.lat)}
-        </b>
-        </p>
-
-        <p>
-        Longitude:
-        <b>
-        ${formatNumber(GPS.lon)}
-        </b>
-        </p>
-
-        <p>
-        Altitude:
-        ${
-        GPS.altitude===null
-        ?"--"
-        :
-        GPS.altitude.toFixed(2)+" m"
-        }
-        </p>
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>📡 Qualidade</h3>
-
-        <p>
-        Fix:
-        <b>
-        ${GPS.fix}
-        </b>
-        </p>
-
-        <p>
-        Satélites:
-        ${GPS.satellites??"--"}
-        </p>
-
-        <p>
-        HDOP:
-        ${GPS.hdop??"--"}
-        </p>
-
-        <p>
-        Precisão:
-        ${
-        GPS.accuracy===null
-        ?"--"
-        :
-        GPS.accuracy.toFixed(2)+" m"
-        }
-        </p>
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>🛰️ Fonte</h3>
-
-        <p>
-        ${GPS.source}
-        </p>
-
-        <p>
-        O receptor RTK precisa fornecer
-        posição corrigida ao Android ou
-        NMEA pela conexão serial.
-        </p>
-
-        </div>
-
-        </div>
-
-
-        <div class="actions">
-
-        <button
-        class="actionBtn"
-        onclick="connectExternalAntenna()">
-
-        🛰️ CONECTAR ANTENA
-
-        </button>
-
-
-        <button
-        class="actionBtn"
-        onclick="startAndroidGPS()">
-
-        📱 GNSS ANDROID
-
-        </button>
-
-        </div>
-
-        `;
-
-    }
-
-
-
-    /* ================= NMEA ================= */
-
-    if(type==="nmea"){
-
-        title.textContent=
-        "📥 ENTRADA NMEA";
-
-
-        content.innerHTML=`
-
-        <div class="card">
-
-        <h3>
-        NMEA GGA / RMC
-        </h3>
-
-        <p>
-        Cole as mensagens NMEA
-        recebidas da antena.
-        </p>
-
-        <textarea
-        id="nmeaText"
-        placeholder="$GNGGA,...
-$GNRMC,..."
-        ></textarea>
-
-
-        <div class="actions">
-
-        <button
-        class="actionBtn"
-        onclick="readManualNMEA()">
-
-        ▶ PROCESSAR
-
-        </button>
-
-        </div>
-
-        </div>
-
-        `;
-
-    }
-
-
-
-    /* ================= GUIAMENTO ================= */
-
-    if(type==="guidance"){
-
-        title.textContent=
-        "⛰️ GUIAMENTO";
-
-
-        let azimuth="--";
-
-
-        if(
-            GPS.A &&
-            GPS.B
-        ){
-
-            azimuth=
-            bearing(
-                GPS.A,
-                GPS.B
-            ).toFixed(1)+"°";
-
-        }
-
-
-        content.innerHTML=`
-
-        <div class="grid">
-
-        <div class="card">
-
-        <h3>🎯 Linha AB</h3>
-
-        <p>
-        A:
-        ${
-        GPS.A
-        ?
-        formatNumber(GPS.A.lat)+
-        ", "+
-        formatNumber(GPS.A.lon)
-        :
-        "não definida"
-        }
-        </p>
-
-        <p>
-        B:
-        ${
-        GPS.B
-        ?
-        formatNumber(GPS.B.lat)+
-        ", "+
-        formatNumber(GPS.B.lon)
-        :
-        "não definida"
-        }
-        </p>
-
-        <p>
-        Azimute:
-        ${azimuth}
-        </p>
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>🚜 Operação</h3>
-
-        <p>
-        Largura:
-        ${GPS.swath.toFixed(1)} m
-        </p>
-
-        <p>
-        Sobreposição:
-        ${GPS.overlap.toFixed(1)} %
-        </p>
-
-        <p>
-        Área:
-        ${GPS.area.toFixed(2)} ha
-        </p>
-
-        <p>
-        Velocidade:
-        ${GPS.speed.toFixed(1)} km/h
-        </p>
-
-        </div>
-
-        </div>
-
-        `;
-
-    }
-
-
-
-    /* ================= CAMPO ================= */
-
-    if(type==="field"){
-
-        title.textContent=
-        "🌾 TALHÃO";
-
-
-        content.innerHTML=`
-
-        <div class="grid">
-
-        <div class="card">
-
-        <h3>
-        Limite do talhão
-        </h3>
-
-        <p>
-        Pontos:
-        ${GPS.field.length}
-        </p>
-
-        <p>
-        Área:
-        <span class="bigNumber">
-        ${GPS.area.toFixed(2)}
-        ha
-        </span>
-        </p>
-
-
-        <div class="actions">
-
-        <button
-        class="actionBtn"
-        onclick="addBoundaryPoint()">
-
-        ➕ ADICIONAR POSIÇÃO
-
-        </button>
-
-
-        <button
-        class="actionBtn"
-        onclick="finishBoundary()">
-
-        ✓ FECHAR TALHÃO
-
-        </button>
-
-        </div>
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>
-        📍 Pontos marcados
-        </h3>
-
-        <p>
-        ${GPS.marks.length}
-        ponto(s)
-        </p>
-
-        <button
-        class="actionBtn"
-        onclick="markPoint()">
-
-        📍 MARCAR
-
-        </button>
-
-        </div>
-
-        </div>
-
-        `;
-
-    }
-
-}
-
-
-
-/* =====================================================
-   FECHAR PAINEL
-===================================================== */
-
-function closePanel(){
-
-    document
-    .getElementById("panel")
-    .classList
-    .remove("open");
-
-}
-
-
-
-/* =====================================================
-   NMEA MANUAL
-===================================================== */
-
-function readManualNMEA(){
-
-    const text=
-    document.getElementById(
-        "nmeaText"
-    ).value;
-
-
-    const lines=
-    text.split(/\r?\n/);
-
-
-    for(
-        const line
-        of lines
-    ){
-
-        processNMEA(line);
-
-    }
-
-
-    toast(
-        "NMEA processado"
-    );
-
-
-    openPanel("gnss");
-
-}
-
-
-
-/* =====================================================
-   ZOOM
-===================================================== */
-
-function zoom(amount){
-
-    GPS.zoom +=
-    amount*.25;
-
-
-    if(GPS.zoom<0.5)
-        GPS.zoom=0.5;
-
-
-    if(GPS.zoom>5)
-        GPS.zoom=5;
-
-
-    draw();
-
-}
-
-
-
-/* =====================================================
-   CENTRALIZAR
-===================================================== */
-
-function centerMap(){
-
-    GPS.zoom=1;
-
-    draw();
-
-    toast(
-        "Mapa centralizado"
-    );
-
-}
-
-
-
-/* =====================================================
-   2D / 3D
-===================================================== */
-
-function toggleView(){
-
-    GPS.view3D=
-    !GPS.view3D;
-
-
-    document.getElementById(
-        "viewButton"
-    ).textContent=
-    GPS.view3D
-    ?"3D"
-    :"2D";
-
-
-    draw();
-
-}
-
-
-
-/* =====================================================
-   SALVAR SESSÃO
-===================================================== */
-
-function saveSession(){
-
-    try{
-
-        localStorage.setItem(
-
-            "PORTAL_SAT_GPS_SESSION",
-
-            JSON.stringify(GPS)
-
-        );
-
-
-        toast(
-            "Sessão salva no tablet"
-        );
-
-    }
-    catch(error){
-
-        toast(
-            "Não foi possível salvar"
-        );
-
-    }
-
-}
-
-
-
-/* =====================================================
-   CARREGAR SESSÃO
-===================================================== */
-
-function loadSession(){
-
-    try{
-
-        const saved=
-        localStorage.getItem(
-            "PORTAL_SAT_GPS_SESSION"
-        );
-
-
-        if(!saved)
-            return;
-
-
-        const data=
-        JSON.parse(saved);
-
-
-        Object.assign(
-            GPS,
-            data
-        );
-
-
-        updateHUD();
-
-        draw();
-
-    }
-    catch(error){
-
-        console.log(error);
-
-    }
-
-}
-
-
-
-/* =====================================================
-   EXPORTAR JSON
-===================================================== */
-
-function downloadFile(
-    filename,
-    content,
-    type
-){
-
-    const blob=
-    new Blob(
-        [content],
-        {type:type}
-    );
-
-
-    const url=
-    URL.createObjectURL(
-        blob
-    );
-
-
-    const link=
-    document.createElement(
-        "a"
-    );
-
-
-    link.href=url;
-
-    link.download=
-    filename;
-
-
-    document.body.appendChild(
-        link
-    );
-
-
-    link.click();
-
-
-    link.remove();
-
-
-    setTimeout(
-        ()=>{
-            URL.revokeObjectURL(
-                url
-            );
-        },
-        1000
-    );
-
-}
-
-
-
-/* =====================================================
-   JSON
-===================================================== */
-
-function exportJSON(){
-
-    const data={
-
-        application:
-        "PORTAL SAT GPS",
-
-        version:
-        "1.0",
-
-        date:
-        new Date().toISOString(),
-
-        position:{
-
-            latitude:
-            GPS.lat,
-
-            longitude:
-            GPS.lon,
-
-            altitude:
-            GPS.altitude
-
-        },
-
-        gnss:{
-
-            source:
-            GPS.source,
-
-            fix:
-            GPS.fix,
-
-            satellites:
-            GPS.satellites,
-
-            hdop:
-            GPS.hdop,
-
-            accuracy:
-            GPS.accuracy
-
-        },
-
-        configuration:{
-
-            swath:
-            GPS.swath,
-
-            overlap:
-            GPS.overlap,
-
-            offset:
-            GPS.offset,
-
-            antennaHeight:
-            GPS.antennaHeight
-
-        },
-
-        lineAB:{
-
-            A:GPS.A,
-
-            B:GPS.B
-
-        },
-
-        areaHa:
-        GPS.area,
-
-        field:
-        GPS.field,
-
-        track:
-        GPS.points,
-
-        coverage:
-        GPS.coverage,
-
-        marks:
-        GPS.marks
-
-    };
-
-
-    downloadFile(
-
-        "portal_sat_gps.json",
-
-        JSON.stringify(
-            data,
-            null,
-            2
-        ),
-
-        "application/json"
-
-    );
-
-
-    toast(
-        "JSON exportado"
-    );
-
-}
-
-
-
-/* =====================================================
-   EXPORTAR CSV
-===================================================== */
-
-function exportCSV(){
-
-    let csv=
-    "data,hora,latitude,longitude,velocidade_kmh,rumo,precisao_m\n";
-
-
-    for(
-        const point
-        of GPS.points
-    ){
-
-        const date=
-        new Date(
-            point.time
-        );
-
-
-        csv +=
-
-        date.toLocaleDateString(
-            "pt-BR"
-        )+
-
-        ","+
-
-        date.toLocaleTimeString(
-            "pt-BR"
-        )+
-
-        ","+
-
-        point.lat+
-
-        ","+
-
-        point.lon+
-
-        ","+
-
-        (point.speed||0)+
-
-        ","+
-
-        (point.heading??"")+
-
-        ","+
-
-        (point.accuracy??"")+
-
-        "\n";
-
-    }
-
-
-    downloadFile(
-
-        "portal_sat_gps_trilha.csv",
-
-        csv,
-
-        "text/csv"
-
-    );
-
-
-    toast(
-        "CSV exportado"
-    );
-
-}
-
-
-
-/* =====================================================
-   LIMPAR SESSÃO
-===================================================== */
-
-function clearSession(){
-
-    if(
-        !confirm(
-            "Limpar todos os dados desta sessão?"
-        )
-    ){
-
-        return;
-
-    }
-
-
-    GPS.points=[];
-
-    GPS.coverage=[];
-
-    GPS.marks=[];
-
-    GPS.field=[];
-
-    GPS.A=null;
-
-    GPS.B=null;
-
-    GPS.area=0;
-
-
-    draw();
-
-    updateHUD();
-
-
-    toast(
-        "Sessão limpa"
-    );
-
-}
-
-
-
-/* =====================================================
-   RELÓGIO
-===================================================== */
-
-setInterval(
-
-    ()=>{
-
-        document.getElementById(
-            "clock"
-        ).textContent=
-
-        new Date()
-        .toLocaleTimeString(
-            "pt-BR"
-        );
-
-    },
-
-    1000
-
-);
-
-
-
-/* =====================================================
-   ATUALIZAÇÃO
-===================================================== */
-
-setInterval(
-
-    ()=>{
-
-        if(
-            GPS.field.length>=3
-        ){
-
-            GPS.area=
-            calculateArea(
-                GPS.field
-            );
-
-        }
-
-
-        updateHUD();
-
-    },
-
-    1000
-
-);
-
-
-
-/* =====================================================
-   PEDIR PAISAGEM
-===================================================== */
-
-async function requestLandscape(){
-
-    try{
-
-        if(
-            screen.orientation &&
-            screen.orientation.lock
-        ){
-
-            await screen.orientation.lock(
-                "landscape"
-            );
-
-        }
-
-    }
-    catch(error){
-
-        console.log(
-            "Orientação controlada pelo Android"
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   EVENTO DE PRIMEIRO TOQUE
-===================================================== */
-
-document.addEventListener(
-
-    "click",
-
-    function(){
-
-        requestLandscape();
-
-    },
-
-    {
-        once:true
-    }
-
-);
-
-
-
-/* =====================================================
-   INICIALIZAÇÃO
-===================================================== */
-
-loadSession();
+startGPS();
 
 updateHUD();
-
-draw();
-
-startAndroidGPS();
-
-requestLandscape();
 
 </script>
 
