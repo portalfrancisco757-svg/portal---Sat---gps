@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PORTAL SAT GPS 🛰️</title>
     
-    <!-- Leaflet para MAPA REAL -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Plugin 3D Leaflet -->
+    <script src="https://unpkg.com/leaflet.terrain@0.1.6/dist/leaflet.terrain.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
@@ -106,18 +107,6 @@
         }
         .btn-mapa.ativo { background: #2E7D32; }
 
-        .linha-guia-principal {
-            position: absolute; top: 0; bottom: 0; width: 3px;
-            background: linear-gradient(180deg, #22c55e, #4ade80, #22c55e);
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
-            z-index: 5; display: none;
-            left: 50%; transform: translateX(-50%);
-        }
-        .linha-paralela {
-            position: absolute; top: 0; bottom: 0; width: 1px;
-            background: rgba(74, 222, 128, 0.35);
-            z-index: 4; display: none;
-        }
         .ponto-a, .ponto-b {
             position: absolute;
             width: 32px; height: 32px; border-radius: 50%;
@@ -197,7 +186,7 @@
         <button class="btn" id="btnA" onclick="criarPontoA()" title="Ponto A - Linha Guia">📍</button>
         <button class="btn" id="btnB" onclick="criarPontoB()" title="Ponto B - Linha Guia" disabled>🎯</button>
         <button class="btn" onclick="centralizarMapa()" title="Centralizar Mapa">🎯</button>
-        <button class="btn" onclick="paralelas()" title="Linhas Paralelas">〰️</button>
+        <button class="btn" onclick="paralelas()" title="Linhas Paralelas Infinitas">〰️</button>
     </div>
 
     <div class="mapa" id="mapa">
@@ -205,6 +194,8 @@
             <button class="btn-mapa ativo" onclick="trocarCamada('padrao')" title="Mapa Padrão">🗺️</button>
             <button class="btn-mapa" onclick="trocarCamada('satelite')" title="Satélite">🛰️</button>
             <button class="btn-mapa" onclick="trocarCamada('terreno')" title="Terreno">⛰️</button>
+            <!-- 🔄 BOTÃO 2D / 3D -->
+            <button class="btn-mapa" id="btn3d" onclick="alternar3D()" title="Alternar 2D/3D">3D</button>
         </div>
         
         <div id="mapaReal"></div>
@@ -238,7 +229,7 @@
         <h3>⚙️ CONFIGURAÇÕES — PORTAL SAT GPS</h3>
         <div class="campo">
             <label>Largura do Implemento (metros)</label>
-            <input type="number" id="inpLargura" value="24.0" step="0.1" min="0.1">
+            <input type="number" id="inpLargura" value="24.0" step="0.1" min="0.1" onchange="atualizarLargura()">
         </div>
         <div class="campo">
             <label>Nome do Talhão / Área</label>
@@ -270,9 +261,11 @@
 let mapaReal;
 let camadaPadrao, camadaSatelite, camadaTerreno;
 let marcadorTrator = null;
-let linhaGuiaAB = null;
+let linhaGuiaInfinita = null;
+let linhasParalelas = [];
 let camadaCobertura = null;
 let poligonoCobertura = [];
+let modo3D = false;
 
 camadaPadrao = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap', maxZoom: 20
@@ -292,7 +285,7 @@ mapaReal = L.map('mapaReal', {
 });
 camadaPadrao.addTo(mapaReal);
 
-// 🧭 FLECHA AMARELA — APONTA PELA BÚSSOLA/RUMO
+// 🟡 FLECHA AMARELA — ÍCONE
 const iconeTrator = L.divIcon({
     html: `<div style="width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; border-bottom:28px solid #ffd700; filter:drop-shadow(0 0 8px #ffd700); transform-origin:center bottom;"></div>`,
     className: '',
@@ -314,6 +307,23 @@ function trocarCamada(tipo) {
     if (tipo === 'padrao') camadaPadrao.addTo(mapaReal);
     else if (tipo === 'satelite') camadaSatelite.addTo(mapaReal);
     else if (tipo === 'terreno') camadaTerreno.addTo(mapaReal);
+}
+
+// 🔄 ALTERNAR 2D / 3D
+function alternar3D() {
+    modo3D = !modo3D;
+    const btn = document.getElementById('btn3d');
+    btn.classList.toggle('ativo', modo3D);
+    btn.textContent = modo3D ? '2D' : '3D';
+    
+    if (modo3D) {
+        // Simulação de vista 3D (inclinação do mapa)
+        mapaReal.options.maxPitch = 60;
+        mapaReal.setPitch(45);
+        mapaReal.setBearing(0);
+    } else {
+        mapaReal.setPitch(0);
+    }
 }
 
 function centralizarMapa() {
@@ -366,20 +376,20 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
 }
 
 // ==============================================
-// 🧭 ATUALIZA FLECHA — BÚSSOLA + RUMO GPS
+// 🟡 FLECHA — MOVIMENTO GPS REAL + BÚSSOLA
 // ==============================================
 function atualizarFlecha() {
-    // Posição da flecha = localização GPS
+    // Posição 100% do GPS
     marcadorTrator.setLatLng([ESTADO.lat, ESTADO.lon]);
     
-    // Rotação da flecha = BÚSSOLA + RUMO (prioridade para bússola quando parado)
+    // Rotação = bússola ou rumo
     const rumoFinal = ESTADO.velocidade > 0.5 ? ESTADO.rumo : ESTADO.rumoBussola;
     marcadorTrator.setRotationAngle(rumoFinal);
     
     // Centraliza mapa
     mapaReal.panTo([ESTADO.lat, ESTADO.lon]);
     
-    // Atualiza posição visual dos pontos A e B no mapa
+    // Atualiza posição visual dos pontos A e B
     if (ESTADO.pontoA) {
         const pontoAPos = mapaReal.latLngToContainerPoint([ESTADO.pontoA.lat, ESTADO.pontoA.lon]);
         pontoAEl.style.left = pontoAPos.x + 'px';
@@ -395,31 +405,95 @@ function atualizarFlecha() {
 }
 
 // ==============================================
-// 📍 CRIA LINHA AB NA DIREÇÃO DA FLECHA
+// 📏 LINHA INFINITA + PARALELAS
 // ==============================================
-function criarLinhaGuia() {
+function criarLinhaGuiaInfinita() {
     if (!ESTADO.pontoA || !ESTADO.pontoB) {
-        if (linhaGuiaAB) { mapaReal.removeLayer(linhaGuiaAB); linhaGuiaAB = null; }
+        if (linhaGuiaInfinita) { mapaReal.removeLayer(linhaGuiaInfinita); linhaGuiaInfinita = null; }
+        removerParalelas();
         return;
     }
     
-    // Remove linha anterior
-    if (linhaGuiaAB) mapaReal.removeLayer(linhaGuiaAB);
+    // Remove linhas anteriores
+    if (linhaGuiaInfinita) mapaReal.removeLayer(linhaGuiaInfinita);
+    removerParalelas();
     
-    // Cria linha AB na direção da bússola/flecha
-    linhaGuiaAB = L.polyline([
-        [ESTADO.pontoA.lat, ESTADO.pontoA.lon],
-        [ESTADO.pontoB.lat, ESTADO.pontoB.lon]
+    // Calcula direção e estende para "infinito" (limite do mapa)
+    const lat1 = ESTADO.pontoA.lat, lon1 = ESTADO.pontoA.lon;
+    const lat2 = ESTADO.pontoB.lat, lon2 = ESTADO.pontoB.lon;
+    
+    // Vetor direção
+    const dLat = lat2 - lat1;
+    const dLon = lon2 - lon1;
+    
+    // Estende a linha em ambas as direções (valor grande = linha infinita)
+    const fator = 0.5; // ~50km de extensão
+    const latInf1 = lat1 - dLat * fator;
+    const lonInf1 = lon1 - dLon * fator;
+    const latInf2 = lat2 + dLat * fator;
+    const lonInf2 = lon2 + dLon * fator;
+    
+    // Linha guia principal INFINITA
+    linhaGuiaInfinita = L.polyline([
+        [latInf1, lonInf1],
+        [latInf2, lonInf2]
     ], {
         color: '#22c55e',
         weight: 4,
-        opacity: 0.8,
+        opacity: 0.9,
         lineJoin: 'round'
-    }).addTo(mapaReal).bindPopup('Linha Guia A→B');
+    }).addTo(mapaReal).bindPopup('Linha Guia Infinita A→B');
+    
+    // 📏 LINHAS PARALELAS — espaçamento = largura do implemento
+    const metrosPorGrauLat = 111320;
+    const metrosPorGrauLon = 111320 * Math.cos((lat1 + lat2) / 2 * Math.PI / 180);
+    const deslocamentoGrauLat = ESTADO.larguraImplemento / metrosPorGrauLat;
+    const deslocamentoGrauLon = ESTADO.larguraImplemento / metrosPorGrauLon;
+    
+    // Direção perpendicular
+    const perpLat = -dLon / Math.sqrt(dLat*dLat + dLon*dLon);
+    const perpLon = dLat / Math.sqrt(dLat*dLat + dLon*dLon);
+    
+    // Quantidade de linhas (visível no mapa)
+    const qtdLados = 5;
+    
+    for (let i = 1; i <= qtdLados; i++) {
+        const desl = i * 1; // 1× largura
+        // Lado esquerdo
+        const latE1 = latInf1 + perpLat * desl * deslocamentoGrauLat;
+        const lonE1 = lonInf1 + perpLon * desl * deslocamentoGrauLon;
+        const latE2 = latInf2 + perpLat * desl * deslocamentoGrauLat;
+        const lonE2 = lonInf2 + perpLon * desl * deslocamentoGrauLon;
+        const linhaE = L.polyline([[latE1, lonE1], [latE2, lonE2]], {
+            color: '#4ade80', weight: 2, opacity: 0.5
+        }).addTo(mapaReal);
+        linhasParalelas.push(linhaE);
+        
+        // Lado direito
+        const latD1 = latInf1 - perpLat * desl * deslocamentoGrauLat;
+        const lonD1 = lonInf1 - perpLon * desl * deslocamentoGrauLon;
+        const latD2 = latInf2 - perpLat * desl * deslocamentoGrauLat;
+        const lonD2 = lonInf2 - perpLon * desl * deslocamentoGrauLon;
+        const linhaD = L.polyline([[latD1, lonD1], [latD2, lonD2]], {
+            color: '#4ade80', weight: 2, opacity: 0.5
+        }).addTo(mapaReal);
+        linhasParalelas.push(linhaD);
+    }
+}
+
+function removerParalelas() {
+    linhasParalelas.forEach(l => mapaReal.removeLayer(l));
+    linhasParalelas = [];
+}
+
+function atualizarLargura() {
+    ESTADO.larguraImplemento = parseFloat(document.getElementById('inpLargura').value);
+    document.getElementById('dLargura').textContent = ESTADO.larguraImplemento.toFixed(1) + ' m';
+    if (ESTADO.pontoA && ESTADO.pontoB) criarLinhaGuiaInfinita();
 }
 
 // ==============================================
-// 🟢 COBERTURA — ACOMPANHA A FLECHA
+// 🟢 COBERTURA — SEGUE A FLECHA COM LARGURA CONFIGURADA
 // ==============================================
 function desenharCobertura() {
     if (!ESTADO.pintando) return;
@@ -435,18 +509,18 @@ function desenharCobertura() {
         ESTADO.lat, ESTADO.lon
     );
     
-    if (dist > 0.5) { // Registra a cada 50cm
+    if (dist > 0.5) {
         ESTADO.distanciaPercorrida += dist;
         ESTADO.areaTotal = (ESTADO.distanciaPercorrida * ESTADO.larguraImplemento) / 10000;
         poligonoCobertura.push([ESTADO.lat, ESTADO.lon]);
         ESTADO.ultimoPonto = { lat: ESTADO.lat, lon: ESTADO.lon };
         
-        // Desenha faixa de cobertura com a LARGURA DO IMPLEMENTO
+        // Largura da faixa = configurada pelo usuário
         if (!camadaCobertura) {
             camadaCobertura = L.polyline([], {
-                color: '#16a34a',
+                color: '#15803d',
                 weight: ESTADO.larguraImplemento * 8,
-                opacity: 0.45,
+                opacity: 0.5,
                 lineJoin: 'round',
                 lineCap: 'round'
             }).addTo(mapaReal);
@@ -456,19 +530,19 @@ function desenharCobertura() {
 }
 
 // ==============================================
-// 🛰️ INICIAR GPS + BÚSSOLA
+// 🛰️ GPS REAL + BÚSSOLA
 // ==============================================
 function iniciarGPS() {
     if (!navigator.geolocation) {
-        alert("⚠️ GPS não disponível. Verifique permissões.");
+        alert("⚠️ GPS não disponível.");
         return;
     }
 
-    // 🧭 BÚSSOLA / ORIENTAÇÃO DO DISPOSITIVO
+    // Bússola
     if (window.DeviceOrientationEvent) {
         window.addEventListener('deviceorientation', (event) => {
             if (event.alpha !== null) {
-                ESTADO.rumoBussola = 360 - event.alpha; // Norte = 0°
+                ESTADO.rumoBussola = 360 - event.alpha;
                 if (ESTADO.rumoBussola < 0) ESTADO.rumoBussola += 360;
             }
         });
@@ -492,7 +566,7 @@ function iniciarGPS() {
             ESTADO.satelites = posicao.coords.satellites || 8;
             ESTADO.velocidade = posicao.coords.speed ? posicao.coords.speed * 3.6 : 0;
             
-            // RUMO = DIREÇÃO DE MOVIMENTO REAL
+            // Rumo real
             if (posicao.coords.heading !== null && posicao.coords.speed > 0.3) {
                 ESTADO.rumo = posicao.coords.heading;
             } else if (ESTADO.latAnterior && ESTADO.lonAnterior) {
@@ -526,20 +600,19 @@ function iniciarGPS() {
             }
 
             calcularDesvioLinha();
-            atualizarFlecha();     // 🔄 Flecha se move e gira com bússola
-            criarLinhaGuia();      // 📍 Linha AB na direção da flecha
+            atualizarFlecha();
+            criarLinhaGuiaInfinita(); // Linha infinita + paralelas atualizadas
             atualizarTela();
-            desenharCobertura();   // 🟢 Cobertura acompanha a flecha
+            desenharCobertura(); // Cobertura segue a flecha
         },
         (erro) => {
-            console.warn("⚠️ GPS — modo simulação:", erro.message);
+            console.warn("⚠️ Modo simulação:", erro.message);
             simularMovimento();
         },
         opcoesGPS
     );
 }
 
-// Simulação quando sem sinal
 let timerSimulacao = null;
 function simularMovimento() {
     if (timerSimulacao) return;
@@ -570,7 +643,7 @@ function simularMovimento() {
 
         calcularDesvioLinha();
         atualizarFlecha();
-        criarLinhaGuia();
+        criarLinhaGuiaInfinita();
         atualizarTela();
         desenharCobertura();
     }, 300);
@@ -639,7 +712,6 @@ function atualizarBarraLuz() {
 
 function atualizarStatusGNSS() {
     const bolinha = document.getElementById('bolinhaGps');
-    const precisaoEl = document.getElementById('precisao') || {textContent: ''};
     const modoEl = document.getElementById('modoGnss');
     document.getElementById('satNum').textContent = ESTADO.satelites + '/12';
 
@@ -655,9 +727,7 @@ function atualizarStatusGNSS() {
     }
 }
 
-// ==============================================
-// 📍 CRIAR PONTO A — NA DIREÇÃO DA FLECHA
-// ==============================================
+// 📍 CRIAR PONTOS
 function criarPontoA() {
     ESTADO.pontoA = { lat: ESTADO.lat, lon: ESTADO.lon };
     ESTADO.pontoB = null;
@@ -668,7 +738,8 @@ function criarPontoA() {
     poligonoCobertura = [];
     
     if (camadaCobertura) { mapaReal.removeLayer(camadaCobertura); camadaCobertura = null; }
-    if (linhaGuiaAB) { mapaReal.removeLayer(linhaGuiaAB); linhaGuiaAB = null; }
+    if (linhaGuiaInfinita) { mapaReal.removeLayer(linhaGuiaInfinita); linhaGuiaInfinita = null; }
+    removerParalelas();
     
     pontoBEl.style.display = 'none';
     btnB.disabled = true;
@@ -679,25 +750,22 @@ function criarPontoA() {
     atualizarTela();
 }
 
-// ==============================================
-// 📍 CRIAR PONTO B — NA DIREÇÃO DA FLECHA
-// ==============================================
 function criarPontoB() {
     if (!ESTADO.pontoA) { alert('⚠️ Crie o PONTO A primeiro!'); return; }
     if (ESTADO.distanciaDesdeA < 5) { alert('⚠️ Precisa percorrer pelo menos 5 metros!'); return; }
     
-    // Ponto B gerado na DIREÇÃO EXATA da bússola/flecha
     ESTADO.pontoB = { lat: ESTADO.lat, lon: ESTADO.lon };
-    
     avisoDistancia.style.display = 'none';
-    criarLinhaGuia(); // Linha A→B na direção da flecha
-    alert('✅ Linha AB criada na direção: ' + Math.round(ESTADO.rumo) + '°');
+    
+    criarLinhaGuiaInfinita(); // Linha infinita + paralelas automáticas
+    alert('✅ Linha INFINITA criada! Largura: ' + ESTADO.larguraImplemento + 'm');
     atualizarTela();
 }
 
 function paralelas() {
     if (!ESTADO.pontoA || !ESTADO.pontoB) { alert('⚠️ Crie a Linha Guia AB primeiro!'); return; }
-    alert('〰️ Linhas paralelas — ' + ESTADO.larguraImplemento + 'm');
+    criarLinhaGuiaInfinita();
+    alert('〰️ Paralelas atualizadas — ' + ESTADO.larguraImplemento + 'm de largura');
 }
 
 function zoomIn() { mapaReal.zoomIn(); }
@@ -723,6 +791,7 @@ function salvarConfig() {
         maxDesvioBarra: ESTADO.maxDesvioBarra
     }));
     fecharConfig();
+    if (ESTADO.pontoA && ESTADO.pontoB) criarLinhaGuiaInfinita();
     atualizarTela();
 }
 
@@ -749,7 +818,7 @@ function carregarTalhao() {
         ESTADO.distanciaPercorrida = t.distancia || 0;
         ESTADO.nomeTalhao = nome;
         if (ESTADO.pontoA) mapaReal.setView([ESTADO.pontoA.lat, ESTADO.pontoA.lon], 18);
-        criarLinhaGuia();
+        criarLinhaGuiaInfinita();
         atualizarFlecha();
         atualizarTela();
         alert('✅ Talhão CARREGADO!');
@@ -765,7 +834,8 @@ function limparTudo() {
     poligonoCobertura = [];
     
     if (camadaCobertura) { mapaReal.removeLayer(camadaCobertura); camadaCobertura = null; }
-    if (linhaGuiaAB) { mapaReal.removeLayer(linhaGuiaAB); linhaGuiaAB = null; }
+    if (linhaGuiaInfinita) { mapaReal.removeLayer(linhaGuiaInfinita); linhaGuiaInfinita = null; }
+    removerParalelas();
     
     pontoAEl.style.display = 'none';
     pontoBEl.style.display = 'none';
@@ -797,11 +867,3 @@ window.onload = () => {
     const cfgSalva = localStorage.getItem('portalSatConfig');
     if (cfgSalva) {
         const cfg = JSON.parse(cfgSalva);
-        Object.assign(ESTADO, cfg);
-    }
-    atualizarTela();
-    iniciarGPS();
-};
-</script>
-</body>
-</html>
