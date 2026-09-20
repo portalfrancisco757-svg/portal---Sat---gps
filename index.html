@@ -14,7 +14,6 @@
             background: #000; color: #fff;
             user-select: none; inset: 0; margin: 0; padding: 0;
         }
-        /* ✅ TELA CHEIA — TUDO DENTRO, NADA FORA */
         .tela {
             width: 100vw; height: 100vh; height: 100dvh;
             display: grid;
@@ -34,7 +33,6 @@
         .bolinha.verde { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
         .bolinha.amarela { background: #eab308; box-shadow: 0 0 6px #eab308; }
         .bolinha.vermelha { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
-        /* ✅ BARRA DE LUZ — VISÍVEL E FUNCIONAL */
         .barra-luz {
             position: absolute; top: 55px; left: 50%; transform: translateX(-50%);
             width: 340px; height: 24px; background: #0f0f0f; border: 2px solid #333; border-radius: 12px;
@@ -49,7 +47,6 @@
         .luz-dir { transform-origin: left; }
         .centro-luz { width: 4px; height: 22px; background: #fff; border-radius: 2px; }
         .desvio-valor { position: absolute; bottom: -26px; font-size: 14px; font-weight: bold; color: #ffd700; white-space: nowrap; }
-        /* ✅ PAINEIS LATERAIS */
         .painel-esq, .painel-dir {
             background: #081018; display: flex; flex-direction: column; align-items: center;
             padding: 8px 4px; gap: 10px; border-right: 1px solid #2E7D32; height: 100%;
@@ -65,7 +62,6 @@
         .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
         .btn.pintando { background: #16a34a; animation: piscar 1s infinite; }
         @keyframes piscar { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
-        /* ✅ MAPA — TELA CHEIA */
         .mapa { 
             grid-area: mapa; position: relative; overflow: hidden; 
             width: 100%; height: 100%; background: #000;
@@ -74,7 +70,6 @@
             width: 100%; height: 100%; z-index: 1; position: absolute; inset: 0;
             background: #050a12;
         }
-        /* ✅ CONTROLES DO MAPA */
         .controle-mapa {
             position: absolute; top: 10px; right: 10px; z-index: 500;
             background: rgba(0,0,0,0.8); border-radius: 8px; padding: 4px; border: 1px solid #2E7D32;
@@ -86,7 +81,6 @@
         }
         .btn-mapa.ativo { background: #2E7D32; }
         .btn-mapa:active { transform: scale(0.9); }
-        /* ✅ PONTOS A e B */
         .ponto-a, .ponto-b {
             position: absolute; width: 36px; height: 36px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; font-weight: bold;
@@ -95,7 +89,6 @@
         }
         .ponto-a { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
         .ponto-b { background: #3b82f6; box-shadow: 0 0 12px #3b82f6; }
-        /* ✅ DADOS — SEMPRE VISÍVEIS */
         .dados {
             position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.85);
             padding: 12px; border-radius: 8px; border: 1px solid #2E7D32;
@@ -107,7 +100,36 @@
             background: rgba(234,179,8,0.95); color: #000; padding: 8px 20px;
             border-radius: 25px; font-weight: bold; font-size: 14px; z-index: 600; display: none;
         }
-        /* ✅ MODAL DE CONFIGURAÇÕES */
+
+        /* ✅ Botão de pintura movido para canto inferior direito */
+        .btn-pintar-flutuante {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 600;
+            width: 56px;
+            height: 56px;
+            font-size: 24px;
+            border-radius: 12px;
+            background: #152238;
+            color: #fff;
+            border: 2px solid #2E7D32;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-pintar-flutuante:active {
+            transform: scale(0.9);
+            background: #2E7D32;
+        }
+        .btn-pintar-flutuante.pintando {
+            background: #16a34a;
+            animation: piscar 1s infinite;
+        }
+
         .modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.95); z-index: 999; display: none;
@@ -151,10 +173,10 @@
         <div class="desvio-valor" id="desvioValor">0.00 m</div>
     </div>
 
-    <div class="aviso-distancia" id="avisoDistancia">📍 Anda 5m para ativar Ponto B</div>
+    <div class="aviso-distancia" id="avisoDistancia">📍 Anda 5m para liberar Ponto B</div>
 
     <div class="painel-esq">
-        <button class="btn" id="btnPintar" onclick="alternarPintura()" title="Cobertura">🖌️</button>
+        <!-- ✅ Botão de pintar REMOVIDO daqui -->
         <button class="btn" id="btnA" onclick="criarPontoA()" title="Ponto A">📍</button>
         <button class="btn" id="btnB" onclick="criarPontoB()" title="Ponto B" disabled>🎯</button>
         <button class="btn" onclick="centralizarMapa()" title="Centralizar">🎯</button>
@@ -169,6 +191,10 @@
             <button class="btn-mapa" onclick="trocarCamada('terreno')">⛰️</button>
             <button class="btn-mapa" id="btn3d" onclick="alternar3D()">2D</button>
         </div>
+
+        <!-- ✅ Botão de pintura movido para dentro do mapa, canto inferior direito -->
+        <button class="btn-pintar-flutuante" id="btnPintar" onclick="alternarPintura()" title="Cobertura">🖌️</button>
+
         <div id="mapaReal"></div>
         <div class="ponto-a" id="pontoA">A</div>
         <div class="ponto-b" id="pontoB">B</div>
@@ -258,7 +284,6 @@ function iniciarMapa() {
     });
     camadaPadrao.addTo(mapaReal);
 
-    // ✅ FLECHA AZUL DO GPS — NÃO MAIS AMARELA
     const icone = L.divIcon({
         html: `<div style="position:relative; width:28px; height:32px;">
             <div style="width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; border-bottom:32px solid #0066ff; filter:drop-shadow(0 0 12px #0088ff); position:absolute; top:0; left:0;"></div>
@@ -278,7 +303,6 @@ function trocarCamada(tipo) {
     if (tipo === 'padrao') camadaPadrao.addTo(mapaReal);
     else if (tipo === 'satelite') camadaSatelite.addTo(mapaReal);
     else camadaTerreno.addTo(mapaReal);
-    if (ESTADO.pontoA && ESTADO.pontoB) criarLinhaGuia();
     if (cobertura) cobertura.addTo(mapaReal);
     marcadorTrator.addTo(mapaReal);
 }
@@ -320,21 +344,12 @@ function atualizarFlecha() {
     }
 }
 
+// ✅ Linha verde removida: função criarLinhaGuia não cria mais nada
 function criarLinhaGuia() {
     if (linhaGuia) { mapaReal.removeLayer(linhaGuia); linhaGuia = null; }
-    if (!ESTADO.pontoA || !ESTADO.pontoB) return;
-
-    const rumoFinal = ESTADO.velocidade > 0.5 ? ESTADO.rumo : ESTADO.rumoBussola;
-    const anguloRad = rumoFinal * Math.PI / 180;
-    const comprimento = 0.015;
-    
-    const p1 = [ESTADO.pontoA.lat - Math.cos(anguloRad) * comprimento, ESTADO.pontoA.lon - Math.sin(anguloRad) * comprimento];
-    const p2 = [ESTADO.pontoB.lat + Math.cos(anguloRad) * comprimento, ESTADO.pontoB.lon + Math.sin(anguloRad) * comprimento];
-    
-    linhaGuia = L.polyline([p1, p2], {color: '#00ff44', weight: 3, opacity: 0.9}).addTo(mapaReal);
+    // Não cria mais linha verde
 }
 
-// ✅ PINTURA DE COBERTURA REAL — LARGURA EM METROS CONFIGURADA
 function desenharCobertura() {
     if (!ESTADO.pintando) return;
     
@@ -352,7 +367,6 @@ function desenharCobertura() {
         ESTADO.caminho.push([ESTADO.lat, ESTADO.lon]);
         ESTADO.ultimoPonto = {lat: ESTADO.lat, lon: ESTADO.lon};
         
-        // ✅ LARGURA EXATA EM METROS — visível conforme zoom
         const zoom = mapaReal.getZoom();
         const fatorZoom = Math.pow(0.92, 19 - zoom);
         const pesoLinha = Math.max(10, ESTADO.larguraLinha * 2.5 * fatorZoom);
@@ -398,7 +412,7 @@ function criarPontoB() {
     ESTADO.pontoB = {lat: ESTADO.lat, lon: ESTADO.lon};
     aviso.style.display = 'none';
     criarLinhaGuia();
-    alert('✅ Linha guia criada!');
+    alert('✅ Ponto B definido!');
 }
 
 function alternarPintura() {
@@ -466,7 +480,6 @@ function carregarTalhao() {
         document.getElementById('dLargura').textContent = ESTADO.larguraLinha.toFixed(1) + 'm';
         document.getElementById('dArea').textContent = ESTADO.area.toFixed(2) + ' ha';
         if (ESTADO.pontoA) mapaReal.setView([ESTADO.pontoA.lat, ESTADO.pontoA.lon], 19);
-        if (ESTADO.pontoA && ESTADO.pontoB) criarLinhaGuia();
         atualizarFlecha();
         alert('✅ Talhão CARREGADO!');
     } else { alert('❌ Não encontrado!'); }
