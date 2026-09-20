@@ -35,7 +35,7 @@
             padding: 0 10px; border-bottom: 2px solid #2E7D32;
         }
         .logo { font-size: 16px; font-weight: bold; color: #4ade80; display: flex; align-items: center; gap: 6px; }
-        .status-gps { display: flex; gap: 10px; font-size: 10.5px; align-items: center; }
+        .status-gps { display: flex; gap: 8px; font-size: 10px; align-items: center; flex-wrap: wrap; }
         .status-item { display: flex; align-items: center; gap: 3px; }
         .bolinha { width: 10px; height: 10px; border-radius: 50%; background: #333; transition: all 0.3s; }
         .bolinha.verde { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
@@ -87,7 +87,6 @@
         .btn.pintando { background: #16a34a; animation: piscar 1s infinite; }
         @keyframes piscar { 0% {opacity:1;} 50% {opacity:0.5;} 100% {opacity:1;} }
 
-        /* MAPA REAL — OCUPA TELA INTEIRA */
         .mapa {
             grid-area: mapa;
             position: relative; overflow: hidden;
@@ -95,7 +94,6 @@
         }
         #mapaReal { width: 100%; height: 100%; z-index: 1; }
         
-        /* CONTROLE DE CAMADAS DO MAPA */
         .controle-mapa {
             position: absolute; top: 10px; right: 10px; z-index: 100;
             background: rgba(0,0,0,0.7); border-radius: 8px; padding: 5px;
@@ -107,11 +105,6 @@
             cursor: pointer; font-size: 16px;
         }
         .btn-mapa.ativo { background: #2E7D32; }
-
-        #canvasCobertura {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10;
-        }
 
         .linha-guia-principal {
             position: absolute; top: 0; bottom: 0; width: 3px;
@@ -126,36 +119,22 @@
             z-index: 4; display: none;
         }
         .ponto-a, .ponto-b {
-            position: absolute; left: 50%; transform: translateX(-50%);
-            width: 30px; height: 30px; border-radius: 50%;
+            position: absolute;
+            width: 32px; height: 32px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; font-size: 14px; color: #fff;
             z-index: 6; display: none;
             border: 2px solid #fff;
+            transform: translate(-50%, -50%);
         }
-        .ponto-a { background: #22c55e; box-shadow: 0 0 12px #22c55e; bottom: 20px; }
-        .ponto-b { background: #3b82f6; box-shadow: 0 0 12px #3b82f6; top: 20px; }
-
-        /* FLECHA AMARELA — SE MOVE COM GPS */
-        .trator {
-            position: absolute;
-            width: 0; height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 30px solid #ffd700;
-            filter: drop-shadow(0 0 10px #ffd700);
-            z-index: 20;
-            transition: transform 0.15s linear;
-            transform-origin: center bottom;
-            /* O Leaflet cuida da posição via marker */
-            display: none; /* Usamos marker do Leaflet */
-        }
+        .ponto-a { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
+        .ponto-b { background: #3b82f6; box-shadow: 0 0 12px #3b82f6; }
 
         .dados {
             position: absolute; bottom: 8px; left: 8px;
             background: rgba(0,0,0,0.8); padding: 8px 10px;
             border-radius: 6px; border: 1px solid #2E7D32;
-            font-size: 11px; line-height: 1.7; z-index: 30;
+            font-size: 10.5px; line-height: 1.7; z-index: 30;
             min-width: 160px;
         }
         .dados span { color: #4ade80; font-weight: bold; }
@@ -198,7 +177,7 @@
         <div class="status-gps">
             <div class="status-item"><span id="bolinhaGps" class="bolinha"></span> GNSS</div>
             <div class="status-item">📡 <span id="satNum">--/--</span></div>
-            <div class="status-item">🎯 <span id="precisao">---</span></div>
+            <div class="status-item">🧭 <span id="dRumo">---°</span></div>
             <div class="status-item status-div" id="modoGnss">GNSS</div>
             <div class="status-item">⏱️ <span id="hora">00:00:00</span></div>
         </div>
@@ -222,7 +201,6 @@
     </div>
 
     <div class="mapa" id="mapa">
-        <!-- CONTROLES DE CAMADA DO MAPA -->
         <div class="controle-mapa">
             <button class="btn-mapa ativo" onclick="trocarCamada('padrao')" title="Mapa Padrão">🗺️</button>
             <button class="btn-mapa" onclick="trocarCamada('satelite')" title="Satélite">🛰️</button>
@@ -230,8 +208,6 @@
         </div>
         
         <div id="mapaReal"></div>
-        <canvas id="canvasCobertura"></canvas>
-        <div class="linha-guia-principal" id="linhaGuia"></div>
         <div class="ponto-a" id="pontoA">A</div>
         <div class="ponto-b" id="pontoB">B</div>
 
@@ -240,7 +216,7 @@
             <div>Latitude: <span id="dLat">--.------°</span></div>
             <div>Longitude: <span id="dLon">--.------°</span></div>
             <div>Velocidade: <span id="dVel">0.0</span> km/h</div>
-            <div>Rumo: <span id="dRumo">---°</span></div>
+            <div>Rumo/Bússola: <span id="dRumo">---°</span></div>
             <div>Faixa: <span id="dLargura">24.0m</span></div>
             <div>Área: <span id="dArea">0.00 ha</span></div>
             <div>Distância: <span id="dDistancia">0.00 m</span></div>
@@ -262,7 +238,7 @@
         <h3>⚙️ CONFIGURAÇÕES — PORTAL SAT GPS</h3>
         <div class="campo">
             <label>Largura do Implemento (metros)</label>
-            <input type="number" id="inpLargura" value="24.0" step="0.1" min="0.1" onchange="atualizarEspacamentoParalelas()">
+            <input type="number" id="inpLargura" value="24.0" step="0.1" min="0.1">
         </div>
         <div class="campo">
             <label>Nome do Talhão / Área</label>
@@ -289,14 +265,15 @@
 
 <script>
 // ==============================================
-// INICIALIZAÇÃO DO MAPA REAL — LEAFLET
+// MAPA E CAMADAS
 // ==============================================
 let mapaReal;
 let camadaPadrao, camadaSatelite, camadaTerreno;
 let marcadorTrator = null;
+let linhaGuiaAB = null;
+let camadaCobertura = null;
 let poligonoCobertura = [];
 
-// Camadas de mapa
 camadaPadrao = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap', maxZoom: 20
 });
@@ -307,7 +284,6 @@ camadaTerreno = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 
     attribution: '© OpenTopoMap', maxZoom: 17
 });
 
-// Inicializa mapa
 mapaReal = L.map('mapaReal', {
     center: [-26.341234, -54.687901],
     zoom: 18,
@@ -316,7 +292,7 @@ mapaReal = L.map('mapaReal', {
 });
 camadaPadrao.addTo(mapaReal);
 
-// Ícone personalizado — FLECHA AMARELA
+// 🧭 FLECHA AMARELA — APONTA PELA BÚSSOLA/RUMO
 const iconeTrator = L.divIcon({
     html: `<div style="width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; border-bottom:28px solid #ffd700; filter:drop-shadow(0 0 8px #ffd700); transform-origin:center bottom;"></div>`,
     className: '',
@@ -324,21 +300,17 @@ const iconeTrator = L.divIcon({
     iconAnchor: [14, 14]
 });
 
-// Cria marcador inicial
 marcadorTrator = L.marker([-26.341234, -54.687901], {
     icon: iconeTrator,
     rotationAngle: 0
 }).addTo(mapaReal);
 
-// Troca camada do mapa
 function trocarCamada(tipo) {
     document.querySelectorAll('.btn-mapa').forEach(b => b.classList.remove('ativo'));
     event.target.classList.add('ativo');
-    
     mapaReal.removeLayer(camadaPadrao);
     mapaReal.removeLayer(camadaSatelite);
     mapaReal.removeLayer(camadaTerreno);
-    
     if (tipo === 'padrao') camadaPadrao.addTo(mapaReal);
     else if (tipo === 'satelite') camadaSatelite.addTo(mapaReal);
     else if (tipo === 'terreno') camadaTerreno.addTo(mapaReal);
@@ -354,7 +326,7 @@ function centralizarMapa() {
 const ESTADO = {
     lat: -26.341234, lon: -54.687901,
     latAnterior: null, lonAnterior: null,
-    velocidade: 0, rumo: 0,
+    velocidade: 0, rumo: 0, rumoBussola: 0,
     precisao: 0, satelites: 0,
     
     pontoA: null, pontoB: null,
@@ -369,24 +341,13 @@ const ESTADO = {
     maxDesvioBarra: 0.5,
     
     pintando: false,
-    ultimoPonto: null,
-    
-    linhasParalelas: []
+    ultimoPonto: null
 };
 
-const canvas = document.getElementById('canvasCobertura');
-const ctx = canvas.getContext('2d');
 const btnB = document.getElementById('btnB');
 const avisoDistancia = document.getElementById('avisoDistancia');
-const linhaGuia = document.getElementById('linhaGuia');
-
-function ajustarCanvas() {
-    const rect = mapa.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-}
-ajustarCanvas();
-window.addEventListener('resize', ajustarCanvas);
+const pontoAEl = document.getElementById('pontoA');
+const pontoBEl = document.getElementById('pontoB');
 
 setInterval(() => {
     const h = new Date();
@@ -405,26 +366,112 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
 }
 
 // ==============================================
-// ATUALIZA FLECHA COM POSIÇÃO GPS REAL
+// 🧭 ATUALIZA FLECHA — BÚSSOLA + RUMO GPS
 // ==============================================
-function atualizarFlechaGPS() {
-    // Atualiza posição do marcador no mapa
+function atualizarFlecha() {
+    // Posição da flecha = localização GPS
     marcadorTrator.setLatLng([ESTADO.lat, ESTADO.lon]);
     
-    // Atualiza rotação da flecha (direção de movimento)
-    marcadorTrator.setRotationAngle(ESTADO.rumo);
+    // Rotação da flecha = BÚSSOLA + RUMO (prioridade para bússola quando parado)
+    const rumoFinal = ESTADO.velocidade > 0.5 ? ESTADO.rumo : ESTADO.rumoBussola;
+    marcadorTrator.setRotationAngle(rumoFinal);
     
-    // Centraliza mapa na posição atual
+    // Centraliza mapa
     mapaReal.panTo([ESTADO.lat, ESTADO.lon]);
+    
+    // Atualiza posição visual dos pontos A e B no mapa
+    if (ESTADO.pontoA) {
+        const pontoAPos = mapaReal.latLngToContainerPoint([ESTADO.pontoA.lat, ESTADO.pontoA.lon]);
+        pontoAEl.style.left = pontoAPos.x + 'px';
+        pontoAEl.style.top = pontoAPos.y + 'px';
+        pontoAEl.style.display = 'flex';
+    }
+    if (ESTADO.pontoB) {
+        const pontoBPos = mapaReal.latLngToContainerPoint([ESTADO.pontoB.lat, ESTADO.pontoB.lon]);
+        pontoBEl.style.left = pontoBPos.x + 'px';
+        pontoBEl.style.top = pontoBPos.y + 'px';
+        pontoBEl.style.display = 'flex';
+    }
 }
 
 // ==============================================
-// INICIAR GPS REAL
+// 📍 CRIA LINHA AB NA DIREÇÃO DA FLECHA
+// ==============================================
+function criarLinhaGuia() {
+    if (!ESTADO.pontoA || !ESTADO.pontoB) {
+        if (linhaGuiaAB) { mapaReal.removeLayer(linhaGuiaAB); linhaGuiaAB = null; }
+        return;
+    }
+    
+    // Remove linha anterior
+    if (linhaGuiaAB) mapaReal.removeLayer(linhaGuiaAB);
+    
+    // Cria linha AB na direção da bússola/flecha
+    linhaGuiaAB = L.polyline([
+        [ESTADO.pontoA.lat, ESTADO.pontoA.lon],
+        [ESTADO.pontoB.lat, ESTADO.pontoB.lon]
+    ], {
+        color: '#22c55e',
+        weight: 4,
+        opacity: 0.8,
+        lineJoin: 'round'
+    }).addTo(mapaReal).bindPopup('Linha Guia A→B');
+}
+
+// ==============================================
+// 🟢 COBERTURA — ACOMPANHA A FLECHA
+// ==============================================
+function desenharCobertura() {
+    if (!ESTADO.pintando) return;
+    
+    if (!ESTADO.ultimoPonto) {
+        ESTADO.ultimoPonto = { lat: ESTADO.lat, lon: ESTADO.lon };
+        poligonoCobertura.push([ESTADO.lat, ESTADO.lon]);
+        return;
+    }
+
+    const dist = calcularDistancia(
+        ESTADO.ultimoPonto.lat, ESTADO.ultimoPonto.lon,
+        ESTADO.lat, ESTADO.lon
+    );
+    
+    if (dist > 0.5) { // Registra a cada 50cm
+        ESTADO.distanciaPercorrida += dist;
+        ESTADO.areaTotal = (ESTADO.distanciaPercorrida * ESTADO.larguraImplemento) / 10000;
+        poligonoCobertura.push([ESTADO.lat, ESTADO.lon]);
+        ESTADO.ultimoPonto = { lat: ESTADO.lat, lon: ESTADO.lon };
+        
+        // Desenha faixa de cobertura com a LARGURA DO IMPLEMENTO
+        if (!camadaCobertura) {
+            camadaCobertura = L.polyline([], {
+                color: '#16a34a',
+                weight: ESTADO.larguraImplemento * 8,
+                opacity: 0.45,
+                lineJoin: 'round',
+                lineCap: 'round'
+            }).addTo(mapaReal);
+        }
+        camadaCobertura.setLatLngs(poligonoCobertura);
+    }
+}
+
+// ==============================================
+// 🛰️ INICIAR GPS + BÚSSOLA
 // ==============================================
 function iniciarGPS() {
     if (!navigator.geolocation) {
-        alert("⚠️ GPS não disponível. Verifique permissões de localização.");
+        alert("⚠️ GPS não disponível. Verifique permissões.");
         return;
+    }
+
+    // 🧭 BÚSSOLA / ORIENTAÇÃO DO DISPOSITIVO
+    if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', (event) => {
+            if (event.alpha !== null) {
+                ESTADO.rumoBussola = 360 - event.alpha; // Norte = 0°
+                if (ESTADO.rumoBussola < 0) ESTADO.rumoBussola += 360;
+            }
+        });
     }
 
     const opcoesGPS = {
@@ -435,7 +482,6 @@ function iniciarGPS() {
 
     navigator.geolocation.watchPosition(
         (posicao) => {
-            // Salva posição anterior
             ESTADO.latAnterior = ESTADO.lat;
             ESTADO.lonAnterior = ESTADO.lon;
 
@@ -446,7 +492,7 @@ function iniciarGPS() {
             ESTADO.satelites = posicao.coords.satellites || 8;
             ESTADO.velocidade = posicao.coords.speed ? posicao.coords.speed * 3.6 : 0;
             
-            // Rumo/direção REAL do GPS
+            // RUMO = DIREÇÃO DE MOVIMENTO REAL
             if (posicao.coords.heading !== null && posicao.coords.speed > 0.3) {
                 ESTADO.rumo = posicao.coords.heading;
             } else if (ESTADO.latAnterior && ESTADO.lonAnterior) {
@@ -459,7 +505,7 @@ function iniciarGPS() {
                 }
             }
 
-            // Verifica distância desde Ponto A
+            // Verifica distância desde A
             if (ESTADO.pontoA && !ESTADO.pontoB) {
                 const dist = calcularDistancia(
                     ESTADO.pontoA.lat, ESTADO.pontoA.lon,
@@ -480,9 +526,10 @@ function iniciarGPS() {
             }
 
             calcularDesvioLinha();
-            atualizarFlechaGPS(); // 🔑 FLECHA SE MOVE COM GPS
+            atualizarFlecha();     // 🔄 Flecha se move e gira com bússola
+            criarLinhaGuia();      // 📍 Linha AB na direção da flecha
             atualizarTela();
-            if (ESTADO.pintando) desenharCobertura();
+            desenharCobertura();   // 🟢 Cobertura acompanha a flecha
         },
         (erro) => {
             console.warn("⚠️ GPS — modo simulação:", erro.message);
@@ -492,7 +539,7 @@ function iniciarGPS() {
     );
 }
 
-// Simulação quando sem sinal GPS
+// Simulação quando sem sinal
 let timerSimulacao = null;
 function simularMovimento() {
     if (timerSimulacao) return;
@@ -506,34 +553,26 @@ function simularMovimento() {
         ESTADO.lat += Math.cos(rad) * passo;
         ESTADO.lon += Math.sin(rad) * passo;
         ESTADO.rumo += Math.sin(Date.now() / 8000) * 0.2;
+        ESTADO.rumoBussola = ESTADO.rumo;
         if (ESTADO.rumo < 0) ESTADO.rumo += 360;
         if (ESTADO.rumo >= 360) ESTADO.rumo -= 360;
         ESTADO.velocidade = 8 + Math.sin(Date.now() / 5000) * 3;
         ESTADO.precisao = 3.5;
 
         if (ESTADO.pontoA && !ESTADO.pontoB) {
-            const dist = calcularDistancia(
-                ESTADO.pontoA.lat, ESTADO.pontoA.lon,
-                ESTADO.lat, ESTADO.lon
-            );
+            const dist = calcularDistancia(ESTADO.pontoA.lat, ESTADO.pontoA.lon, ESTADO.lat, ESTADO.lon);
             ESTADO.distanciaDesdeA = dist;
             document.getElementById('dDistancia').textContent = dist.toFixed(1) + ' m';
-            
-            if (dist >= 5) {
-                btnB.disabled = false;
-                avisoDistancia.style.display = 'block';
-                avisoDistancia.textContent = '✅ Ponto B liberado! Toque para confirmar';
-            } else {
-                btnB.disabled = true;
-                avisoDistancia.style.display = 'block';
-                avisoDistancia.textContent = `📍 Anda mais ${(5 - dist).toFixed(1)}m para liberar B`;
-            }
+            btnB.disabled = dist < 5;
+            avisoDistancia.style.display = 'block';
+            avisoDistancia.textContent = dist >= 5 ? '✅ Ponto B liberado!' : `📍 Anda mais ${(5 - dist).toFixed(1)}m`;
         }
 
         calcularDesvioLinha();
-        atualizarFlechaGPS();
+        atualizarFlecha();
+        criarLinhaGuia();
         atualizarTela();
-        if (ESTADO.pintando) desenharCobertura();
+        desenharCobertura();
     }, 300);
 }
 
@@ -542,33 +581,23 @@ function calcularDesvioLinha() {
         ESTADO.desvioLinha = 0;
         return;
     }
-
     const dLonAB = ESTADO.pontoB.lon - ESTADO.pontoA.lon;
     const dLatAB = ESTADO.pontoB.lat - ESTADO.pontoA.lat;
     const comprimentoAB = Math.sqrt(dLonAB * dLonAB + dLatAB * dLatAB);
+    if (comprimentoAB < 0.000001) { ESTADO.desvioLinha = 0; return; }
     
-    if (comprimentoAB < 0.000001) {
-        ESTADO.desvioLinha = 0;
-        return;
-    }
-
     const t = Math.max(0, Math.min(1,
         ((ESTADO.lon - ESTADO.pontoA.lon) * dLonAB + 
          (ESTADO.lat - ESTADO.pontoA.lat) * dLatAB) / 
         (comprimentoAB * comprimentoAB)
     ));
-
     const projLon = ESTADO.pontoA.lon + t * dLonAB;
     const projLat = ESTADO.pontoA.lat + t * dLatAB;
-
-    const metrosPorGrauLat = 111320;
     const metrosPorGrauLon = 111320 * Math.cos(ESTADO.lat * Math.PI / 180);
-    
     const desvioMeters = Math.sqrt(
         Math.pow((ESTADO.lon - projLon) * metrosPorGrauLon, 2) +
-        Math.pow((ESTADO.lat - projLat) * metrosPorGrauLat, 2)
+        Math.pow((ESTADO.lat - projLat) * 111320, 2)
     );
-
     const produtoVetorial = (ESTADO.lon - ESTADO.pontoA.lon) * dLatAB - 
                             (ESTADO.lat - ESTADO.pontoA.lat) * dLonAB;
     ESTADO.desvioLinha = desvioMeters * (produtoVetorial >= 0 ? 1 : -1);
@@ -578,24 +607,12 @@ function atualizarTela() {
     document.getElementById('dLat').textContent = ESTADO.lat.toFixed(6) + '°';
     document.getElementById('dLon').textContent = ESTADO.lon.toFixed(6) + '°';
     document.getElementById('dVel').textContent = ESTADO.velocidade.toFixed(1);
-    document.getElementById('dRumo').textContent = Math.round(ESTADO.rumo) + '°';
+    document.getElementById('dRumo').textContent = Math.round(ESTADO.velocidade > 0.5 ? ESTADO.rumo : ESTADO.rumoBussola) + '°';
     document.getElementById('dLargura').textContent = ESTADO.larguraImplemento.toFixed(1) + ' m';
     document.getElementById('dArea').textContent = ESTADO.areaTotal.toFixed(2) + ' ha';
     
     atualizarBarraLuz();
     atualizarStatusGNSS();
-    
-    document.getElementById('pontoA').style.display = ESTADO.pontoA ? 'flex' : 'none';
-    document.getElementById('pontoB').style.display = ESTADO.pontoB ? 'flex' : 'none';
-    
-    if (ESTADO.pontoA && ESTADO.pontoB) {
-        linhaGuia.style.display = 'block';
-        avisoDistancia.style.display = 'none';
-        desenharLinhasParalelas();
-    } else {
-        linhaGuia.style.display = 'none';
-        removerTodasLinhasParalelas();
-    }
 }
 
 function atualizarBarraLuz() {
@@ -605,11 +622,8 @@ function atualizarBarraLuz() {
         document.getElementById('desvioValor').textContent = '--- m';
         return;
     }
-
     const desvio = ESTADO.desvioLinha;
-    const maxDesvio = ESTADO.maxDesvioBarra;
-    const escala = Math.min(Math.abs(desvio) / maxDesvio, 1);
-
+    const escala = Math.min(Math.abs(desvio) / ESTADO.maxDesvioBarra, 1);
     if (desvio < -0.02) {
         document.getElementById('luzEsq').style.transform = `scaleX(${escala})`;
         document.getElementById('luzDir').style.transform = 'scaleX(0)';
@@ -625,119 +639,25 @@ function atualizarBarraLuz() {
 
 function atualizarStatusGNSS() {
     const bolinha = document.getElementById('bolinhaGps');
-    const precisaoEl = document.getElementById('precisao');
+    const precisaoEl = document.getElementById('precisao') || {textContent: ''};
     const modoEl = document.getElementById('modoGnss');
-    const satEl = document.getElementById('satNum');
-
-    satEl.textContent = ESTADO.satelites + '/12';
+    document.getElementById('satNum').textContent = ESTADO.satelites + '/12';
 
     if (ESTADO.modoCorrecao === 'rtk' || ESTADO.precisao < 0.05) {
         bolinha.className = 'bolinha verde';
-        precisaoEl.textContent = '~2 cm';
         modoEl.textContent = 'RTK';
     } else if (ESTADO.modoCorrecao === 'sbas' || ESTADO.precisao < 1.0) {
         bolinha.className = 'bolinha amarela';
-        precisaoEl.textContent = '~50 cm';
         modoEl.textContent = 'SBAS';
-    } else if (ESTADO.precisao < 5.0) {
-        bolinha.className = 'bolinha amarela';
-        precisaoEl.textContent = ESTADO.precisao.toFixed(0) + ' m';
+    } else {
+        bolinha.className = ESTADO.precisao < 5.0 ? 'bolinha amarela' : 'bolinha vermelha';
         modoEl.textContent = 'GNSS';
-    } else {
-        bolinha.className = 'bolinha vermelha';
-        precisaoEl.textContent = '>5 m';
-        modoEl.textContent = 'BUSCANDO';
     }
 }
 
-function desenharLinhasParalelas() {
-    removerTodasLinhasParalelas();
-    const larguraTela = mapa.clientWidth;
-    const espacamentoPx = ESTADO.larguraImplemento * 4;
-    const linhasCadaLado = Math.ceil((larguraTela / 2) / espacamentoPx);
-    
-    for (let i = 1; i <= linhasCadaLado; i++) {
-        const linha = document.createElement('div');
-        linha.className = 'linha-paralela';
-        linha.style.left = `calc(50% - ${espacamentoPx * i}px)`;
-        linha.style.display = 'block';
-        mapa.appendChild(linha);
-        ESTADO.linhasParalelas.push(linha);
-    }
-    for (let i = 1; i <= linhasCadaLado; i++) {
-        const linha = document.createElement('div');
-        linha.className = 'linha-paralela';
-        linha.style.left = `calc(50% + ${espacamentoPx * i}px)`;
-        linha.style.display = 'block';
-        mapa.appendChild(linha);
-        ESTADO.linhasParalelas.push(linha);
-    }
-}
-
-function removerTodasLinhasParalelas() {
-    ESTADO.linhasParalelas.forEach(linha => linha.remove());
-    ESTADO.linhasParalelas = [];
-}
-
-function atualizarEspacamentoParalelas() {
-    ESTADO.larguraImplemento = parseFloat(document.getElementById('inpLargura').value);
-    document.getElementById('dLargura').textContent = ESTADO.larguraImplemento.toFixed(1) + ' m';
-    if (ESTADO.pontoA && ESTADO.pontoB) desenharLinhasParalelas();
-}
-
-function desenharCobertura() {
-    if (!ESTADO.ultimoPonto) {
-        ESTADO.ultimoPonto = { lat: ESTADO.lat, lon: ESTADO.lon };
-        poligonoCobertura.push([ESTADO.lat, ESTADO.lon]);
-        return;
-    }
-
-    const dist = calcularDistancia(
-        ESTADO.ultimoPonto.lat, ESTADO.ultimoPonto.lon,
-        ESTADO.lat, ESTADO.lon
-    );
-    
-    if (dist > 0.5) { // Só registra pontos a cada 50cm
-        ESTADO.distanciaPercorrida += dist;
-        ESTADO.areaTotal = (ESTADO.distanciaPercorrida * ESTADO.larguraImplemento) / 10000;
-        poligonoCobertura.push([ESTADO.lat, ESTADO.lon]);
-        ESTADO.ultimoPonto = { lat: ESTADO.lat, lon: ESTADO.lon };
-        
-        // Desenha faixa de cobertura no mapa
-        if (poligonoCobertura.length >= 2) {
-            const ultima = poligonoCobertura[poligonoCobertura.length - 2];
-            const atual = poligonoCobertura[poligonoCobertura.length - 1];
-            
-            // Cria linha com largura do implemento
-            if (!window.camadaCobertura) {
-                window.camadaCobertura = L.polyline([], {
-                    color: '#22c55e',
-                    weight: ESTADO.larguraImplemento * 10,
-                    opacity: 0.4,
-                    lineJoin: 'round'
-                }).addTo(mapaReal);
-            }
-            window.camadaCobertura.setLatLngs(poligonoCobertura);
-        }
-    }
-}
-
-function alternarPintura() {
-    ESTADO.pintando = !ESTADO.pintando;
-    const btn = document.getElementById('btnPintar');
-    
-    if (ESTADO.pintando) {
-        btn.classList.add('pintando');
-        btn.innerHTML = '⏹';
-        ESTADO.ultimoPonto = { lat: ESTADO.lat, lon: ESTADO.lon };
-        poligonoCobertura = [[ESTADO.lat, ESTADO.lon]];
-    } else {
-        btn.classList.remove('pintando');
-        btn.innerHTML = '🖌️';
-        ESTADO.ultimoPonto = null;
-    }
-}
-
+// ==============================================
+// 📍 CRIAR PONTO A — NA DIREÇÃO DA FLECHA
+// ==============================================
 function criarPontoA() {
     ESTADO.pontoA = { lat: ESTADO.lat, lon: ESTADO.lon };
     ESTADO.pontoB = null;
@@ -747,33 +667,36 @@ function criarPontoA() {
     ESTADO.ultimoPonto = null;
     poligonoCobertura = [];
     
-    if (window.camadaCobertura) {
-        mapaReal.removeLayer(window.camadaCobertura);
-        window.camadaCobertura = null;
-    }
+    if (camadaCobertura) { mapaReal.removeLayer(camadaCobertura); camadaCobertura = null; }
+    if (linhaGuiaAB) { mapaReal.removeLayer(linhaGuiaAB); linhaGuiaAB = null; }
     
+    pontoBEl.style.display = 'none';
     btnB.disabled = true;
     avisoDistancia.style.display = 'block';
     avisoDistancia.textContent = '📍 Anda 5 metros para liberar o Ponto B';
     
-    removerTodasLinhasParalelas();
+    atualizarFlecha();
     atualizarTela();
 }
 
+// ==============================================
+// 📍 CRIAR PONTO B — NA DIREÇÃO DA FLECHA
+// ==============================================
 function criarPontoB() {
     if (!ESTADO.pontoA) { alert('⚠️ Crie o PONTO A primeiro!'); return; }
-    if (ESTADO.distanciaDesdeA < 5) { alert('⚠️ Precisa percorrer pelo menos 5 metros desde o Ponto A!'); return; }
+    if (ESTADO.distanciaDesdeA < 5) { alert('⚠️ Precisa percorrer pelo menos 5 metros!'); return; }
     
+    // Ponto B gerado na DIREÇÃO EXATA da bússola/flecha
     ESTADO.pontoB = { lat: ESTADO.lat, lon: ESTADO.lon };
+    
     avisoDistancia.style.display = 'none';
-    desenharLinhasParalelas();
-    alert('✅ Linha AB criada! Largura: ' + ESTADO.larguraImplemento + 'm');
+    criarLinhaGuia(); // Linha A→B na direção da flecha
+    alert('✅ Linha AB criada na direção: ' + Math.round(ESTADO.rumo) + '°');
     atualizarTela();
 }
 
 function paralelas() {
     if (!ESTADO.pontoA || !ESTADO.pontoB) { alert('⚠️ Crie a Linha Guia AB primeiro!'); return; }
-    desenharLinhasParalelas();
     alert('〰️ Linhas paralelas — ' + ESTADO.larguraImplemento + 'm');
 }
 
@@ -793,30 +716,28 @@ function salvarConfig() {
     ESTADO.nomeTalhao = document.getElementById('inpTalhao').value;
     ESTADO.modoCorrecao = document.getElementById('inpCorrecao').value;
     ESTADO.maxDesvioBarra = parseFloat(document.getElementById('inpMaxDesvio').value);
-    
     localStorage.setItem('portalSatConfig', JSON.stringify({
         larguraImplemento: ESTADO.larguraImplemento,
         nomeTalhao: ESTADO.nomeTalhao,
         modoCorrecao: ESTADO.modoCorrecao,
         maxDesvioBarra: ESTADO.maxDesvioBarra
     }));
-    
     fecharConfig();
     atualizarTela();
 }
 
 function salvarTalhao() {
-    if (!ESTADO.pontoA) { alert('⚠️ Crie pelo menos o Ponto A primeiro!'); return; }
+    if (!ESTADO.pontoA) { alert('⚠️ Crie pelo menos o Ponto A!'); return; }
     localStorage.setItem('talhao_' + ESTADO.nomeTalhao, JSON.stringify({
         pontoA: ESTADO.pontoA, pontoB: ESTADO.pontoB,
         largura: ESTADO.larguraImplemento, area: ESTADO.areaTotal,
         distancia: ESTADO.distanciaPercorrida
     }));
-    alert('✅ Talhão "' + ESTADO.nomeTalhao + '" SALVO!');
+    alert('✅ Talhão SALVO!');
 }
 
 function carregarTalhao() {
-    const nome = prompt('Digite o nome do talhão:');
+    const nome = prompt('Nome do talhão:');
     if (!nome) return;
     const dados = localStorage.getItem('talhao_' + nome);
     if (dados) {
@@ -827,37 +748,49 @@ function carregarTalhao() {
         ESTADO.areaTotal = t.area || 0;
         ESTADO.distanciaPercorrida = t.distancia || 0;
         ESTADO.nomeTalhao = nome;
-        
-        if (ESTADO.pontoA) {
-            mapaReal.setView([ESTADO.pontoA.lat, ESTADO.pontoA.lon], mapaReal.getZoom());
-        }
-        if (ESTADO.pontoA && ESTADO.pontoB) desenharLinhasParalelas();
+        if (ESTADO.pontoA) mapaReal.setView([ESTADO.pontoA.lat, ESTADO.pontoA.lon], 18);
+        criarLinhaGuia();
+        atualizarFlecha();
         atualizarTela();
-        alert('✅ Talhão "' + nome + '" CARREGADO!');
-    } else { alert('❌ Talhão não encontrado!'); }
+        alert('✅ Talhão CARREGADO!');
+    } else { alert('❌ Não encontrado!'); }
 }
 
 function limparTudo() {
-    if (!confirm('🗑️ Limpar tudo? Pontos, cobertura e linhas serão apagados!')) return;
+    if (!confirm('🗑️ Limpar tudo?')) return;
     ESTADO.pontoA = null; ESTADO.pontoB = null;
     ESTADO.areaTotal = 0; ESTADO.distanciaPercorrida = 0;
     ESTADO.distanciaDesdeA = 0; ESTADO.ultimoPonto = null;
     ESTADO.pintando = false;
     poligonoCobertura = [];
     
-    if (window.camadaCobertura) {
-        mapaReal.removeLayer(window.camadaCobertura);
-        window.camadaCobertura = null;
-    }
+    if (camadaCobertura) { mapaReal.removeLayer(camadaCobertura); camadaCobertura = null; }
+    if (linhaGuiaAB) { mapaReal.removeLayer(linhaGuiaAB); linhaGuiaAB = null; }
     
+    pontoAEl.style.display = 'none';
+    pontoBEl.style.display = 'none';
     btnB.disabled = true;
     avisoDistancia.style.display = 'none';
-    removerTodasLinhasParalelas();
     
     document.getElementById('btnPintar').classList.remove('pintando');
     document.getElementById('btnPintar').innerHTML = '🖌️';
     
     atualizarTela();
+}
+
+function alternarPintura() {
+    ESTADO.pintando = !ESTADO.pintando;
+    const btn = document.getElementById('btnPintar');
+    if (ESTADO.pintando) {
+        btn.classList.add('pintando');
+        btn.innerHTML = '⏹';
+        ESTADO.ultimoPonto = { lat: ESTADO.lat, lon: ESTADO.lon };
+        poligonoCobertura = [[ESTADO.lat, ESTADO.lon]];
+    } else {
+        btn.classList.remove('pintando');
+        btn.innerHTML = '🖌️';
+        ESTADO.ultimoPonto = null;
+    }
 }
 
 window.onload = () => {
@@ -866,8 +799,6 @@ window.onload = () => {
         const cfg = JSON.parse(cfgSalva);
         Object.assign(ESTADO, cfg);
     }
-    
-    ajustarCanvas();
     atualizarTela();
     iniciarGPS();
 };
