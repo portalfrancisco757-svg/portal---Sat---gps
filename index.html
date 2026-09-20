@@ -1,155 +1,143 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Portal Sat GPS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>PORTAL SAT GPS PRO</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;display:flex;justify-content:center;align-items:center;height:100vh;font-family:Arial,Helvetica,sans-serif}
-#tablet{width:100%;max-width:900px;height:100vh;background:#111;border:8px solid #222;border-radius:18px;display:flex;flex-direction:column;overflow:hidden;position:relative}
-#lightbar{background:#000;display:flex;justify-content:space-between;padding:6px 10px}
-.led{flex:1;height:18px;margin:0 2px;background:#222;border-radius:3px}
-.led.on-green{background:#00FF00;box-shadow:0 0 8px #0f0}
-.led.on-yellow{background:#FFC400;box-shadow:0 0 8px #FFC400}
-#header{background:#fff;display:flex;align-items:center;justify-content:space-between;padding:8px 12px}
-#logo{display:flex;align-items:center;gap:8px;font-weight:900}
-#logo span{color:#0B5E20}
-#logo b{color:#003366;font-size:26px;letter-spacing:-1px}
-#rtk{background:#2E7D32;color:#fff;font-size:11px;padding:3px 8px;border-radius:10px}
-#campo{flex:1;position:relative;background:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200') center/cover;overflow:hidden}
-#canvas{position:absolute;top:0;left:0;width:100%;height:100%}
-#trator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:42px;z-index:5;filter:drop-shadow(0 2px 4px #000)}
-#lineAB{position:absolute;top:55%;left:0;right:0;height:3px;background:#1E88E5;z-index:4;display:flex;justify-content:space-between;align-items:center;padding:0 5%}
-.pointA,.pointB{background:#1E88E5;color:#fff;font-weight:900;padding:2px 8px;border-radius:3px;font-size:18px}
-#infoAB{position:absolute;top:58%;left:50%;transform:translateX(-50%);color:#1E88E5;font-weight:900;font-size:14px;background:rgba(255,255,255,0.8);padding:2px 6px;border-radius:4px;z-index:4}
-#bottom{background:#1a1a1a;color:#fff}
-#dados{display:flex;justify-content:space-around;padding:10px;text-align:center;font-size:12px}
-#dados b{display:block;font-size:16px;margin-top:2px}
-#dados i{font-style:normal;font-size:18px}
-#btns{display:flex;gap:6px;padding:8px;background:#2a2a2a}
-#btns button{flex:1;height:44px;border:none;border-radius:8px;font-weight:900;font-size:13px;cursor:pointer}
-.bA{background:#1E88E5;color:#fff}
-.bB{background:#1E88E5;color:#fff}
-.bGo{background:#2E7D32;color:#fff}
-.bClear{background:#C62828;color:#fff}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#000;color:#fff;height:100vh;overflow:hidden;display:flex}
+#left{width:280px;background:#121212;border-right:2px solid #333;display:flex;flex-direction:column}
+#left h2{background:#fff;color:#000;padding:10px;font-size:16px;display:flex;align-items:center;gap:6px}
+#left h2 b{color:#0B5E20}
+#left h2 strong{color:#0D47A1}
+#formT{padding:10px;background:#1e1e1e;display:flex;flex-direction:column;gap:6px}
+#formT input,#formT select{padding:10px;border-radius:6px;border:none;background:#2a2a2a;color:#fff}
+#formT button{background:#2E7D32;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:900}
+#lista{flex:1;overflow-y:auto;padding:8px}
+.itemT{background:#222;padding:10px;border-radius:8px;margin-bottom:8px;cursor:pointer;border-left:4px solid #4CAF50}
+.itemT.active{border-left-color:#FFC400;background:#333}
+.itemT small{display:block;color:#aaa;margin-top:4px}
+.itemT.del{float:right;background:#C62828;color:#fff;border:none;padding:4px 8px;border-radius:4px;font-size:11px}
+#main{flex:1;display:flex;flex-direction:column;background:#111}
+#lightbar{background:#000;display:flex;padding:5px 8px;gap:2px}
+.led{flex:1;height:16px;background:#222;border-radius:2px;transition:0.1s}
+.led.g{background:#00E676;box-shadow:0 0 6px #00E676}
+.led.y{background:#FFD600;box-shadow:0 0 6px #FFD600}
+.led.r{background:#FF3D00}
+#header{background:#fff;color:#000;display:flex;justify-content:space-between;align-items:center;padding:6px 10px}
+#header b{font-size:20px;color:#0D47A1}
+#rtk{padding:4px 8px;border-radius:12px;color:#fff;font-size:11px;font-weight:900}
+.rtk-bad{background:#C62828}.rtk-ok{background:#2E7D32}.rtk-float{background:#EF6C00}
+#campo{flex:1;position:relative;background:#3a5f2d;overflow:hidden}
+#canvas,#canvas2{position:absolute;top:0;left:0;width:100%;height:100%}
+#trator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;width:40px;height:60px;background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 60"><rect x="8" y="5" width="24" height="20" fill="%232E7D32"/><rect x="10" y="25" width="20" height="25" fill="%231B5E20"/><circle cx="10" cy="55" r="6" fill="%23333"/><circle cx="30" cy="55" r="6" fill="%23333"/></svg>') no-repeat center/contain;pointer-events:none}
+#cross{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.3)}
+#lineAB{position:absolute;top:50%;left:5%;right:5%;height:3px;background:#2196F3;display:none;z-index:5}
+#lineAB::before,#lineAB::after{content:'A';position:absolute;top:-18px;background:#2196F3;color:#fff;padding:2px 6px;font-weight:900;border-radius:3px}
+#lineAB::after{content:'B';right:0}
+#bottom{background:#1c1c1c}
+#dados{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;padding:8px;font-size:11px;gap:4px}
+#dados b{font-size:15px;color:#4CAF50;display:block}
+#btns{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;padding:8px;background:#252525}
+#btns button{height:48px;border:none;border-radius:8px;font-weight:900;font-size:12px}
+.bA{background:#1976D2;color:#fff}.bGo{background:#2E7D32;color:#fff}.bStop{background:#EF6C00;color:#fff}.bCl{background:#424242;color:#fff}
+#warn{position:absolute;top:45px;left:50%;transform:translateX(-50%);background:#FF3D00;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:900;z-index:20;display:none}
+@media(max-width:800px){body{flex-direction:column}#left{width:100%;height:32vh}#main{height:68vh}}
 </style>
 </head>
 <body>
-<div id="tablet">
+<div id="left">
+<h2><span>🛰️</span> <b>FP</b> PORTAL AGRO <strong>SERVICIOS</strong></h2>
+<div id="formT">
+<input id="nomeT" placeholder="Nome do Talhão (ex: Lote 1)">
+<div style="display:flex;gap:6px">
+<select id="cultura"><option>Soja</option><option>Milho</option><option>Trigo</option><option>Pulverização</option><option>Plantio</option></select>
+<input id="largura" type="number" value="20" style="width:90px"> <span style="line-height:40px">m</span>
+</div>
+<button onclick="criarTalhao()">+ CRIAR TALHÃO</button>
+<button onclick="exportar()" style="background:#1565C0;margin-top:4px">EXPORTAR KML</button>
+</div>
+<div id="lista"></div>
+</div>
+
+<div id="main">
 <div id="lightbar"></div>
 <div id="header">
-<div id="logo">🛰️ <span>FP</span> PORTAL AGRO<br>SERVICIOS</div>
-<div><b>PORTAL SAT GPS</b></div>
-<div id="rtk">✓ RTK FIX</div>
+<div><b>PORTAL SAT GPS</b> <small id="talhaoNome">- Sem talhão</small></div>
+<div id="rtk" class="rtk-bad">SEM GPS</div>
 </div>
 <div id="campo">
+<div id="warn">⚠️ ANDA 3m PRA COMEÇAR A PINTAR</div>
+<canvas id="canvas2"></canvas>
 <canvas id="canvas"></canvas>
-<div id="lineAB"><div class="pointA">A</div><div class="pointB">B</div></div>
-<div id="infoAB">Linha A-B &nbsp; A-----B</div>
-<div id="trator">🚜</div>
+<div id="lineAB"></div>
+<div id="cross"></div>
+<div id="trator"></div>
 </div>
 <div id="bottom">
 <div id="dados">
-<div><i>↔️</i> LARGURA<b id="vL">20.0 m</b></div>
-<div><i>🎯</i> DESVIO<b id="vD">0.00 m</b></div>
-<div><i>🌱</i> ÁREA<b id="vA">0.00 ha</b></div>
-<div><i>🛰️</i> GPS<b id="vG">--</b></div>
+<div>DESVIO<b id="vD">0.00 m</b></div>
+<div>LARGURA<b id="vL">20.0 m</b></div>
+<div>ÁREA<b id="vA">0.00 ha</b></div>
+<div>GPS<b id="vG">--</b></div>
 </div>
 <div id="btns">
-<button class="bA" id="btnA" onclick="marcaA()">🚩 MARCAR A</button>
-<button class="bA" id="btnB" onclick="marcaB()">🚩 MARCAR B</button>
-<button class="bGo" id="btnGo" onclick="iniciar()">◀ INICIAR</button>
-<button class="bClear" onclick="limpar()">🗑️ LIMPAR</button>
+<button class="bA" id="bA" onclick="marcaA()">MARCAR A</button>
+<button class="bA" id="bB" onclick="marcaB()">MARCAR B</button>
+<button class="bGo" id="bGo" onclick="toggleRun()">▶ INICIAR</button>
+<button class="bCl" onclick="limparTela()">LIMPAR</button>
 </div>
 </div>
 </div>
 
 <script>
-var leds=[];
-var bar=document.getElementById('lightbar');
-for(var i=0;i<21;i++){var d=document.createElement('div');d.className='led';bar.appendChild(d);leds.push(d);}
-var canvas=document.getElementById('canvas');
-var ctx=canvas.getContext('2d');
-var larg=20, area=0, run=false, watchId=null, timer=null, lastPos=null, pA=null, pB=null, hasA=false, hasB=false, desv=0, totalDist=0;
+var leds=[], canvas=document.getElementById('canvas'), ctx=canvas.getContext('2d'), canvas2=document.getElementById('canvas2'), ctx2=canvas2.getContext('2d');
+for(var i=0;i<21;i++){var d=document.createElement('div');d.className='led';document.getElementById('lightbar').appendChild(d);leds.push(d);}
+function resize(){[canvas,canvas2].forEach(function(c){c.width=c.offsetWidth;c.height=c.offsetHeight}); desenhaGrade(); redesenha();}
+window.addEventListener('resize',resize);
 
-function resize(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;}
-window.addEventListener('resize',resize); resize();
+function desenhaGrade(){
+ ctx2.clearRect(0,0,canvas2.width,canvas2.height);
+ ctx2.strokeStyle='rgba(255,255,255,0.08)'; ctx2.lineWidth=1;
+ for(var x=0;x<canvas2.width;x+=40){ctx2.beginPath();ctx2.moveTo(x,0);ctx2.lineTo(x,canvas2.height);ctx2.stroke();}
+ for(var y=0;y<canvas2.height;y+=40){ctx2.beginPath();ctx2.moveTo(0,y);ctx2.lineTo(canvas2.width,y);ctx2.stroke();}
+}
 
-function toRad(d){return d*Math.PI/180;}
-function dist(a,b){
- var R=6371000; var dLat=toRad(b.lat-a.lat); var dLon=toRad(b.lon-a.lon);
- var lat1=toRad(a.lat); var lat2=toRad(b.lat);
- var h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)*Math.sin(dLon/2);
- return R*2*Math.asin(Math.sqrt(h));
+var talhoes=JSON.parse(localStorage.getItem('portal_talhoes_v2')||'[]');
+var talhaoAtivo=JSON.parse(localStorage.getItem('portal_ativo')||'null');
+var pts=[], pA=null, pB=null, run=false, watchId=null, lastPos=null, area=0, larg=20, totalPintado=[], distAcum=0;
+
+function salvar(){
+ localStorage.setItem('portal_talhoes_v2', JSON.stringify(talhoes));
+ if(talhaoAtivo) localStorage.setItem('portal_ativo', JSON.stringify(talhaoAtivo));
+ renderLista();
 }
-function bearing(a,b){
- var y=Math.sin(toRad(b.lon-a.lon))*Math.cos(toRad(b.lat));
- var x=Math.cos(toRad(a.lat))*Math.sin(toRad(b.lat))-Math.sin(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.cos(toRad(b.lon-a.lon));
- return (Math.atan2(y,x)*180/Math.PI+360)%360;
+function criarTalhao(){
+ var nome=document.getElementById('nomeT').value.trim(); if(!nome){alert('Digite nome do talhão');return;}
+ larg=parseFloat(document.getElementById('largura').value)||20;
+ var t={id:Date.now(), nome:nome, cultura:document.getElementById('cultura').value, larg:larg, area:0, pontos:[], abA:null, abB:null, data:new Date().toLocaleDateString()};
+ talhoes.push(t); talhaoAtivo=t; document.getElementById('nomeT').value=''; salvar(); carregarTalhao(t.id);
 }
-function crossTrack(A,B,P){
- var d13=dist(A,P)/6371000; var brng13=toRad(bearing(A,P)-bearing(A,B));
- return Math.asin(Math.sin(d13)*Math.sin(brng13))*6371000;
-}
-function setLight(v){
- for(var i=0;i<leds.length;i++) leds[i].className='led';
- var center=10; leds[center].className='led on-green';
- var q=Math.round(Math.abs(v)/0.2); if(q>10) q=10;
- for(var i=1;i<=q;i++){
-  if(v<0 && leds[center-i]) leds[center-i].className='led on-yellow';
-  if(v>0 && leds[center+i]) leds[center+i].className='led on-yellow';
+function renderLista(){
+ var h=''; for(var i=0;i<talhoes.length;i++){
+  var t=talhoes[i]; var act=talhaoAtivo&&talhaoAtivo.id==t.id?' active':'';
+  h+='<div class="itemT'+act+'" onclick="carregarTalhao('+t.id+')"><button class="del" onclick="apagar('+t.id+',event)">X</button><b>'+t.nome+'</b> - '+t.cultura+'<small>'+t.area.toFixed(2)+' ha | '+t.larg+'m | '+(t.pontos.length||0)+' pts<br>'+t.data+'</small></div>';
  }
- if(Math.abs(v)<0.05){ for(var i=0;i<leds.length;i++) if(i>=8&&i<=12) leds[i].className='led on-green'; }
- document.getElementById('vD').innerText=v.toFixed(2)+' m';
+ document.getElementById('lista').innerHTML=h||'<div style="padding:10px;color:#777">Nenhum talhão criado</div>';
+ if(talhaoAtivo){document.getElementById('talhaoNome').innerText=' - '+talhaoAtivo.nome; document.getElementById('vL').innerText=talhaoAtivo.larg.toFixed(1)+' m';}
 }
-function marcaA(){
- if(!lastPos){ alert('Clique INICIAR e permita GPS primeiro'); return; }
- pA={lat:lastPos.lat,lon:lastPos.lon}; hasA=true;
- document.getElementById('btnA').innerText='✓ A OK'; document.getElementById('btnA').style.background='#2E7D32';
+function carregarTalhao(id){
+ var t=talhoes.find(function(x){return x.id==id}); if(!t) return;
+ talhaoAtivo=t; larg=t.larg; pts=t.pontos||[]; pA=t.abA; pB=t.abB; area=t.area||0;
+ document.getElementById('vA').innerText=area.toFixed(2)+' ha';
+ document.getElementById('lineAB').style.display=(pA&&pB)?'block':'none';
+ document.getElementById('bA').innerText=pA?'✓ A':'MARCAR A'; document.getElementById('bB').innerText=pB?'✓ B':'MARCAR B';
+ totalPintado=[]; ctx.clearRect(0,0,canvas.width,canvas.height); redesenha(); salvar();
 }
-function marcaB(){
- if(!hasA){ alert('Marque A primeiro'); return; }
- pB={lat:lastPos.lat,lon:lastPos.lon}; hasB=true;
- document.getElementById('btnB').innerText='✓ B OK'; document.getElementById('btnB').style.background='#2E7D32';
-}
-function paintStrip(d){
- var w=canvas.width; var h=canvas.height;
- ctx.fillStyle='rgba(180,255,100,0.55)';
- var x=w/2 - (desv*12);
- var lw = (larg*3); // escala visual
- ctx.fillRect(x - lw/2, h*0.2, lw, h*0.8);
-}
-function iniciar(){
- if(run){ run=false; if(watchId) navigator.geolocation.clearWatch(watchId); if(timer) clearInterval(timer); document.getElementById('btnGo').innerText='◀ INICIAR'; document.getElementById('vG').innerText='--'; return; }
- run=true; document.getElementById('btnGo').innerText='⏸ PARAR'; document.getElementById('vG').innerText='BUSCANDO...';
- if(navigator.geolocation){
-  watchId=navigator.geolocation.watchPosition(function(p){
-   var pos={lat:p.coords.latitude,lon:p.coords.longitude};
-   document.getElementById('vG').innerText= p.coords.accuracy.toFixed(0)+'m RTK';
-   document.getElementById('rtk').innerText='✓ '+p.coords.accuracy.toFixed(0)+'m';
-   if(!lastPos){ lastPos=pos; return; }
-   var d=dist(lastPos,pos); if(d<0.5) return;
-   area+=d*larg/10000; document.getElementById('vA').innerText=area.toFixed(2)+' ha';
-   if(hasA&&hasB){ desv=crossTrack(pA,pB,pos); } else { desv=(Math.random()-0.5)*0.4; }
-   setLight(desv); paintStrip(d); document.getElementById('trator').style.marginLeft=(desv*14)+'px';
-   lastPos=pos;
-  },function(e){ document.getElementById('vG').innerText='SIMULADO'; simul(); },{enableHighAccuracy:true,maximumAge:0,timeout:8000});
-  setTimeout(function(){ if(!lastPos) simul(); },4000);
- } else { simul(); }
-}
-function simul(){
- if(timer) clearInterval(timer); var t=0;
- timer=setInterval(function(){
-  t+=0.08; desv=Math.sin(t)*0.8; area+=0.0008*larg/10;
-  document.getElementById('vA').innerText=area.toFixed(2)+' ha';
-  document.getElementById('vG').innerText='SIM 2cm';
-  setLight(desv); paintStrip(1);
-  document.getElementById('trator').style.marginLeft=(desv*14)+'px';
- },120);
-}
-function limpar(){ area=0; ctx.clearRect(0,0,canvas.width,canvas.height); document.getElementById('vA').innerText='0.00 ha'; setLight(0); document.getElementById('trator').style.marginLeft='0px'; }
-setLight(0);
-</script>
-</body>
-</html>
+function apagar(id,e){e.stopPropagation(); if(!confirm('Apagar talhão?'))return; talhoes=talhoes.filter(function(t){return t.id!=id}); if(talhaoAtivo&&talhaoAtivo.id==id) talhaoAtivo=null; localStorage.removeItem('portal_ativo'); salvar(); ctx.clearRect(0,0,canvas.width,canvas.height);}
+
+function toRad(d){return d*Math.PI/180}
+function distM(a,b){var R=6371000,dLat=toRad(b.lat-a.lat),dLon=toRad(b.lon-a.lon),lat1=toRad(a.lat),lat2=toRad(b.lat),h=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)*Math.sin(dLon/2);return R*2*Math.asin(Math.sqrt(h))}
+function bearing(a,b){var y=Math.sin(toRad(b.lon-a.lon))*Math.cos(toRad(b.lat)),x=Math.cos(toRad(a.lat))*Math.sin(toRad(b.lat))-Math.sin(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.cos(toRad(b.lon-a.lon));return (Math.atan2(y,x)*180/Math.PI+360)%360}
+function crossTrack(A,B,P){var d13=distM(A,P)/6371000,br=toRad(bearing(A,P)-bearing(A,B));return Math.asin(Math.sin(d13)*Math.sin(br
