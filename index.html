@@ -4,3104 +4,2807 @@
 <meta charset="UTF-8">
 <meta name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#061016">
 
-<title>PORTAL SAT GPS</title>
+<title>Portal Sat GPS Agrícola PRO</title>
 
 <style>
+:root{
+ --bg:#061016;
+ --panel:#091820;
+ --border:#294650;
+ --green:#35f13d;
+ --green2:#8aff78;
+ --cyan:#00eaff;
+ --red:#ff3030;
+ --yellow:#ffd52e;
+}
+
 *{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    -webkit-tap-highlight-color:transparent;
+ box-sizing:border-box;
 }
 
 html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#000;
-    font-family:Arial,sans-serif;
-    touch-action:none;
+ margin:0;
+ width:100%;
+ height:100%;
+ overflow:hidden;
+ background:var(--bg);
+ color:#eef7f8;
+ font-family:Arial,Helvetica,sans-serif;
 }
 
-body{
-    color:white;
+button,input,select{
+ font:inherit;
+}
+
+button{
+ cursor:pointer;
 }
 
 #app{
-    width:100%;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    background:#050a11;
+ width:100vw;
+ height:100vh;
+ display:flex;
+ flex-direction:column;
 }
 
-/* CABEÇALHO */
+/* TOPO */
 
-header{
-    height:65px;
-    flex-shrink:0;
-    background:#050a11;
-    border-bottom:3px solid #28743e;
-    display:flex;
-    align-items:center;
-    padding:0 18px;
+.top{
+ height:66px;
+ display:flex;
+ align-items:center;
+ gap:7px;
+ padding:7px 10px;
+ background:#061016;
+ border-bottom:1px solid #24414b;
+ z-index:10;
 }
 
 .logo{
-    color:#45ed79;
-    font-size:25px;
-    font-weight:bold;
+ font-size:21px;
+ font-weight:900;
+ min-width:235px;
 }
 
-.status{
-    margin-left:auto;
-    display:flex;
-    align-items:center;
-    gap:18px;
-    font-size:15px;
+.logo span{
+ color:var(--green);
 }
 
-.pill{
-    padding:9px 15px;
-    border:1px solid #39784b;
-    border-radius:22px;
-    background:#101c2b;
+.sub{
+ display:block;
+ font-size:8px;
+ letter-spacing:4px;
+ margin-left:39px;
+ color:#b9c8cd;
 }
 
-#fixStatus{
-    color:#ffd400;
-    font-weight:bold;
+.stat{
+ height:49px;
+ padding:4px 12px;
+ border-left:1px solid #213a44;
+ min-width:105px;
+}
+
+.stat b{
+ font-size:17px;
+}
+
+.stat small{
+ display:block;
+ color:#9db0b6;
+ font-size:9px;
+}
+
+.grow{
+ flex:1;
+}
+
+.btn{
+ background:#10232c;
+ border:1px solid #31515d;
+ color:white;
+ border-radius:7px;
+ padding:8px 11px;
+}
+
+.btn.green{
+ border-color:#35ec3d;
+ background:#0c281e;
+ color:#83ff7b;
+}
+
+.btn.red{
+ border-color:#9a3b3b;
+ background:#301619;
 }
 
 /* ÁREA PRINCIPAL */
 
-#main{
-    flex:1;
-    min-height:0;
-    display:flex;
+.main{
+ position:relative;
+ flex:1;
+ min-height:0;
+ overflow:hidden;
+ background:#253e28;
 }
 
-/* BARRAS LATERAIS */
-
-.rail{
-    width:78px;
-    flex-shrink:0;
-    background:#07111e;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    padding:9px 5px;
+#field{
+ position:absolute;
+ inset:0;
+ width:100%;
+ height:100%;
 }
 
-.rail button{
-    width:65px;
-    height:60px;
-    border:0;
-    border-radius:11px;
-    background:#122239;
-    color:white;
-    font-size:26px;
+/* MENU LATERAL */
+
+.side{
+ position:absolute;
+ left:0;
+ top:0;
+ bottom:0;
+ width:72px;
+ background:#071219e8;
+ border-right:1px solid #25414b;
+ z-index:5;
+ display:flex;
+ flex-direction:column;
 }
 
-.rail button:active{
-    background:#1c5632;
+.side button{
+ flex:1;
+ background:none;
+ border:0;
+ border-bottom:1px solid #1e3740;
+ color:#dce8ea;
+ font-size:9px;
 }
 
-.rail button.active{
-    background:#18562f;
-    outline:2px solid #42df72;
+.side strong{
+ font-size:20px;
+ display:block;
+ margin-bottom:3px;
 }
 
-/* MAPA */
-
-#map{
-    position:relative;
-    flex:1;
-    overflow:hidden;
-    background:#dfe3e3;
+.side button.active{
+ color:var(--green);
+ background:#0b2520;
 }
 
-#canvas{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-}
-
-/* DISTÂNCIA */
-
-#distance{
-    position:absolute;
-    top:10px;
-    left:50%;
-    transform:translateX(-50%);
-    color:#ffd400;
-    font-size:30px;
-    font-weight:bold;
-    z-index:5;
-}
-
-/* LIGHTBAR */
-
-#lightbar{
-    position:absolute;
-    top:76px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    gap:3px;
-    z-index:5;
-}
-
-.light{
-    width:13px;
-    height:19px;
-    background:#303b42;
-    border-radius:2px;
-}
-
-.light.center{
-    height:28px;
-    background:white;
-}
-
-.light.on{
-    background:#ffd400;
-}
-
-/* MODO */
-
-#modebar{
-    position:absolute;
-    top:12px;
-    right:15px;
-    display:flex;
-    gap:7px;
-    padding:7px;
-    background:#07111de8;
-    border:2px solid #2e6943;
-    border-radius:14px;
-    z-index:5;
-}
-
-#modebar button{
-    width:58px;
-    height:55px;
-    border:0;
-    border-radius:9px;
-    background:#122239;
-    color:white;
-    font-size:25px;
-}
-
-/* HUD */
-
-#hud{
-    position:absolute;
-    left:18px;
-    bottom:17px;
-    width:355px;
-    padding:14px 17px;
-    background:#05090edb;
-    border:2px solid #2d7045;
-    border-radius:15px;
-    z-index:5;
-    font-size:15px;
-    line-height:1.55;
-}
-
-#hud b{
-    color:#45ed79;
-}
-
-.yellow{
-    color:#ffd400!important;
-}
-
-/* MENU INFERIOR */
-
-#bottom{
-    position:absolute;
-    bottom:15px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    gap:7px;
-    padding:7px;
-    background:#07111de8;
-    border:1px solid #316845;
-    border-radius:13px;
-    z-index:5;
-}
-
-#bottom button{
-    border:1px solid #356b48;
-    border-radius:9px;
-    padding:10px 13px;
-    background:#132b20;
-    color:white;
-}
-
-/* PAINEL */
-
-#panel{
-    display:none;
-    position:absolute;
-    inset:0;
-    z-index:20;
-    background:#03070cf7;
-    overflow:auto;
-    padding:18px;
-}
-
-#panel.open{
-    display:block;
-}
-
-.panelHeader{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    border-bottom:1px solid #31533e;
-    padding-bottom:12px;
-}
-
-.panelHeader h2{
-    color:#45ed79;
-}
-
-.close{
-    width:43px;
-    height:43px;
-    border:0;
-    border-radius:9px;
-    background:#822828;
-    color:white;
-    font-size:20px;
-}
-
-.cards{
-    display:grid;
-    grid-template-columns:
-    repeat(auto-fit,minmax(220px,1fr));
-    gap:12px;
-    margin-top:15px;
-}
+/* PAINÉIS */
 
 .card{
-    background:#0b1726;
-    border:1px solid #28513c;
-    border-radius:12px;
-    padding:14px;
+ position:absolute;
+ background:#07131ae8;
+ border:1px solid #34535e;
+ border-radius:10px;
+ box-shadow:0 8px 25px #0008;
+ z-index:4;
 }
 
-.card h3{
-    color:#45ed79;
-    margin-bottom:10px;
+.field{
+ left:86px;
+ top:12px;
+ width:235px;
+ padding:10px;
 }
 
-.card label{
-    display:block;
-    color:#a8b5ba;
-    font-size:12px;
-    margin-top:9px;
+.guide{
+ right:14px;
+ top:12px;
+ width:270px;
+ padding:10px;
 }
 
-.card input,
-.card select,
-.card textarea{
-    width:100%;
-    margin-top:4px;
-    padding:9px;
-    border:1px solid #355541;
-    border-radius:8px;
-    background:#07101a;
-    color:white;
+.cardtitle{
+ font-weight:800;
+ margin-bottom:6px;
 }
 
-.card textarea{
-    height:170px;
+.muted{
+ color:#9eb1b7;
+ font-size:11px;
 }
 
-.actions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-top:14px;
+.row{
+ display:flex;
+ justify-content:space-between;
+ gap:10px;
+ margin:5px 0;
 }
 
-.actions button{
-    padding:10px 14px;
-    background:#14301f;
-    border:1px solid #39764c;
-    border-radius:9px;
-    color:white;
+/* BARRA DE LUZ */
+
+.lightbar{
+ position:absolute;
+ top:13px;
+ left:50%;
+ transform:translateX(-50%);
+ width:min(440px,42vw);
+ height:47px;
+ background:#071219ef;
+ border:1px solid #385660;
+ border-radius:9px;
+ padding:7px 10px;
+ z-index:7;
 }
 
-/* MENSAGEM */
-
-#toast{
-    display:none;
-    position:absolute;
-    top:75px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:50;
-    background:#06111a;
-    border:1px solid #3d8953;
-    border-radius:9px;
-    padding:10px 16px;
+.lights{
+ height:20px;
+ display:flex;
+ gap:4px;
+ justify-content:center;
 }
 
-/* AVISO RETRATO */
-
-#portrait{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:9999;
-    background:#050a11;
-    color:white;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    font-size:22px;
-    padding:30px;
+.lamp{
+ width:24px;
+ height:13px;
+ border-radius:3px;
+ background:#1b2a30;
+ border:1px solid #395059;
 }
 
-/* TABLET */
+.lamp.onL{
+ background:#29e638;
+ box-shadow:0 0 8px #29e638;
+}
 
-@media(max-width:850px){
+.lamp.onY{
+ background:#ffd21f;
+ box-shadow:0 0 8px #ffd21f;
+}
 
-    header{
-        height:58px;
-        padding:0 9px;
-    }
+.lamp.onR{
+ background:#ff3434;
+ box-shadow:0 0 8px #ff3434;
+}
 
-    .logo{
-        font-size:18px;
-    }
+.lbtext{
+ text-align:center;
+ font-size:9px;
+ color:#b8c8cd;
+}
 
-    .status{
-        gap:5px;
-        font-size:10px;
-    }
+.lbtext b{
+ color:#fff;
+}
 
-    .rail{
-        width:58px;
-    }
+/* FERRAMENTAS */
 
-    .rail button{
-        width:48px;
-        height:50px;
-        font-size:20px;
-    }
+.tools{
+ position:absolute;
+ right:14px;
+ top:145px;
+ display:flex;
+ flex-direction:column;
+ gap:7px;
+ z-index:6;
+}
 
-    #hud{
-        width:285px;
-        font-size:12px;
-    }
+.tools button{
+ width:44px;
+ height:44px;
+ background:#091a22ef;
+ color:#fff;
+ border:1px solid #36515a;
+ border-radius:8px;
+ font-weight:bold;
+}
 
-    #bottom button{
-        padding:8px;
-        font-size:10px;
-    }
+/* CONTROLES INFERIORES */
+
+.bottom{
+ position:absolute;
+ left:86px;
+ right:14px;
+ bottom:10px;
+ display:flex;
+ gap:8px;
+ z-index:6;
+}
+
+.ctrl{
+ background:#07131aea;
+ border:1px solid #304e58;
+ border-radius:9px;
+ padding:8px 10px;
+ min-width:145px;
+}
+
+.ctrl label{
+ display:block;
+ color:#aebec3;
+ font-size:9px;
+ margin-bottom:4px;
+}
+
+.ctrl input,
+.ctrl select{
+ width:100%;
+ padding:7px;
+ background:#0c2028;
+ color:#fff;
+ border:1px solid #31515d;
+ border-radius:6px;
+}
+
+.cover{
+ display:flex;
+ align-items:center;
+ gap:8px;
+ color:var(--green2);
+}
+
+.cover input{
+ width:38px;
+ height:20px;
+ accent-color:var(--green);
+}
+
+/* MODAL */
+
+.modal{
+ position:absolute;
+ inset:0;
+ background:#000b;
+ z-index:30;
+ display:none;
+ align-items:center;
+ justify-content:center;
+}
+
+.box{
+ width:min(650px,90vw);
+ max-height:85vh;
+ overflow:auto;
+ background:#09171e;
+ border:1px solid #35545f;
+ border-radius:12px;
+ padding:18px;
+}
+
+.box h2{
+ margin:0 0 12px;
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:9px;
+}
+
+.grid input,
+.grid select{
+ width:100%;
+ padding:9px;
+ background:#0c2028;
+ color:#fff;
+ border:1px solid #31515d;
+ border-radius:6px;
+}
+
+.list{
+ margin-top:12px;
+ border-top:1px solid #263f48;
+}
+
+.item{
+ padding:9px 0;
+ border-bottom:1px solid #263f48;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.toast{
+ position:absolute;
+ top:73px;
+ left:50%;
+ transform:translateX(-50%);
+ z-index:20;
+ background:#06151cef;
+ border:1px solid var(--green);
+ border-radius:18px;
+ padding:8px 15px;
+ display:none;
+}
+
+.badge{
+ padding:2px 6px;
+ border-radius:10px;
+ background:#163027;
+ color:#71ff69;
+ font-size:9px;
+}
+
+@media(max-width:1000px){
+
+ .top{
+  height:55px;
+ }
+
+ .logo{
+  font-size:16px;
+  min-width:170px;
+ }
+
+ .stat{
+  min-width:75px;
+  padding:4px 6px;
+ }
+
+ .stat b{
+  font-size:12px;
+ }
+
+ .side{
+  width:58px;
+ }
+
+ .field{
+  left:68px;
+  width:200px;
+ }
+
+ .bottom{
+  left:68px;
+  overflow-x:auto;
+ }
+
+ .lightbar{
+  top:7px;
+ }
+
+ .guide{
+  transform:scale(.85);
+  transform-origin:top right;
+ }
 }
 </style>
 </head>
 
 <body>
 
-<div id="portrait">
-    🔄<br><br>
-    Gire o tablet para usar o<br>
-    <b>PORTAL SAT GPS</b><br>
-    em modo paisagem.
-</div>
-
 <div id="app">
 
-<header>
+<header class="top">
 
-<div class="logo">
-🛰️ PORTAL SAT GPS
-</div>
+ <div class="logo">
+   Portal <span>Sat GPS</span>
+   <i class="sub">AGRÍCOLA PRO</i>
+ </div>
 
-<div class="status">
+ <div class="stat">
+   <b id="gps">SEM GPS</b>
+   <small>POSIÇÃO</small>
+ </div>
 
-<div class="pill" id="source">
-📱 GNSS Android
-</div>
+ <div class="stat">
+   <b id="sat">--</b>
+   <small>SATÉLITES</small>
+ </div>
 
-<div>
-GNSS:
-<span id="fixStatus">● SEM SINAL</span>
-</div>
+ <div class="stat">
+   <b id="spd">0,0</b>
+   <small>KM/H</small>
+ </div>
 
-<div>
-🕒 <span id="clock">--:--:--</span>
-</div>
+ <div class="stat">
+   <b id="ha">0,00</b>
+   <small>HECTARES COBERTOS</small>
+ </div>
 
-</div>
+ <div class="stat">
+   <b id="km">0,00</b>
+   <small>KM PERCORRIDOS</small>
+ </div>
+
+ <div class="grow"></div>
+
+ <button class="btn" onclick="settings()">⚙</button>
 
 </header>
 
-<div id="main">
 
-<!-- LADO ESQUERDO -->
+<main class="main">
 
-<div class="rail">
+<canvas id="field"></canvas>
 
-<button onclick="markPoint()">📍</button>
-
-<button id="coverageBtn"
-        onclick="toggleCoverage()">
-🎯
-</button>
-
-<button onclick="setA()">A</button>
-
-<button onclick="setB()">B</button>
-
-<button onclick="nudge(-1)">↢</button>
-
-<button onclick="nudge(1)">↣</button>
-
-<button onclick="zoom(-1)">−</button>
-
-<button onclick="zoom(1)">+</button>
-
-</div>
-
-<!-- MAPA -->
-
-<div id="map">
-
-<canvas id="canvas"></canvas>
-
-<div id="distance">
-0.00 m
-</div>
-
-<div id="lightbar"></div>
-
-<!-- MODO -->
-
-<div id="modebar">
-
-<button onclick="centerMap()">🗺️</button>
-
-<button onclick="openGNSS()">🛰️</button>
-
-<button onclick="openGuidance()">⛰️</button>
-
-<button id="viewButton"
-        onclick="toggle3D()">3D</button>
-
-</div>
-
-<!-- HUD -->
-
-<div id="hud">
-
-<div>
-Lat:
-<b id="lat">--.------</b>°
-</div>
-
-<div>
-Lon:
-<b id="lon">--.------</b>°
-</div>
-
-<div>
-Vel:
-<b id="speed">0.0 km/h</b>
-</div>
-
-<div>
-Rumo:
-<b id="heading">---°</b>
-</div>
-
-<div>
-Faixa:
-<b id="pass">--</b>
-</div>
-
-<div>
-Erro:
-<b id="cross">0.00 m</b>
-</div>
-
-<div>
-Largura:
-<b id="widthHUD">24.0 m</b>
-</div>
-
-<div>
-Área:
-<b id="area">0.00 ha</b>
-</div>
-
-<div>
-Precisão:
-<b id="accuracy">-- m</b>
-</div>
-
-<div>
-Satélites:
-<b id="satellites">--</b>
-</div>
-
-<div>
-Fix:
-<b id="fix">---</b>
-</div>
-
-<div>
-HDOP:
-<b id="hdop">--</b>
-</div>
-
-<div>
-Cobertura:
-<b id="coverageArea">0.00 ha</b>
-</div>
-
-</div>
 
 <!-- MENU -->
 
-<div id="bottom">
+<nav class="side">
 
-<button onclick="openField()">
-🌾 Campo
-</button>
+ <button class="active">
+  <strong>⌂</strong>
+  Início
+ </button>
 
-<button onclick="toggleCoverage()">
-▶ Cobertura
-</button>
+ <button onclick="fields()">
+  <strong>▣</strong>
+  Talhões
+ </button>
 
-<button onclick="openConfig()">
-⚙ Config
-</button>
+ <button onclick="markA()">
+  <strong>A</strong>
+  Marcar A
+ </button>
 
-<button onclick="exportJSON()">
-💾 JSON
-</button>
+ <button onclick="markB()">
+  <strong>B</strong>
+  Marcar B
+ </button>
 
-<button onclick="exportKML()">
-📍 KML
-</button>
+ <button onclick="newBoundary()">
+  <strong>◇</strong>
+  Limite
+ </button>
 
-</div>
+ <button onclick="settings()">
+  <strong>⚙</strong>
+  Config.
+ </button>
 
-<div id="toast"></div>
+</nav>
 
-<!-- PAINEL -->
 
-<div id="panel">
+<!-- BARRA DE LUZ -->
 
-<div class="panelHeader">
+<div class="lightbar">
 
-<h2 id="panelTitle">
-PORTAL SAT GPS
-</h2>
+ <div class="lights" id="lights"></div>
 
-<button class="close"
-        onclick="closePanel()">
-✕
-</button>
-
-</div>
-
-<div id="panelContent"></div>
-
-</div>
-
-</div>
-
-<!-- DIREITA -->
-
-<div class="rail">
-
-<button onclick="openConfig()">⚙️</button>
-
-<button onclick="save()">💾</button>
-
-<button onclick="openGNSS()">📂</button>
-
-<button onclick="openField()">🖌️</button>
-
-<button onclick="clearData()">🗑️</button>
+ <div class="lbtext">
+   BARRA DE LUZ •
+   <b id="error">0,00 m</b> •
+   <span id="modeTxt">RETA A–B</span>
+ </div>
 
 </div>
 
+
+<!-- TALHÃO -->
+
+<section class="card field">
+
+ <div class="cardtitle">
+   TALHÃO
+   <span class="badge" id="fieldName">
+     NÃO SALVO
+   </span>
+ </div>
+
+ <div class="row">
+   <span class="muted">Área</span>
+   <b id="fieldArea">0,00 ha</b>
+ </div>
+
+ <div class="row">
+   <span class="muted">Cobertura</span>
+   <b class="green" id="pct">0%</b>
+ </div>
+
+ <button
+  class="btn green"
+  style="width:100%"
+  onclick="fields()">
+  ▣ Criar / Salvar Talhão
+ </button>
+
+</section>
+
+
+<!-- GUIAMENTO -->
+
+<section class="card guide">
+
+ <div class="cardtitle">
+   <span style="color:#00eaff">A→B</span>
+   GUIAMENTO
+ </div>
+
+ <div class="row">
+   <span class="muted">Status</span>
+   <b id="ab">Aguardando A</b>
+ </div>
+
+ <div class="row">
+   <span class="muted">Desvio</span>
+   <b id="err">0,00 m</b>
+ </div>
+
+ <div class="row">
+   <span class="muted">Direção</span>
+   <b id="head">0°</b>
+ </div>
+
+ <div class="row">
+   <span class="muted">Passada</span>
+   <b id="pass">0</b>
+ </div>
+
+ <div style="display:flex;gap:6px;margin-top:7px">
+
+  <button
+   class="btn green"
+   onclick="markA()">
+   Marcar A
+  </button>
+
+  <button
+   class="btn green"
+   onclick="markB()">
+   Marcar B
+  </button>
+
+  <button
+   class="btn red"
+   onclick="resetAB()">
+   Reset
+  </button>
+
+ </div>
+
+</section>
+
+
+<!-- FERRAMENTAS -->
+
+<div class="tools">
+
+ <button onclick="threeD()">
+  3D
+ </button>
+
+ <button onclick="zoom(1.15)">
+  +
+ </button>
+
+ <button onclick="zoom(.87)">
+  −
+ </button>
+
+ <button onclick="center()">
+  ⌾
+ </button>
+
+ <button onclick="toggleFollow()">
+  ↗
+ </button>
+
 </div>
+
+
+<!-- CONTROLES -->
+
+<div class="bottom">
+
+ <div class="ctrl">
+
+  <label>
+   LARGURA DO IMPLEMENTO (m)
+  </label>
+
+  <input
+   id="width"
+   type="number"
+   value="12"
+   min=".5"
+   max="60"
+   step=".1"
+   onchange="saveCfg()">
+
+ </div>
+
+
+ <div class="ctrl">
+
+  <label>
+   GUIAMENTO
+  </label>
+
+  <select
+   id="guideType"
+   onchange="saveCfg()">
+
+   <option>Reta A–B</option>
+   <option>Curva</option>
+   <option>Pivô</option>
+
+  </select>
+
+ </div>
+
+
+ <div class="ctrl">
+
+  <label>
+   COBERTURA
+  </label>
+
+  <div class="cover">
+
+   <input
+    id="cov"
+    type="checkbox"
+    checked
+    onchange="saveCfg()">
+
+   ATIVA
+
+  </div>
+
+ </div>
+
+
+ <div class="ctrl">
+
+  <label>
+   ACOMPANHAR TRATOR
+  </label>
+
+  <div class="cover">
+
+   <input
+    id="follow"
+    type="checkbox"
+    checked>
+
+   ATIVO
+
+  </div>
+
+ </div>
+
+
+ <div class="ctrl">
+
+  <label>
+   ANTENA EXTERNA
+  </label>
+
+  <button
+   class="btn"
+   onclick="serial()">
+
+   USB / OTG / NMEA
+
+  </button>
+
+ </div>
+
 </div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<!-- MODAL -->
+
+<div class="modal" id="modal">
+
+ <div class="box" id="box"></div>
+
+</div>
+
+</main>
+
+</div>
+
 
 <script>
 
 /* =====================================================
-PORTAL SAT GPS
-Motor agrícola em HTML
+   PORTAL SAT GPS AGRÍCOLA PRO
+   MOTOR PRINCIPAL
 ===================================================== */
 
-const G={
+const $ = x => document.getElementById(x);
 
-lat:null,
-lon:null,
-alt:null,
-accuracy:null,
+const canvas = $("field");
 
-speed:0,
-heading:null,
+const ctx = canvas.getContext("2d");
 
-fix:"---",
-satellites:null,
-hdop:null,
+let W = 0;
+let H = 0;
+let dpr = 1;
 
-width:24,
-overlap:0,
+let view3d = true;
+let zoomLevel = 1;
+let follow = true;
 
-nudgeValue:0,
-nudgeStep:0.025,
 
-A:null,
-B:null,
+/* POSIÇÃO DO TRATOR */
 
-pass:0,
-cross:0,
-
-coverage:false,
-
-track:[],
-coveragePolys:[],
-marks:[],
-field:[],
-
-area:0,
-coverageArea:0,
-
-zoom:1,
-
-view3D:false
-
+let pos = {
+ x:0,
+ y:0,
+ h:0,
+ speed:0
 };
 
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d");
 
-let gpsWatch=null;
-let lastPosition=null;
+/* ORIGEM GPS */
+
+let origin = null;
+
+
+/* HISTÓRICO */
+
+let track = [];
+
+
+/* COBERTURA */
+
+let swaths = [];
+
+
+/* LINHA A-B */
+
+let A = null;
+let B = null;
+
+
+/* LIMITE DO TALHÃO */
+
+let boundary = [];
+
+
+/* TALHÕES */
+
+let fieldsDB =
+ JSON.parse(
+  localStorage.getItem("psgps_fields") || "{}"
+ );
+
+let current =
+ localStorage.getItem("psgps_current") || "";
+
+
+/* CONFIGURAÇÃO */
+
+let cfg =
+ JSON.parse(
+  localStorage.getItem("psgps_cfg") || "{}"
+ );
+
+
+$("width").value =
+ cfg.width || 12;
+
+$("cov").checked =
+ cfg.cov !== false;
+
+$("guideType").value =
+ cfg.guide || "Reta A–B";
 
 
 /* =====================================================
-UTILIDADES
+   TELA
 ===================================================== */
 
-function $(id){
-    return document.getElementById(id);
+function resize(){
+
+ dpr =
+  window.devicePixelRatio || 1;
+
+ W = canvas.clientWidth;
+ H = canvas.clientHeight;
+
+ canvas.width =
+  W * dpr;
+
+ canvas.height =
+  H * dpr;
+
+ ctx.setTransform(
+  dpr,0,0,dpr,0,0
+ );
+
+ draw();
 }
+
+window.addEventListener(
+ "resize",
+ resize
+);
+
+
+/* =====================================================
+   MENSAGEM
+===================================================== */
 
 function toast(text){
 
-    const t=$("toast");
+ $("toast").textContent =
+  text;
 
-    t.textContent=text;
-    t.style.display="block";
+ $("toast").style.display =
+  "block";
 
-    clearTimeout(window.toastTimer);
+ clearTimeout(toast.timer);
 
-    window.toastTimer=setTimeout(()=>{
-        t.style.display="none";
-    },2500);
+ toast.timer =
+  setTimeout(
+   () =>
+    $("toast").style.display =
+     "none",
+   2200
+  );
 }
 
 
 /* =====================================================
-DISTÂNCIA GPS
+   CONFIGURAÇÃO
 ===================================================== */
 
-function distance(a,b){
+function saveCfg(){
 
-    const R=6371000;
+ cfg = {
 
-    const p=Math.PI/180;
+  width:
+   Number($("width").value),
 
-    const dLat=(b.lat-a.lat)*p;
+  cov:
+   $("cov").checked,
 
-    const dLon=(b.lon-a.lon)*p;
+  guide:
+   $("guideType").value
 
-    const x=
-    Math.sin(dLat/2)**2+
-    Math.cos(a.lat*p)*
-    Math.cos(b.lat*p)*
-    Math.sin(dLon/2)**2;
+ };
 
-    return 2*R*Math.asin(Math.sqrt(x));
+ localStorage.setItem(
+  "psgps_cfg",
+  JSON.stringify(cfg)
+ );
+
+ draw();
 }
 
 
 /* =====================================================
-AZIMUTE
+   ZOOM
 ===================================================== */
 
-function bearing(a,b){
+function zoom(value){
 
-    const p=Math.PI/180;
+ zoomLevel =
+  Math.max(
+   .35,
+   Math.min(
+    5,
+    zoomLevel * value
+   )
+  );
 
-    const y=
-    Math.sin((b.lon-a.lon)*p)*
-    Math.cos(b.lat*p);
-
-    const x=
-    Math.cos(a.lat*p)*
-    Math.sin(b.lat*p)
-    -
-    Math.sin(a.lat*p)*
-    Math.cos(b.lat*p)*
-    Math.cos((b.lon-a.lon)*p);
-
-    return(
-        Math.atan2(y,x)/p+360
-    )%360;
+ draw();
 }
 
 
 /* =====================================================
-DESTINO
+   CENTRALIZAR
 ===================================================== */
 
-function destination(p,angle,meters){
+function center(){
 
-    const R=6378137;
+ pos.x = 0;
+ pos.y = 0;
 
-    const q=Math.PI/180;
-
-    const a=angle*q;
-
-    const d=meters/R;
-
-    const lat=p.lat*q;
-
-    const lon=p.lon*q;
-
-    const newLat=Math.asin(
-        Math.sin(lat)*Math.cos(d)+
-        Math.cos(lat)*Math.sin(d)*Math.cos(a)
-    );
-
-    const newLon=
-    lon+
-    Math.atan2(
-        Math.sin(a)*Math.sin(d)*Math.cos(lat),
-        Math.cos(d)-Math.sin(lat)*Math.sin(newLat)
-    );
-
-    return{
-
-        lat:newLat/q,
-
-        lon:((newLon/q+540)%360)-180
-
-    };
-
+ draw();
 }
 
 
 /* =====================================================
-COORDENADAS LOCAIS
+   2D / 3D
 ===================================================== */
 
-function xy(p,ref){
+function threeD(){
 
-    const R=6378137;
+ view3d =
+  !view3d;
 
-    const q=Math.PI/180;
-
-    return{
-
-        x:
-        (p.lon-ref.lon)*
-        q*
-        R*
-        Math.cos(ref.lat*q),
-
-        y:
-        (p.lat-ref.lat)*
-        q*
-        R
-
-    };
-
+ draw();
 }
 
 
 /* =====================================================
-ÁREA
+   ACOMPANHAR
 ===================================================== */
 
-function polygonArea(points){
+function toggleFollow(){
 
-    if(points.length<3)
-        return 0;
+ follow =
+  !follow;
 
-    const ref=points[0];
+ $("follow").checked =
+  follow;
 
-    let total=0;
-
-    for(let i=1;i<points.length-1;i++){
-
-        const a=xy(points[i],ref);
-
-        const b=xy(points[i+1],ref);
-
-        total+=
-        a.x*b.y-
-        b.x*a.y;
-
-    }
-
-    return Math.abs(total/2);
-
+ toast(
+  follow
+   ? "Acompanhamento ativo"
+   : "Acompanhamento pausado"
+ );
 }
 
 
 /* =====================================================
-POSIÇÃO -> TELA
+   PROJEÇÃO DO TERRENO
 ===================================================== */
 
-function screenPoint(p,ref,w,h){
+function world(x,y){
 
-    const z=xy(p,ref);
+ let rx =
+  x - pos.x;
 
-    const scale=5*G.zoom;
-
-    if(G.view3D){
-
-        const depth=
-        Math.max(
-            .35,
-            1+(-z.y)/500
-        );
-
-        return{
-
-            x:
-            w/2+
-            z.x*scale/depth,
-
-            y:
-            h*.52-
-            z.y*scale/depth
-
-        };
-
-    }
-
-    return{
-
-        x:w/2+z.x*scale,
-
-        y:h/2-z.y*scale
-
-    };
-
-}
+ let ry =
+  y - pos.y;
 
 
-/* =====================================================
-GNSS ANDROID
-===================================================== */
+ if(!view3d){
 
-function startGPS(){
+  return {
 
-    if(!navigator.geolocation){
+   x:
+    W/2 +
+    rx * zoomLevel,
 
-        toast(
-        "GPS não disponível no Android"
-        );
+   y:
+    H/2 -
+    ry * zoomLevel
 
-        return;
-    }
+  };
 
-    gpsWatch=
-    navigator.geolocation.watchPosition(
+ }
 
-        gpsPosition,
 
-        gpsError,
+ /*
+   PROJEÇÃO 3D:
 
-        {
-            enableHighAccuracy:true,
-            maximumAge:300,
-            timeout:10000
-        }
+   A linha A-B,
+   cobertura e trator
+   usam exatamente o
+   mesmo plano.
+ */
 
-    );
+ let depth = ry;
 
-    $("source").textContent=
-    "📱 GNSS Android";
+ let perspective =
+  1 /
+  (
+   1 +
+   Math.max(
+    -150,
+    depth
+   ) * .0018
+  );
+
+ return {
+
+  x:
+   W/2 +
+   rx *
+   zoomLevel *
+   perspective,
+
+  y:
+   H*.52 -
+   depth *
+   zoomLevel *
+   .34
+
+ };
 
 }
 
 
 /* =====================================================
-POSIÇÃO RECEBIDA
-===================================================== */
-
-function gpsPosition(pos){
-
-    const c=pos.coords;
-
-    const previous=
-    G.lat!==null
-    ?
-    {
-        lat:G.lat,
-        lon:G.lon
-    }
-    :
-    null;
-
-    G.lat=c.latitude;
-
-    G.lon=c.longitude;
-
-    G.alt=c.altitude;
-
-    G.accuracy=c.accuracy;
-
-    if(c.speed!==null &&
-       c.speed>=0){
-
-        G.speed=
-        c.speed*3.6;
-
-    }
-
-    if(c.heading!==null &&
-       c.heading>=0){
-
-        G.heading=c.heading;
-
-    }
-
-    if(
-        previous &&
-        G.heading===null
-    ){
-
-        const d=
-        distance(
-            previous,
-            G
-        );
-
-        if(d>.3){
-
-            G.heading=
-            bearing(
-                previous,
-                G
-            );
-
-        }
-
-    }
-
-    if(previous){
-
-        recordTrack(
-            previous,
-            {
-                lat:G.lat,
-                lon:G.lon
-            }
-        );
-
-    }
-
-    updateHUD();
-
-    draw();
-
-}
-
-
-/* =====================================================
-ERRO GPS
-===================================================== */
-
-function gpsError(error){
-
-    G.fix="SEM SINAL";
-
-    updateHUD();
-
-}
-
-
-/* =====================================================
-TRILHA E COBERTURA
-===================================================== */
-
-function recordTrack(prev,p){
-
-    const d=distance(prev,p);
-
-    if(d<.2)
-        return;
-
-    G.track.push({
-
-        lat:p.lat,
-        lon:p.lon,
-
-        speed:G.speed,
-
-        heading:G.heading,
-
-        accuracy:G.accuracy,
-
-        time:new Date().toISOString()
-
-    });
-
-    if(
-        G.coverage
-    ){
-
-        const width=
-        G.width*
-        (1-G.overlap/100);
-
-        const ang=
-        G.heading!==null
-        ?
-        G.heading
-        :
-        bearing(prev,p);
-
-        const left1=
-        destination(
-            prev,
-            ang+90,
-            width/2
-        );
-
-        const right1=
-        destination(
-            prev,
-            ang-90,
-            width/2
-        );
-
-        const left2=
-        destination(
-            p,
-            ang+90,
-            width/2
-        );
-
-        const right2=
-        destination(
-            p,
-            ang-90,
-            width/2
-        );
-
-        const poly=[
-            left1,
-            left2,
-            right2,
-            right1
-        ];
-
-        G.coveragePolys.push(poly);
-
-        G.coverageArea+=
-        polygonArea(poly)/10000;
-
-    }
-
-    if(G.A && G.B){
-
-        calculateGuidance(p);
-
-    }
-
-}
-
-
-/* =====================================================
-GUIAMENTO A-B
-===================================================== */
-
-function calculateGuidance(p){
-
-    const ref=p;
-
-    const A=xy(G.A,ref);
-
-    const B=xy(G.B,ref);
-
-    const vx=B.x-A.x;
-
-    const vy=B.y-A.y;
-
-    const len=
-    Math.hypot(vx,vy)||1;
-
-    const wx=-A.x;
-
-    const wy=-A.y;
-
-    const cross=
-    (
-        vx*wy-
-        vy*wx
-    )/len;
-
-    const spacing=
-    G.width*
-    (1-G.overlap/100);
-
-    G.cross=
-    cross-
-    G.nudgeValue;
-
-    G.pass=
-    Math.round(
-        G.cross/spacing
-    );
-
-    $("distance").textContent=
-    Math.abs(G.cross).toFixed(2)+
-    " m";
-
-}
-
-
-/* =====================================================
-A
-===================================================== */
-
-function setA(){
-
-    if(G.lat===null){
-
-        toast(
-        "Aguardando posição GPS"
-        );
-
-        return;
-
-    }
-
-    G.A={
-        lat:G.lat,
-        lon:G.lon
-    };
-
-    G.B=null;
-
-    G.pass=0;
-
-    toast("Ponto A definido");
-
-    draw();
-
-}
-
-
-/* =====================================================
-B
-===================================================== */
-
-function setB(){
-
-    if(!G.A){
-
-        toast(
-        "Primeiro marque A"
-        );
-
-        return;
-
-    }
-
-    if(G.lat===null){
-
-        toast(
-        "Aguardando GPS"
-        );
-
-        return;
-
-    }
-
-    G.B={
-        lat:G.lat,
-        lon:G.lon
-    };
-
-    toast(
-    "Linha AB criada"
-    );
-
-    draw();
-
-}
-
-
-/* =====================================================
-NUDGE
-===================================================== */
-
-function nudge(direction){
-
-    G.nudgeValue+=
-    direction*
-    G.nudgeStep;
-
-    draw();
-
-    toast(
-    "Nudge: "+
-    G.nudgeValue.toFixed(3)+
-    " m"
-    );
-
-}
-
-
-/* =====================================================
-COBERTURA
-===================================================== */
-
-function toggleCoverage(){
-
-    G.coverage=
-    !G.coverage;
-
-    const b=
-    $("coverageBtn");
-
-    if(G.coverage){
-
-        b.classList.add("active");
-
-        b.textContent="⏸";
-
-        toast(
-        "Cobertura ligada"
-        );
-
-    }else{
-
-        b.classList.remove("active");
-
-        b.textContent="🎯";
-
-        toast(
-        "Cobertura pausada"
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-MARCADOR
-===================================================== */
-
-function markPoint(){
-
-    if(G.lat===null){
-
-        toast(
-        "Aguardando GPS"
-        );
-
-        return;
-
-    }
-
-    G.marks.push({
-
-        lat:G.lat,
-
-        lon:G.lon,
-
-        name:
-        "Ponto "+
-        (G.marks.length+1),
-
-        time:
-        new Date().toISOString()
-
-    });
-
-    draw();
-
-}
-
-
-/* =====================================================
-DESENHO
+   DESENHAR
 ===================================================== */
 
 function draw(){
 
-    const w=canvas.clientWidth;
+ if(!W)
+  return;
 
-    const h=canvas.clientHeight;
 
-    ctx.clearRect(
-        0,
-        0,
-        w,
-        h
-    );
+ ctx.clearRect(
+  0,
+  0,
+  W,
+  H
+ );
 
-    drawBackground(w,h);
 
-    if(G.lat===null)
-        return;
+ /* FUNDO */
 
-    const ref={
-        lat:G.lat,
-        lon:G.lon
-    };
+ let gradient =
+  ctx.createLinearGradient(
+   0,
+   0,
+   0,
+   H
+  );
 
+ gradient.addColorStop(
+  0,
+  "#183d35"
+ );
 
-    /* CAMPO */
+ gradient.addColorStop(
+  .4,
+  "#6b713d"
+ );
 
-    if(G.field.length>=3){
+ gradient.addColorStop(
+  1,
+  "#513c28"
+ );
 
-        ctx.beginPath();
+ ctx.fillStyle =
+  gradient;
 
-        G.field.forEach(
-        (p,i)=>{
+ ctx.fillRect(
+  0,
+  0,
+  W,
+  H
+ );
 
-            const z=
-            screenPoint(
-                p,
-                ref,
-                w,
-                h
-            );
 
-            if(i===0)
-                ctx.moveTo(z.x,z.y);
-            else
-                ctx.lineTo(z.x,z.y);
+ /* LINHAS DO TERRENO */
 
-        });
+ ctx.globalAlpha = .2;
 
-        ctx.closePath();
+ ctx.strokeStyle =
+  "#e3ca8d";
 
-        ctx.fillStyle=
-        "rgba(30,160,70,.18)";
+ ctx.lineWidth = 1;
 
-        ctx.fill();
+ for(
+  let i=-45;
+  i<=45;
+  i+=3
+ ){
 
-        ctx.strokeStyle=
-        "#27854c";
+  let a =
+   world(
+    i*10,
+    -600
+   );
 
-        ctx.lineWidth=3;
+  let b =
+   world(
+    i*10,
+    600
+   );
 
-        ctx.stroke();
+  ctx.beginPath();
 
-    }
+  ctx.moveTo(
+   a.x,
+   a.y
+  );
 
+  ctx.lineTo(
+   b.x,
+   b.y
+  );
 
-    /* COBERTURA */
+  ctx.stroke();
 
-    G.coveragePolys.forEach(
-    poly=>{
+ }
 
-        ctx.beginPath();
+ ctx.globalAlpha = 1;
 
-        poly.forEach(
-        (p,i)=>{
 
-            const z=
-            screenPoint(
-                p,
-                ref,
-                w,
-                h
-            );
+ /* =================================================
+    COBERTURA VERDE
+ ================================================= */
 
-            if(i===0)
-                ctx.moveTo(z.x,z.y);
-            else
-                ctx.lineTo(z.x,z.y);
-
-        });
-
-        ctx.closePath();
-
-        ctx.fillStyle=
-        "rgba(255,190,0,.36)";
-
-        ctx.fill();
-
-    });
-
-
-    /* TRILHA */
-
-    if(G.track.length>1){
-
-        ctx.beginPath();
-
-        G.track.forEach(
-        (p,i)=>{
-
-            const z=
-            screenPoint(
-                p,
-                ref,
-                w,
-                h
-            );
-
-            if(i===0)
-                ctx.moveTo(z.x,z.y);
-            else
-                ctx.lineTo(z.x,z.y);
-
-        });
-
-        ctx.strokeStyle=
-        "#087cff";
-
-        ctx.lineWidth=3;
-
-        ctx.stroke();
-
-    }
-
-
-    /* LINHAS AB */
-
-    if(G.A && G.B){
-
-        drawGuidanceLines(
-            ref,
-            w,
-            h
-        );
-
-    }
-
-
-    /* MARCADORES */
-
-    G.marks.forEach(
-    (m,i)=>{
-
-        const z=
-        screenPoint(
-            m,
-            ref,
-            w,
-            h
-        );
-
-        ctx.fillStyle=
-        "#00bb4d";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            z.x,
-            z.y,
-            7,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle="#111";
-
-        ctx.font=
-        "bold 13px Arial";
-
-        ctx.fillText(
-            i+1,
-            z.x+9,
-            z.y-8
-        );
-
-    });
-
-
-    /* VEÍCULO */
-
-    drawVehicle(w,h);
-
-    updateLightbar();
-
-}
-
-
-/* =====================================================
-FUNDO 2D / 3D
-===================================================== */
-
-function drawBackground(w,h){
-
-    if(G.view3D){
-
-        ctx.fillStyle=
-        "#cfd4d6";
-
-        ctx.fillRect(
-            0,
-            0,
-            w,
-            h
-        );
-
-        ctx.fillStyle=
-        "#bdc5c9";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            0,
-            h*.35
-        );
-
-        ctx.lineTo(
-            w,
-            h*.35
-        );
-
-        ctx.lineTo(
-            w,
-            h
-        );
-
-        ctx.lineTo(
-            0,
-            h
-        );
-
-        ctx.closePath();
-
-        ctx.fill();
-
-        ctx.strokeStyle=
-        "#aeb7bc";
-
-        for(
-            let i=-15;
-            i<=15;
-            i++
-        ){
-
-            ctx.beginPath();
-
-            ctx.moveTo(
-                w/2,
-                h*.35
-            );
-
-            ctx.lineTo(
-                w/2+i*90,
-                h
-            );
-
-            ctx.stroke();
-
-        }
-
-        for(
-            let y=0;
-            y<12;
-            y++
-        ){
-
-            const yy=
-            h*.35+
-            y*y*5+
-            15;
-
-            ctx.beginPath();
-
-            ctx.moveTo(
-                0,
-                yy
-            );
-
-            ctx.lineTo(
-                w,
-                yy
-            );
-
-            ctx.stroke();
-
-        }
-
-    }else{
-
-        ctx.fillStyle=
-        "#dfe3e3";
-
-        ctx.fillRect(
-            0,
-            0,
-            w,
-            h
-        );
-
-        const grid=
-        Math.max(
-            30,
-            60*G.zoom
-        );
-
-        ctx.strokeStyle=
-        "#c6cbcd";
-
-        ctx.lineWidth=1;
-
-        for(
-            let x=0;
-            x<w;
-            x+=grid
-        ){
-
-            ctx.beginPath();
-
-            ctx.moveTo(x,0);
-
-            ctx.lineTo(x,h);
-
-            ctx.stroke();
-
-        }
-
-        for(
-            let y=0;
-            y<h;
-            y+=grid
-        ){
-
-            ctx.beginPath();
-
-            ctx.moveTo(0,y);
-
-            ctx.lineTo(w,y);
-
-            ctx.stroke();
-
-        }
-
-    }
-
-}
-
-
-/* =====================================================
-LINHAS DE ORIENTAÇÃO
-===================================================== */
-
-function drawGuidanceLines(ref,w,h){
-
-    const ang=
-    bearing(
-        G.A,
-        G.B
-    );
-
-    const spacing=
-    G.width*
-    (1-G.overlap/100);
-
-    for(
-        let i=-20;
-        i<=20;
-        i++
-    ){
-
-        const start=
-        destination(
-            G.A,
-            ang+90,
-            i*spacing+
-            G.nudgeValue
-        );
-
-        const p1=
-        destination(
-            start,
-            ang,
-            -3000
-        );
-
-        const p2=
-        destination(
-            start,
-            ang,
-            3000
-        );
-
-        const z1=
-        screenPoint(
-            p1,
-            ref,
-            w,
-            h
-        );
-
-        const z2=
-        screenPoint(
-            p2,
-            ref,
-            w,
-            h
-        );
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            z1.x,
-            z1.y
-        );
-
-        ctx.lineTo(
-            z2.x,
-            z2.y
-        );
-
-        ctx.setLineDash(
-            i===G.pass
-            ? []
-            : [7,7]
-        );
-
-        ctx.strokeStyle=
-        i===G.pass
-        ? "#ff2020"
-        : "#7e8b91";
-
-        ctx.lineWidth=
-        i===G.pass
-        ? 3
-        : 1;
-
-        ctx.stroke();
-
-        ctx.setLineDash([]);
-
-    }
-
-
-    /* A */
-
-    let a=
-    screenPoint(
-        G.A,
-        ref,
-        w,
-        h
-    );
-
-    ctx.fillStyle=
-    "#00bd52";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        a.x,
-        a.y,
-        8,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* B */
-
-    let b=
-    screenPoint(
-        G.B,
-        ref,
-        w,
-        h
-    );
-
-    ctx.fillStyle=
-    "#ef3030";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        b.x,
-        b.y,
-        8,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-}
-
-
-/* =====================================================
-VEÍCULO
-===================================================== */
-
-function drawVehicle(w,h){
-
-    ctx.save();
-
-    ctx.translate(
-        w/2,
-        h/2
-    );
-
-    let angle=
-    G.heading===null
-    ?0
-    :G.heading*Math.PI/180;
-
-    ctx.rotate(angle);
-
-    if(G.view3D)
-        ctx.scale(1,.8);
-
-    ctx.shadowColor=
-    "#087cff";
-
-    ctx.shadowBlur=18;
-
-    ctx.fillStyle=
-    "#087cff";
+ if(
+  $("cov").checked
+ ){
+
+  swaths.forEach(
+   s => {
+
+    let half =
+     s.w / 2;
+
+    let nx =
+     Math.cos(s.h);
+
+    let ny =
+     Math.sin(s.h);
+
+    let px =
+     -ny * half;
+
+    let py =
+     nx * half;
+
+    let length =
+     Math.max(
+      1,
+      s.w * .9
+     );
+
+    let p1 =
+     world(
+      s.x + px,
+      s.y + py
+     );
+
+    let p2 =
+     world(
+      s.x - px,
+      s.y - py
+     );
+
+    let p3 =
+     world(
+      s.x - px +
+      nx * length,
+      s.y - py +
+      ny * length
+     );
+
+    let p4 =
+     world(
+      s.x + px +
+      nx * length,
+      s.y + py +
+      ny * length
+     );
+
+
+    ctx.fillStyle =
+     "rgba(45,240,55,.36)";
 
     ctx.beginPath();
 
     ctx.moveTo(
-        0,
-        -36
+     p1.x,
+     p1.y
     );
 
     ctx.lineTo(
-        25,
-        31
+     p2.x,
+     p2.y
     );
 
     ctx.lineTo(
-        -25,
-        31
+     p3.x,
+     p3.y
+    );
+
+    ctx.lineTo(
+     p4.x,
+     p4.y
     );
 
     ctx.closePath();
 
     ctx.fill();
 
-    ctx.shadowBlur=0;
+   }
+  );
 
-    ctx.fillStyle="white";
+ }
 
-    ctx.fillRect(
-        -4,
-        4,
-        8,
-        25
-    );
 
-    ctx.restore();
+ /* =================================================
+    LIMITE DO TALHÃO
+ ================================================= */
+
+ if(
+  boundary.length > 1
+ ){
+
+  ctx.strokeStyle =
+   "#ffd52e";
+
+  ctx.lineWidth = 3;
+
+  ctx.beginPath();
+
+  boundary.forEach(
+   (p,i) => {
+
+    let q =
+     world(
+      p.x,
+      p.y
+     );
+
+    if(i)
+     ctx.lineTo(
+      q.x,
+      q.y
+     );
+    else
+     ctx.moveTo(
+      q.x,
+      q.y
+     );
+
+   }
+  );
+
+  ctx.stroke();
+
+ }
+
+
+ /* =================================================
+    LINHA A-B 3D
+ ================================================= */
+
+ if(A && B){
+
+  let dx =
+   B.x - A.x;
+
+  let dy =
+   B.y - A.y;
+
+  let length =
+   Math.hypot(
+    dx,
+    dy
+   ) || 1;
+
+  let nx =
+   -dy / length;
+
+  let ny =
+   dx / length;
+
+
+  let p =
+   world(
+    A.x - nx*700,
+    A.y - ny*700
+   );
+
+  let q =
+   world(
+    A.x + nx*700,
+    A.y + ny*700
+   );
+
+
+  ctx.strokeStyle =
+   "#00eaff";
+
+  ctx.lineWidth = 3;
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+   p.x,
+   p.y
+  );
+
+  ctx.lineTo(
+   q.x,
+   q.y
+  );
+
+  ctx.stroke();
+
+
+  /* PONTO A */
+
+  let a =
+   world(
+    A.x,
+    A.y
+   );
+
+  ctx.fillStyle =
+   "#f22";
+
+  ctx.beginPath();
+
+  ctx.arc(
+   a.x,
+   a.y,
+   13,
+   0,
+   Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle =
+   "#fff";
+
+  ctx.font =
+   "bold 12px Arial";
+
+  ctx.textAlign =
+   "center";
+
+  ctx.fillText(
+   "A",
+   a.x,
+   a.y+4
+  );
+
+
+  /* PONTO B */
+
+  let b =
+   world(
+    B.x,
+    B.y
+   );
+
+  ctx.fillStyle =
+   "#176dff";
+
+  ctx.beginPath();
+
+  ctx.arc(
+   b.x,
+   b.y,
+   13,
+   0,
+   Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle =
+   "#fff";
+
+  ctx.fillText(
+   "B",
+   b.x,
+   b.y+4
+  );
+
+ }
+
+
+ /* =================================================
+    RASTRO
+ ================================================= */
+
+ if(
+  track.length > 1
+ ){
+
+  ctx.strokeStyle =
+   "#8cff76";
+
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+
+  track.forEach(
+   (p,i) => {
+
+    let q =
+     world(
+      p.x,
+      p.y
+     );
+
+    if(i)
+     ctx.lineTo(
+      q.x,
+      q.y
+     );
+    else
+     ctx.moveTo(
+      q.x,
+      q.y
+     );
+
+   }
+  );
+
+  ctx.stroke();
+
+ }
+
+
+ /* =================================================
+    TRATOR
+ ================================================= */
+
+ let tractor =
+  world(
+   pos.x,
+   pos.y
+  );
+
+ ctx.save();
+
+ ctx.translate(
+  tractor.x,
+  tractor.y
+ );
+
+ ctx.rotate(
+  -pos.h
+ );
+
+ ctx.fillStyle =
+  "#111";
+
+ ctx.fillRect(
+  -18,
+  -20,
+  7,
+  15
+ );
+
+ ctx.fillRect(
+  11,
+  -20,
+  7,
+  15
+ );
+
+ ctx.fillRect(
+  -18,
+  6,
+  7,
+  15
+ );
+
+ ctx.fillRect(
+  11,
+  6,
+  7,
+  15
+ );
+
+ ctx.fillStyle =
+  "#31e83b";
+
+ ctx.fillRect(
+  -12,
+  -17,
+  24,
+  31
+ );
+
+ ctx.fillStyle =
+  "#17252b";
+
+ ctx.fillRect(
+  -9,
+  -12,
+  18,
+  10
+ );
+
+ ctx.restore();
+
+
+ drawLightbar();
 
 }
 
 
 /* =====================================================
-LIGHTBAR
+   ERRO DA LINHA
 ===================================================== */
 
-function updateLightbar(){
+function calcError(){
 
-    const bar=
-    $("lightbar");
+ if(
+  !A ||
+  !B
+ )
+  return 0;
 
-    bar.innerHTML="";
+ let dx =
+  B.x-A.x;
 
-    for(
-        let i=-4;
-        i<=4;
-        i++
-    ){
+ let dy =
+  B.y-A.y;
 
-        const e=
-        document.createElement("span");
+ let L =
+  Math.hypot(
+   dx,
+   dy
+  ) || 1;
 
-        e.className=
-        "light"+
-        (i===0?" center":"");
-
-        const error=
-        G.cross;
-
-        if(
-            Math.abs(error)>.1 &&
-            (
-                error>0&&i>0 ||
-                error<0&&i<0
-            )
-        ){
-
-            e.classList.add("on");
-
-        }
-
-        bar.appendChild(e);
-
-    }
+ return (
+  (pos.x-A.x)*(-dy) +
+  (pos.y-A.y)*dx
+ ) / L;
 
 }
 
 
 /* =====================================================
-HUD
+   BARRA DE LUZ
 ===================================================== */
 
-function updateHUD(){
+function drawLightbar(){
 
-    $("lat").textContent=
-    G.lat===null
-    ?"--.------"
-    :G.lat.toFixed(6);
+ let count = 15;
 
-    $("lon").textContent=
-    G.lon===null
-    ?"--.------"
-    :G.lon.toFixed(6);
+ let html = "";
 
-    $("speed").textContent=
-    G.speed.toFixed(1)+
-    " km/h";
+ let error =
+  calcError();
 
-    $("heading").textContent=
-    G.heading===null
-    ?"---°"
-    :G.heading.toFixed(0)+"°";
 
-    $("pass").textContent=
-    G.pass===0
-    ?"--"
-    :G.pass;
+ let active =
+  Math.max(
+   -7,
+   Math.min(
+    7,
+    Math.round(error)
+   )
+  );
 
-    $("cross").textContent=
-    G.cross.toFixed(2)+
-    " m";
 
-    $("widthHUD").textContent=
-    G.width.toFixed(1)+
-    " m";
+ for(
+  let i=-7;
+  i<=7;
+  i++
+ ){
 
-    $("area").textContent=
-    G.area.toFixed(2)+
-    " ha";
+  let cls = "";
 
-    $("coverageArea").textContent=
-    G.coverageArea.toFixed(2)+
-    " ha";
 
-    $("accuracy").textContent=
-    G.accuracy===null
-    ?"-- m"
-    :G.accuracy.toFixed(2)+" m";
+  if(
+   i === active
+  ){
 
-    $("satellites").textContent=
-    G.satellites===null
-    ?"--"
-    :G.satellites;
+   if(
+    Math.abs(error) < .25
+   )
+    cls =
+     "onL";
 
-    $("fix").textContent=
-    G.fix;
+   else if(
+    Math.abs(error) < 1
+   )
+    cls =
+     "onY";
 
-    $("hdop").textContent=
-    G.hdop===null
-    ?"--"
-    :G.hdop;
+   else
+    cls =
+     "onR";
 
-    let status="SEM SINAL";
+  }
 
-    if(
-        G.accuracy!==null &&
-        G.accuracy<=.05
+
+  html +=
+   '<span class="lamp '+
+   cls+
+   '"></span>';
+
+ }
+
+
+ $("lights").innerHTML =
+  html;
+
+ $("error").textContent =
+  error.toFixed(2) +
+  " m";
+
+ $("err").textContent =
+  error.toFixed(2) +
+  " m";
+
+}
+
+
+/* =====================================================
+   ATUALIZAR INFORMAÇÕES
+===================================================== */
+
+function update(){
+
+ let speed =
+  pos.speed || 0;
+
+ $("spd").textContent =
+  (speed*3.6)
+  .toFixed(1)
+  .replace(".",",");
+
+
+ $("head").textContent =
+  (
+   (
+    pos.h*180/Math.PI +
+    360
+   ) % 360
+  ).toFixed(0) +
+  "°";
+
+
+ let error =
+  calcError();
+
+
+ if(
+  A &&
+  B
+ ){
+
+  $("pass").textContent =
+   Math.round(
+    error /
+    (
+     Number(
+      $("width").value
+     ) || 12
     )
-        status="RTK FIX";
+   );
 
-    else if(
-        G.accuracy!==null &&
-        G.accuracy<=.30
-    )
-        status="RTK FLOAT";
-
-    else if(
-        G.accuracy!==null &&
-        G.accuracy<=3
-    )
-        status="GNSS";
-
-    $("fixStatus").textContent=
-    "● "+status;
-
-    $("fixStatus").style.color=
-    status==="RTK FIX"
-    ?"lime"
-    :
-    status==="SEM SINAL"
-    ?"red"
-    :
-    "#ffd400";
-
-}
+ }
 
 
-/* =====================================================
-CAMPO
-===================================================== */
+ let hectares =
+  swaths.reduce(
+   (sum,s) =>
+    sum +
+    s.w*.9,
+   0
+  ) / 10000;
 
-function openField(){
 
-    openPanel(
-        "🌾 CAMPO / TALHÃO",
-        `
+ $("ha").textContent =
+  hectares
+  .toFixed(2)
+  .replace(".",",");
 
-        <div class="cards">
 
-        <div class="card">
+ $("fieldArea").textContent =
+  hectares
+  .toFixed(2)
+  .replace(".",",");
 
-        <h3>Limite do talhão</h3>
 
-        <p>
-        Pontos:
-        <b>${G.field.length}</b>
-        </p>
+ let kilometers =
+  track.length
+  ? track.length*.001
+  : 0;
 
-        <p>
-        Área:
-        <b>${G.area.toFixed(2)} ha</b>
-        </p>
 
-        <div class="actions">
+ $("km").textContent =
+  kilometers
+  .toFixed(2)
+  .replace(".",",");
 
-        <button onclick="addBoundary()">
-        ➕ Adicionar ponto
-        </button>
 
-        <button onclick="closeBoundary()">
-        ✓ Fechar talhão
-        </button>
+ if(
+  current &&
+  fieldsDB[current] &&
+  fieldsDB[current].area
+ ){
 
-        </div>
+  let pct =
+   Math.min(
+    100,
+    hectares /
+    fieldsDB[current].area *
+    100
+   );
 
-        </div>
+  $("pct").textContent =
+   pct.toFixed(0) +
+   "%";
 
-        <div class="card">
+ }
 
-        <h3>Marcação</h3>
-
-        <p>
-        Pontos marcados:
-        <b>${G.marks.length}</b>
-        </p>
-
-        <div class="actions">
-
-        <button onclick="markPoint()">
-        📍 Marcar posição
-        </button>
-
-        </div>
-
-        </div>
-
-        </div>
-
-        `
-    );
+ drawLightbar();
 
 }
 
 
 /* =====================================================
-ADICIONAR LIMITE
+   RECEBER GPS
 ===================================================== */
 
-function addBoundary(){
-
-    if(G.lat===null){
-
-        toast(
-        "Aguardando GPS"
-        );
-
-        return;
-
-    }
-
-    G.field.push({
-
-        lat:G.lat,
-
-        lon:G.lon
-
-    });
-
-    draw();
-
-    openField();
-
-}
-
-
-/* =====================================================
-FECHAR LIMITE
-===================================================== */
-
-function closeBoundary(){
-
-    if(
-        G.field.length<3
-    ){
-
-        toast(
-        "Necessário pelo menos 3 pontos"
-        );
-
-        return;
-
-    }
-
-    G.area=
-    polygonArea(
-        G.field
-    )/10000;
-
-    draw();
-
-    toast(
-    "Talhão calculado"
-    );
-
-}
-
-
-/* =====================================================
-CONFIGURAÇÃO
-===================================================== */
-
-function openConfig(){
-
-    openPanel(
-        "⚙ CONFIGURAÇÃO",
-        `
-
-        <div class="cards">
-
-        <div class="card">
-
-        <h3>Implemento</h3>
-
-        <label>
-        Largura do implemento
-        </label>
-
-        <input
-        id="inputWidth"
-        type="number"
-        step=".01"
-        value="${G.width}"
-        >
-
-        <label>
-        Sobreposição %
-        </label>
-
-        <input
-        id="inputOverlap"
-        type="number"
-        step=".1"
-        value="${G.overlap}"
-        >
-
-        <label>
-        Nudge
-        </label>
-
-        <input
-        id="inputNudge"
-        type="number"
-        step=".01"
-        value="${G.nudgeStep}"
-        >
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>Guiamento</h3>
-
-        <p>
-        • Straight AB
-        </p>
-
-        <p>
-        • A+
-        </p>
-
-        <p>
-        • Identical Curve
-        </p>
-
-        <p>
-        • Adaptive Curve
-        </p>
-
-        <p>
-        • Pivot
-        </p>
-
-        <p>
-        • Headland
-        </p>
-
-        <p>
-        • FreeForm
-        </p>
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>Cobertura</h3>
-
-        <p>
-        Área coberta:
-        <b>
-        ${G.coverageArea.toFixed(2)}
-        ha
-        </b>
-        </p>
-
-        <p>
-        Faixas registradas:
-        <b>
-        ${G.coveragePolys.length}
-        </b>
-        </p>
-
-        </div>
-
-        </div>
-
-
-        <div class="actions">
-
-        <button onclick="applyConfig()">
-        ✓ Aplicar
-        </button>
-
-        <button onclick="clearCoverage()">
-        🗑 Limpar cobertura
-        </button>
-
-        </div>
-
-        `
-    );
-
-}
-
-
-/* =====================================================
-APLICAR CONFIG
-===================================================== */
-
-function applyConfig(){
-
-    G.width=
-    parseFloat(
-        $("inputWidth").value
-    )||24;
-
-    G.overlap=
-    parseFloat(
-        $("inputOverlap").value
-    )||0;
-
-    G.nudgeStep=
-    parseFloat(
-        $("inputNudge").value
-    )||.025;
-
-    updateHUD();
-
-    draw();
-
-    closePanel();
-
-    toast(
-    "Configuração aplicada"
-    );
-
-}
-
-
-/* =====================================================
-GNSS / ANTENA EXTERNA
-===================================================== */
-
-function openGNSS(){
-
-    openPanel(
-        "🛰️ GNSS / ANTENA EXTERNA",
-        `
-
-        <div class="cards">
-
-        <div class="card">
-
-        <h3>GNSS Android</h3>
-
-        <p>
-        Latitude:
-        <b>${G.lat??"--"}</b>
-        </p>
-
-        <p>
-        Longitude:
-        <b>${G.lon??"--"}</b>
-        </p>
-
-        <p>
-        Precisão:
-        <b>${G.accuracy??"--"} m</b>
-        </p>
-
-        <div class="actions">
-
-        <button onclick="startGPS()">
-        📱 Usar GNSS Android
-        </button>
-
-        </div>
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>USB / OTG</h3>
-
-        <p>
-        Antenas que enviam NMEA
-        podem ser lidas através
-        de uma porta serial
-        compatível.
-        </p>
-
-        <label>
-        Baud rate
-        </label>
-
-        <select id="baud">
-
-        <option>4800</option>
-        <option>9600</option>
-        <option>19200</option>
-        <option>38400</option>
-        <option>57600</option>
-        <option selected>
-        115200
-        </option>
-
-        </select>
-
-        <div class="actions">
-
-        <button onclick="connectSerial()">
-        🛰️ Conectar antena
-        </button>
-
-        </div>
-
-        </div>
-
-
-        <div class="card">
-
-        <h3>NMEA</h3>
-
-        <textarea
-        id="nmea"
-        placeholder="$GNGGA,...
-$GNRMC,..."
-        ></textarea>
-
-        <div class="actions">
-
-        <button onclick="processNMEA()">
-        ▶ Processar NMEA
-        </button>
-
-        </div>
-
-        </div>
-
-        </div>
-
-        `
-    );
-
-}
-
-
-/* =====================================================
-NMEA
-===================================================== */
-
-function nmeaCoord(value,hem){
-
-    if(!value)
-        return null;
-
-    const n=
-    parseFloat(value);
-
-    const deg=
-    Math.floor(n/100);
-
-    const min=
-    n-deg*100;
-
-    let result=
-    deg+min/60;
-
-    if(
-        hem==="S"||
-        hem==="W"
-    )
-        result=-result;
-
-    return result;
-
-}
-
-
-function parseNMEA(line){
-
-    const p=
-    line.trim().split(",");
-
-    if(p.length<2)
-        return;
-
-    const type=
-    p[0].slice(-3);
-
-    if(type==="GGA"){
-
-        const lat=
-        nmeaCoord(
-            p[2],
-            p[3]
-        );
-
-        const lon=
-        nmeaCoord(
-            p[4],
-            p[5]
-        );
-
-        if(lat!==null &&
-           lon!==null){
-
-            G.lat=lat;
-
-            G.lon=lon;
-
-        }
-
-        G.fix=p[6]||"---";
-
-        G.satellites=
-        parseInt(p[7])||0;
-
-        G.hdop=
-        parseFloat(p[8])||null;
-
-        G.alt=
-        parseFloat(p[9])||null;
-
-    }
-
-
-    if(type==="RMC"){
-
-        const knots=
-        parseFloat(p[7]);
-
-        if(!isNaN(knots))
-            G.speed=
-            knots*1.852;
-
-        const course=
-        parseFloat(p[8]);
-
-        if(!isNaN(course))
-            G.heading=course;
-
-    }
-
-    $("source").textContent=
-    "🛰️ ANTENA EXTERNA";
-
-    updateHUD();
-
-    draw();
-
-}
-
-
-/* =====================================================
-SERIAL USB
-===================================================== */
-
-async function connectSerial(){
-
-    if(!("serial" in navigator)){
-
-        alert(
-        "Este navegador não oferece Web Serial. Para USB/OTG direto no Android, use um navegador/app compatível ou APK Android nativo."
-        );
-
-        return;
-
-    }
-
-    try{
-
-        const port=
-        await navigator.serial.requestPort();
-
-        const baud=
-        parseInt(
-            $("baud")?.value||
-            115200
-        );
-
-        await port.open({
-            baudRate:baud
-        });
-
-        $("source").textContent=
-        "🛰️ ANTENA EXTERNA";
-
-        toast(
-        "Antena conectada"
-        );
-
-        const decoder=
-        new TextDecoder();
-
-        const reader=
-        port.readable.getReader();
-
-        let buffer="";
-
-        while(true){
-
-            const {
-                value,
-                done
-            }=
-            await reader.read();
-
-            if(done)
-                break;
-
-            buffer+=
-            decoder.decode(
-                value,
-                {
-                    stream:true
-                }
-            );
-
-            const lines=
-            buffer.split(/\r?\n/);
-
-            buffer=
-            lines.pop();
-
-            lines.forEach(
-                parseNMEA
-            );
-
-        }
-
-    }catch(e){
-
-        console.log(e);
-
-        toast(
-        "Falha na conexão USB"
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-PROCESSAR NMEA MANUAL
-===================================================== */
-
-function processNMEA(){
-
-    const text=
-    $("nmea").value;
-
-    text
-    .split(/\r?\n/)
-    .forEach(
-        parseNMEA
-    );
-
-    toast(
-    "NMEA processado"
-    );
-
-}
-
-
-/* =====================================================
-PAINEL GENÉRICO
-===================================================== */
-
-function openPanel(title,content){
-
-    $("panelTitle").textContent=
-    title;
-
-    $("panelContent").innerHTML=
-    content;
-
-    $("panel").classList.add(
-        "open"
-    );
-
-}
-
-
-function closePanel(){
-
-    $("panel").classList.remove(
-        "open"
-    );
-
-}
-
-
-/* =====================================================
-3D
-===================================================== */
-
-function toggle3D(){
-
-    G.view3D=
-    !G.view3D;
-
-    $("viewButton").textContent=
-    G.view3D
-    ?"2D"
-    :"3D";
-
-    draw();
-
-    toast(
-    G.view3D
-    ?"Visão 3D ativada"
-    :"Visão 2D ativada"
-    );
-
-}
-
-
-/* =====================================================
-ZOOM
-===================================================== */
-
-function zoom(value){
-
-    G.zoom+=
-    value*.25;
-
-    G.zoom=
-    Math.max(
-        .4,
-        Math.min(
-            5,
-            G.zoom
-        )
-    );
-
-    draw();
-
-}
-
-
-/* =====================================================
-CENTRALIZAR
-===================================================== */
-
-function centerMap(){
-
-    G.zoom=1;
-
-    draw();
-
-    toast(
-    "Mapa centralizado"
-    );
-
-}
-
-
-/* =====================================================
-LIMPAR COBERTURA
-===================================================== */
-
-function clearCoverage(){
-
-    if(
-        !confirm(
-        "Limpar toda a cobertura?"
-        )
-    )
-        return;
-
-    G.coveragePolys=[];
-
-    G.coverageArea=0;
-
-    draw();
-
-    updateHUD();
-
-    toast(
-    "Cobertura apagada"
-    );
-
-}
-
-
-/* =====================================================
-SALVAR
-===================================================== */
-
-function save(){
-
-    localStorage.setItem(
-        "PORTAL_SAT_GPS",
-        JSON.stringify(G)
-    );
-
-    toast(
-    "Sessão salva no tablet"
-    );
-
-}
-
-
-/* =====================================================
-EXPORTAR JSON
-===================================================== */
-
-function download(
-    filename,
-    data,
-    type
+function gps(
+ lat,
+ lon,
+ speed=0,
+ heading=null
 ){
 
-    const blob=
-    new Blob(
-        [data],
-        {type:type}
-    );
+ if(!origin){
 
-    const url=
-    URL.createObjectURL(
-        blob
-    );
+  origin = {
+   lat,
+   lon
+  };
 
-    const a=
-    document.createElement(
-        "a"
-    );
-
-    a.href=url;
-
-    a.download=filename;
-
-    a.click();
-
-    setTimeout(
-        ()=>{
-            URL.revokeObjectURL(url);
-        },
-        1000
-    );
-
-}
+ }
 
 
-function exportJSON(){
-
-    const data=
-    JSON.stringify(
-        G,
-        null,
-        2
-    );
-
-    download(
-        "portal_sat_gps.json",
-        data,
-        "application/json"
-    );
-
-}
+ let x =
+  (
+   lon-origin.lon
+  ) *
+  111320 *
+  Math.cos(
+   lat*Math.PI/180
+  );
 
 
-/* =====================================================
-EXPORTAR KML
-===================================================== */
-
-function exportKML(){
-
-    let content="";
-
-    if(
-        G.field.length>=3
-    ){
-
-        const coords=
-        G.field
-        .map(
-            p=>
-            `${p.lon},${p.lat},0`
-        )
-        .join(" ");
-
-        content+=`
-
-        <Placemark>
-
-        <name>Talhão</name>
-
-        <Polygon>
-
-        <outerBoundaryIs>
-
-        <LinearRing>
-
-        <coordinates>
-        ${coords}
-        </coordinates>
-
-        </LinearRing>
-
-        </outerBoundaryIs>
-
-        </Polygon>
-
-        </Placemark>
-
-        `;
-
-    }
+ let y =
+  (
+   lat-origin.lat
+  ) *
+  111320;
 
 
-    if(
-        G.track.length>1
-    ){
-
-        const coords=
-        G.track
-        .map(
-            p=>
-            `${p.lon},${p.lat},0`
-        )
-        .join(" ");
-
-        content+=`
-
-        <Placemark>
-
-        <name>Trilha GPS</name>
-
-        <LineString>
-
-        <tessellate>1</tessellate>
-
-        <coordinates>
-        ${coords}
-        </coordinates>
-
-        </LineString>
-
-        </Placemark>
-
-        `;
-
-    }
+ let old =
+  track[
+   track.length-1
+  ];
 
 
-    const kml=`
+ if(
+  old &&
+  heading == null
+ ){
 
-<?xml version="1.0"
-encoding="UTF-8"?>
+  heading =
+   Math.atan2(
+    y-old.y,
+    x-old.x
+   );
 
-<kml
-xmlns="http://www.opengis.net/kml/2.2">
+ }
 
-<Document>
 
-<name>
-Portal Sat GPS
-</name>
+ pos.x = x;
+ pos.y = y;
+ pos.speed = speed;
 
-${content}
 
-</Document>
+ if(
+  heading != null
+ ){
 
-</kml>
+  pos.h =
+   heading *
+   Math.PI /
+   180;
 
-`;
+ }
 
-    download(
-        "portal_sat_gps.kml",
-        kml,
-        "application/vnd.google-earth.kml+xml"
-    );
+
+ track.push({
+  x,
+  y
+ });
+
+
+ if(
+  track.length > 4000
+ )
+  track.shift();
+
+
+ /* COBERTURA */
+
+ if(
+  $("cov").checked
+ ){
+
+  let width =
+   Number(
+    $("width").value
+   ) || 12;
+
+
+  swaths.push({
+
+   x,
+   y,
+   h:pos.h,
+   w:width
+
+  });
+
+
+  if(
+   swaths.length > 7000
+  )
+   swaths.shift();
+
+ }
+
+
+ update();
+
+ draw();
 
 }
 
 
 /* =====================================================
-RELÓGIO
+   GPS DO ANDROID
 ===================================================== */
 
-setInterval(
-()=>{
+if(
+ navigator.geolocation
+){
 
-    $("clock").textContent=
-    new Date()
-    .toLocaleTimeString(
-        "pt-BR"
-    );
+ navigator.geolocation.watchPosition(
 
-},
-1000
-);
+  p => {
 
+   $("gps").textContent =
+    "GPS ATIVO";
 
-/* =====================================================
-TELA DEITADA
-===================================================== */
-
-function orientation(){
-
-    const portrait=
-    innerHeight>
-    innerWidth;
-
-    $("portrait").style.display=
-    portrait
-    ?"flex"
-    :"none";
-
-}
-
-addEventListener(
-"resize",
-orientation
-);
-
-addEventListener(
-"orientationchange",
-orientation
-);
+   $("sat").textContent =
+    "GNSS";
 
 
-/* =====================================================
-RESIZE CANVAS
-===================================================== */
+   gps(
 
-function resizeCanvas(){
+    p.coords.latitude,
 
-    const dpr=
-    devicePixelRatio||1;
+    p.coords.longitude,
 
-    canvas.width=
-    canvas.clientWidth*dpr;
+    p.coords.speed || 0,
 
-    canvas.height=
-    canvas.clientHeight*dpr;
+    p.coords.heading
 
-    ctx.setTransform(
-        dpr,
-        0,
-        0,
-        dpr,
-        0,
-        0
-    );
+   );
 
-    draw();
+  },
+
+  () => {
+
+   $("gps").textContent =
+    "SEM GPS";
+
+  },
+
+  {
+
+   enableHighAccuracy:true,
+
+   maximumAge:500,
+
+   timeout:5000
+
+  }
+
+ );
 
 }
 
 
 /* =====================================================
-INICIAR
+   MARCAR A
 ===================================================== */
 
-addEventListener(
-"resize",
-resizeCanvas
-);
+function markA(){
 
-orientation();
+ A = {
 
-resizeCanvas();
+  x:pos.x,
+  y:pos.y
 
-startGPS();
+ };
 
-updateHUD();
+ $("ab").textContent =
+  "A marcado — marque B";
+
+ toast(
+  "Ponto A marcado"
+ );
+
+ draw();
+
+}
+
+
+/* =====================================================
+   MARCAR B
+===================================================== */
+
+function markB(){
+
+ if(!A){
+
+  toast(
+   "Marque A primeiro"
+  );
+
+  return;
+
+ }
+
+
+ B = {
+
+  x:pos.x,
+  y:pos.y
+
+ };
+
+
+ $("ab").textContent =
+  "A→B ATIVO";
+
+ toast(
+  "Linha A–B criada"
+ );
+
+ saveCurrent();
+
+ draw();
+
+}
+
+
+/* =====================================================
+   RESET A-B
+===================================================== */
+
+function resetAB(){
+
+ A = null;
+ B = null;
+
+ $("ab").textContent =
+  "Aguardando A";
+
+ draw();
+
+}
+
+
+/* =====================================================
+   LIMITE
+===================================================== */
+
+function newBoundary(){
+
+ boundary.push({
+
+  x:pos.x,
+  y:pos.y
+
+ });
+
+ toast(
+  "Ponto do limite adicionado"
+ );
+
+ saveCurrent();
+
+ draw();
+
+}
+
+
+/* =====================================================
+   TALHÕES
+===================================================== */
+
+function fields(){
+
+ $("modal").style.display =
+  "flex";
+
+
+ let list =
+  Object.entries(
+   fieldsDB
+  );
+
+
+ $("box").innerHTML = `
+
+ <h2>
+  ▣ Talhões
+ </h2>
+
+ <div class="grid">
+
+  <input
+   id="fn"
+   placeholder="Nome do talhão">
+
+  <input
+   id="fa"
+   type="number"
+   min="0"
+   step=".01"
+   placeholder="Área planejada (ha)">
+
+ </div>
+
+ <div
+  style="
+   margin-top:10px;
+   display:flex;
+   gap:7px
+  ">
+
+  <button
+   class="btn green"
+   onclick="createField()">
+
+   Criar e salvar
+
+  </button>
+
+  <button
+   class="btn"
+   onclick="closeM()">
+
+   Fechar
+
+  </button>
+
+ </div>
+
+ <div class="list">
+
+ ${
+  list.length
+
+  ?
+
+  list.map(
+   ([name,f]) => `
+
+   <div class="item">
+
+    <span>
+
+     <b>
+      ${esc(name)}
+     </b>
+
+     <br>
+
+     <small class="muted">
+      ${f.area || 0} ha
+     </small>
+
+    </span>
+
+    <span>
+
+     <button
+      class="btn green"
+      onclick="
+       loadField(
+        '${encodeURIComponent(name)}'
+       )
+      ">
+
+      Abrir
+
+     </button>
+
+     <button
+      class="btn red"
+      onclick="
+       delField(
+        '${encodeURIComponent(name)}'
+       )
+      ">
+
+      Excluir
+
+     </button>
+
+    </span>
+
+   </div>
+
+   `
+  ).join("")
+
+  :
+
+  `
+   <p class="muted">
+    Nenhum talhão salvo.
+   </p>
+  `
+
+ }
+
+ </div>
+
+ `;
+
+}
+
+
+/* =====================================================
+   CRIAR TALHÃO
+===================================================== */
+
+function createField(){
+
+ let name =
+  $("fn").value.trim();
+
+
+ if(!name){
+
+  toast(
+   "Digite o nome do talhão"
+  );
+
+  return;
+
+ }
+
+
+ fieldsDB[name] = {
+
+  area:
+   Number(
+    $("fa").value
+   ) || 0,
+
+  A,
+  B,
+
+  boundary,
+
+  coverage:
+   swaths
+
+ };
+
+
+ current =
+  name;
+
+
+ localStorage.setItem(
+  "psgps_fields",
+  JSON.stringify(
+   fieldsDB
+  )
+ );
+
+
+ localStorage.setItem(
+  "psgps_current",
+  current
+ );
+
+
+ $("fieldName").textContent =
+  name;
+
+
+ closeM();
+
+
+ toast(
+  "Talhão salvo"
+ );
+
+}
+
+
+/* =====================================================
+   SALVAR TALHÃO ATUAL
+===================================================== */
+
+function saveCurrent(){
+
+ if(!current)
+  return;
+
+
+ fieldsDB[current] = {
+
+  ...(fieldsDB[current] || {}),
+
+  A,
+  B,
+
+  boundary,
+
+  coverage:
+   swaths
+
+ };
+
+
+ localStorage.setItem(
+  "psgps_fields",
+  JSON.stringify(
+   fieldsDB
+  )
+ );
+
+}
+
+
+/* =====================================================
+   ABRIR TALHÃO
+===================================================== */
+
+function loadField(encoded){
+
+ let name =
+  decodeURIComponent(
+   encoded
+  );
+
+
+ let field =
+  fieldsDB[name];
+
+
+ current =
+  name;
+
+
+ $("fieldName").textContent =
+  name;
+
+
+ A =
+  field.A || null;
+
+ B =
+  field.B || null;
+
+
+ boundary =
+  field.boundary || [];
+
+
+ swaths =
+  field.coverage || [];
+
+
+ localStorage.setItem(
+  "psgps_current",
+  name
+ );
+
+
+ closeM();
+
+ draw();
+
+ toast(
+  "Talhão carregado"
+ );
+
+}
+
+
+/* =====================================================
+   EXCLUIR TALHÃO
+===================================================== */
+
+function delField(encoded){
+
+ let name =
+  decodeURIComponent(
+   encoded
+  );
+
+
+ delete fieldsDB[name];
+
+
+ if(
+  current === name
+ ){
+
+  current = "";
+
+  $("fieldName").textContent =
+   "NÃO SALVO";
+
+ }
+
+
+ localStorage.setItem(
+  "psgps_fields",
+  JSON.stringify(
+   fieldsDB
+  )
+ );
+
+
+ fields();
+
+}
+
+
+/* =====================================================
+   CONFIGURAÇÕES
+===================================================== */
+
+function settings(){
+
+ $("modal").style.display =
+  "flex";
+
+
+ $("box").innerHTML = `
+
+ <h2>
+  ⚙ Configurações PRO
+ </h2>
+
+ <div class="grid">
+
+  <label>
+
+   Largura do implemento
+
+   <input
+    id="sw"
+    type="number"
+    value="${$("width").value}"
+    step=".1">
+
+  </label>
+
+
+  <label>
+
+   Tipo de guia
+
+   <select id="sg">
+
+    <option>
+     Reta A–B
+    </option>
+
+    <option>
+     Curva
+    </option>
+
+    <option>
+     Pivô
+    </option>
+
+   </select>
+
+  </label>
+
+ </div>
+
+
+ <p class="muted">
+
+  A barra de luz utiliza o
+  erro lateral da posição
+  em relação à linha A–B.
+
+  Verde = centralizado.
+
+  Amarelo = correção.
+
+  Vermelho = maior desvio.
+
+ </p>
+
+
+ <div
+  style="
+   display:flex;
+   gap:7px
+  ">
+
+  <button
+   class="btn green"
+   onclick="saveSettings()">
+
+   Salvar
+
+  </button>
+
+
+  <button
+   class="btn"
+   onclick="serial()">
+
+   Conectar antena externa
+
+  </button>
+
+
+  <button
+   class="btn"
+   onclick="closeM()">
+
+   Fechar
+
+  </button>
+
+ </div>
+
+ `;
+
+}
+
+
+/* =====================================================
+   SALVAR CONFIGURAÇÕES
+===================================================== */
+
+function saveSettings(){
+
+ $("width").value =
+  $("sw").value;
+
+ $("guideType").value =
+  $("sg").value;
+
+ saveCfg();
+
+ closeM();
+
+ draw();
+
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+function closeM(){
+
+ $("modal").style.display =
+  "none";
+
+}
+
+
+/* =====================================================
+   ANTENA EXTERNA USB / OTG
+===================================================== */
+
+async function serial(){
+
+ if(
+  !("serial" in navigator)
+ ){
+
+  toast(
+   "Este navegador não oferece Web Serial"
+  );
+
+  return;
+
+ }
+
+
+ try{
+
+  let port =
+   await navigator.serial.requestPort();
+
+
+  await port.open({
+
+   baudRate:4800
+
+  });
+
+
+  toast(
+   "Antena conectada — NMEA"
+  );
+
+
+  readSerial(
+   port
+  );
+
+
+ }
+
+ catch(e){
+
+  toast(
+   "Conexão não realizada"
+  );
+
+ }
+
+}
+
+
+/* =====================================================
+   LEITURA NMEA
+===================================================== */
+
+async function readSerial(port){
+
+ const decoder =
+  new TextDecoderStream();
+
+
+ port.readable.pipeTo(
+  decoder.writable
+ );
+
+
+ const reader =
+  decoder.readable.getReader();
+
+
+ let buffer = "";
+
+
+ while(true){
+
+  let result =
+   await reader.read();
+
+
+  if(
+   result.done
+  )
+   break;
+
+
+  buffer +=
+   result.value;
+
+
+  let lines =
+   buffer.split(
+    /\r?\n/
+   );
+
+
+  buffer =
+   lines.pop();
+
+
+  lines.forEach(
+   parseNMEA
+  );
+
+ }
+
+}
+
+
+/* =====================================================
+   PARSER NMEA GGA
+===================================================== */
+
+function parseNMEA(sentence){
+
+ if(
+  !sentence.startsWith("$")
+ )
+  return;
+
+
+ let p =
+  sentence.split(",");
+
+
+ if(
+  p[0].includes("GGA") &&
+  p[6] > 0
+ ){
+
+  let lat =
+   Number(p[2]);
+
+  let lon =
+   Number(p[4]);
+
+
+  lat =
+   (
+    Math.floor(lat/100) +
+    (lat%100)/60
+   ) *
+   (
+    p[3] === "S"
+    ? -1
+    : 1
+   );
+
+
+  lon =
+   (
+    Math.floor(lon/100) +
+    (lon%100)/60
+   ) *
+   (
+    p[5] === "W"
+    ? -1
+    : 1
+   );
+
+
+  $("gps").textContent =
+   "GPS ATIVO";
+
+
+  $("sat").textContent =
+   p[7] || "--";
+
+
+  gps(
+   lat,
+   lon,
+   0
+  );
+
+ }
+
+}
+
+
+/* =====================================================
+   SEGURANÇA DE TEXTO
+===================================================== */
+
+function esc(text){
+
+ return text.replace(
+  /[&<>"']/g,
+  function(m){
+
+   return {
+
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+
+   }[m];
+
+  }
+ );
+
+}
+
+
+/* =====================================================
+   INICIALIZAÇÃO
+===================================================== */
+
+function init(){
+
+ if(current){
+
+  $("fieldName").textContent =
+   current;
+
+ }
+
+ resize();
+
+ update();
+
+ draw();
+
+}
+
+init();
 
 </script>
 
