@@ -2,2273 +2,879 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Portal Sat GPS Agrícola</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Portal Sat GPS</title>
 
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    user-select:none;
-}
-
+*{box-sizing:border-box}
 html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#020912;
-    font-family:Arial,Helvetica,sans-serif;
-    color:white;
+  margin:0;width:100%;height:100%;overflow:hidden;
+  font-family:Arial,sans-serif;background:#020b12;color:#fff
 }
+body{touch-action:none}
+.app{height:100%;display:flex;flex-direction:column;background:#07131b}
 
-button,input,select{
-    font-family:inherit;
+/* CABEÇALHO */
+.top{
+  height:82px;display:flex;align-items:center;
+  padding:7px 18px;background:#03101a;
+  border-bottom:2px solid #12455c;gap:18px
 }
-
-button{
-    border:0;
-    cursor:pointer;
-}
-
-#app{
-    width:100vw;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    background:#020912;
-}
-
-/* ================= HEADER ================= */
-
-#header{
-    height:82px;
-    min-height:82px;
-    background:linear-gradient(180deg,#071522,#020a12);
-    border-bottom:1px solid #14536b;
-    display:flex;
-    align-items:center;
-    z-index:20;
-}
-
 .logo{
-    width:290px;
-    padding-left:20px;
-    display:flex;
-    align-items:center;
-    gap:12px;
+  display:flex;align-items:center;gap:10px;
+  width:330px;flex:none
+}
+.logoIcon{font-size:42px}
+.logo b{font-size:28px;font-style:italic}
+.logo b span{color:#20ff49}
+.logo small{
+  display:block;color:#aebfc9;font-size:11px;
+  margin-top:2px
 }
 
-.logoIcon{
-    font-size:45px;
+/* BARRA DE LUZ */
+.lightbar{
+  height:48px;flex:1;max-width:700px;
+  border:2px solid #16485d;border-radius:30px;
+  display:flex;align-items:center;justify-content:center;
+  gap:10px;background:#041a25;
+  box-shadow:0 0 20px #0008 inset
+}
+.l{
+  width:17px;height:17px;border-radius:50%;
+  background:#16ed51;box-shadow:0 0 11px #16ed51
+}
+.l.y{background:#ffd51c;box-shadow:0 0 11px #ffd51c}
+.l.r{background:#ff2027;box-shadow:0 0 11px #ff2027}
+
+/* INFORMAÇÕES */
+.stats{
+  display:flex;align-items:center;gap:22px;
+  white-space:nowrap
+}
+.fix{color:#20ff4c;font-size:18px;font-weight:bold}
+.accuracy{font-size:25px;font-weight:bold;color:#16e8ff}
+.compass{font-size:27px}
+.speed{font-size:27px;font-weight:bold}
+.time{text-align:right;font-size:25px}
+.date{font-size:12px;color:#b9c6ce;margin-top:2px}
+
+/* ÁREA DE TRABALHO */
+.main{
+  position:relative;flex:1;overflow:hidden;
+  background:#278b31
+}
+canvas{
+  position:absolute;inset:0;width:100%;height:100%
 }
 
-.logoText{
-    font-size:28px;
-    font-weight:bold;
+/* MENUS LATERAIS */
+.side{
+  position:absolute;top:0;bottom:0;width:145px;
+  background:rgba(2,12,20,.95);
+  z-index:10;display:flex;flex-direction:column;
+  border-right:1px solid #15465e;
+  transition:.25s
+}
+.right{
+  right:0;left:auto;
+  border-right:0;border-left:1px solid #15465e
+}
+.side.closed.left{transform:translateX(-145px)}
+.side.closed.right{transform:translateX(145px)}
+
+.item{
+  height:88px;flex:none;border:0;
+  background:transparent;color:#fff;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:6px
+}
+.item:hover{background:#0b2635}
+.ico{font-size:29px;color:#1cff50}
+.item span:last-child{
+  font-size:14px;font-weight:bold
 }
 
-.logoText span{
-    color:#39ff14;
+/* BOTÃO ABRIR/FECHAR */
+.handle{
+  position:absolute;top:42%;
+  width:32px;height:88px;
+  background:#07843e;border:0;color:#fff;
+  font-size:30px;z-index:12
+}
+.left .handle{
+  right:-32px;border-radius:0 17px 17px 0
+}
+.right .handle{
+  left:-32px;border-radius:17px 0 0 17px
 }
 
-.logoSub{
-    font-size:13px;
-    color:#c9d5dc;
-    margin-top:2px;
+/* DESVIO */
+.deviation{
+  position:absolute;z-index:5;top:14px;
+  left:50%;transform:translateX(-50%);
+  min-width:310px;text-align:center;
+  padding:10px 25px;border-radius:18px;
+  background:rgba(2,17,29,.93);
+  border:1px solid #18506a;
+  box-shadow:0 10px 25px #0008
 }
+.devnum{font-size:32px;font-weight:bold}
+.devlabel{font-size:14px;color:#b9c8d1}
 
-.statusArea{
-    flex:1;
-    height:100%;
-    display:flex;
-    justify-content:space-around;
-    align-items:center;
+/* CARTÕES */
+.bottom{
+  position:absolute;z-index:6;bottom:18px;
+  display:flex;gap:10px
 }
+.coverage{left:165px}
 
-.status{
-    min-width:150px;
-    height:58px;
-    border-left:1px solid #18536b;
-    padding-left:18px;
-    display:flex;
-    align-items:center;
-    gap:10px;
+.rightCards{
+  right:165px;display:flex
 }
-
-.statusIcon{
-    font-size:28px;
-}
-
-.statusTitle{
-    color:#dce8ee;
-    font-size:13px;
-}
-
-.statusValue{
-    font-size:20px;
-    font-weight:bold;
-}
-
-.green{
-    color:#22ff62;
-}
-
-.cyan{
-    color:#16eaff;
-}
-
-.orange{
-    color:#ffb020;
-}
-
-.clock{
-    min-width:130px;
-    text-align:center;
-    font-size:25px;
-}
-
-.date{
-    font-size:12px;
-    color:#b9c7cf;
-}
-
-/* ================= BODY ================= */
-
-#body{
-    flex:1;
-    min-height:0;
-    display:flex;
-    position:relative;
-}
-
-/* ================= LEFT ================= */
-
-#leftPanel{
-    width:118px;
-    min-width:118px;
-    background:linear-gradient(180deg,#061421,#030a11);
-    border-right:1px solid #15465c;
-    z-index:10;
-    transition:.25s;
-}
-
-#leftPanel.hidden{
-    width:0;
-    min-width:0;
-    overflow:hidden;
-}
-
-.menuBtn{
-    width:100%;
-    height:72px;
-    background:transparent;
-    color:#dce9ef;
-    border-bottom:1px solid #123748;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    gap:5px;
-    font-size:12px;
-}
-
-.menuBtn .ico{
-    font-size:25px;
-}
-
-.menuBtn.active{
-    background:linear-gradient(90deg,#0aad47,#066f31);
-    color:white;
-}
-
-.menuBtn:hover{
-    background:#0b2635;
-}
-
-.menuBtn.active:hover{
-    background:#0aad47;
-}
-
-/* ================= WORK AREA ================= */
-
-#workArea{
-    flex:1;
-    min-width:0;
-    position:relative;
-    overflow:hidden;
-    background:
-        radial-gradient(circle at center,#17451e 0,#07150c 45%,#02070a 100%);
-}
-
-/* Campo */
-
-#field{
-    position:absolute;
-    inset:0;
-    overflow:hidden;
-    perspective:850px;
-    background:
-      linear-gradient(90deg,
-      rgba(30,80,24,.4) 0%,
-      rgba(73,130,43,.25) 50%,
-      rgba(26,71,25,.5) 100%),
-      repeating-linear-gradient(
-      90deg,
-      rgba(255,255,255,.025) 0px,
-      rgba(255,255,255,.025) 35px,
-      rgba(0,0,0,.035) 36px,
-      rgba(0,0,0,.035) 72px
-      );
-}
-
-#field.sky{
-    background:
-      linear-gradient(#67b7ed 0 24%,#80a64e 24% 25%,#385b28 25% 100%);
-}
-
-#field.mode3d{
-    transform-origin:center bottom;
-}
-
-.fieldLines{
-    position:absolute;
-    inset:-30%;
-    transform:rotate(0deg);
-    background:
-      repeating-linear-gradient(
-        90deg,
-        transparent 0,
-        transparent 80px,
-        rgba(180,255,120,.12) 81px,
-        transparent 83px
-      );
-}
-
-#coverageCanvas{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    pointer-events:none;
-}
-
-/* ================= TRACTOR ================= */
-
-#tractor{
-    position:absolute;
-    left:50%;
-    top:58%;
-    width:125px;
-    height:145px;
-    transform:translate(-50%,-50%);
-    z-index:8;
-    transition:left .08s linear,top .08s linear;
-}
-
-.tractorBody{
-    position:absolute;
-    width:70px;
-    height:72px;
-    left:27px;
-    top:35px;
-    background:linear-gradient(90deg,#218a30,#61d82d,#137122);
-    border:2px solid #073e12;
-    border-radius:12px 12px 8px 8px;
-}
-
-.cabin{
-    position:absolute;
-    width:64px;
-    height:48px;
-    left:30px;
-    top:5px;
-    background:linear-gradient(135deg,#78c7dc,#0c3e50);
-    border:3px solid #15383d;
-    border-radius:9px 9px 3px 3px;
-}
-
-.roof{
-    position:absolute;
-    width:78px;
-    height:8px;
-    left:23px;
-    top:0;
-    background:#e1c625;
-    border-radius:4px;
-}
-
-.wheel{
-    position:absolute;
-    width:34px;
-    height:55px;
-    background:#080b0d;
-    border:5px solid #20292b;
-    border-radius:50%;
-    top:47px;
-}
-
-.wheel.left{
-    left:4px;
-}
-
-.wheel.right{
-    right:4px;
-}
-
-.wheelSmall{
-    position:absolute;
-    width:25px;
-    height:36px;
-    background:#080b0d;
-    border:4px solid #20292b;
-    border-radius:50%;
-    bottom:4px;
-}
-
-.wheelSmall.left{
-    left:17px;
-}
-
-.wheelSmall.right{
-    right:17px;
-}
-
-.implement{
-    position:absolute;
-    width:190px;
-    height:38px;
-    left:-32px;
-    bottom:-16px;
-    background:#e2c51d;
-    border:3px solid #4d4310;
-    border-radius:5px;
-}
-
-.implementBar{
-    position:absolute;
-    left:10px;
-    right:10px;
-    top:25px;
-    height:12px;
-    background:#151b1d;
-}
-
-.row{
-    position:absolute;
-    width:7px;
-    height:32px;
-    bottom:-25px;
-    background:#121719;
-}
-
-.r1{left:15px}.r2{left:40px}.r3{left:65px}.r4{left:90px}
-.r5{left:115px}.r6{left:140px}.r7{left:165px}
-
-/* ================= GUIDANCE ================= */
-
-.guideline{
-    position:absolute;
-    width:4px;
-    height:180%;
-    top:-40%;
-    background:#19ff45;
-    box-shadow:0 0 8px #19ff45;
-    transform-origin:center;
-    z-index:3;
-}
-
-#lineAB{
-    position:absolute;
-    width:5px;
-    height:180%;
-    left:50%;
-    top:-40%;
-    background:#ffffff;
-    box-shadow:0 0 8px white;
-    transform:translateX(-50%);
-    z-index:4;
-}
-
-#lineA,#lineB{
-    position:absolute;
-    padding:8px 13px;
-    border-radius:10px;
-    font-size:18px;
-    font-weight:bold;
-    z-index:5;
-}
-
-#lineA{
-    background:#087f3a;
-    left:43%;
-    top:25%;
-}
-
-#lineB{
-    background:#1236bb;
-    right:43%;
-    top:25%;
-}
-
-/* ================= LIGHTBAR ================= */
-
-#lightbar{
-    position:absolute;
-    top:12px;
-    left:50%;
-    transform:translateX(-50%);
-    height:34px;
-    padding:5px 16px;
-    border-radius:25px;
-    background:#061018;
-    border:2px solid #183c4b;
-    display:flex;
-    gap:7px;
-    z-index:15;
-}
-
-.light{
-    width:14px;
-    height:14px;
-    border-radius:50%;
-    background:#1ee84d;
-    box-shadow:0 0 8px #1ee84d;
-}
-
-.light.red{
-    background:#ff2929;
-    box-shadow:0 0 8px #ff2929;
-}
-
-.light.yellow{
-    background:#ffd11a;
-    box-shadow:0 0 8px #ffd11a;
-}
-
-#crossTrack{
-    position:absolute;
-    top:49px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:15;
-    background:#071522;
-    border-radius:0 0 12px 12px;
-    padding:5px 32px;
-    font-size:20px;
-    font-weight:bold;
-}
-
-/* ================= CARDS ================= */
 
 .card{
-    position:absolute;
-    background:rgba(3,17,28,.91);
-    border:1px solid #205a70;
-    border-radius:13px;
-    box-shadow:0 5px 20px rgba(0,0,0,.5);
-    z-index:12;
+  background:rgba(2,16,25,.94);
+  border:1px solid #1b4d63;
+  border-radius:17px;
+  padding:15px 20px;
+  min-width:235px;
+  box-shadow:0 8px 24px #0009
+}
+.card .title{
+  font-size:15px;color:#c2d0d7
+}
+.card .value{
+  font-size:28px;font-weight:bold;
+  color:#21ff4d;margin-top:5px
+}
+.bar{
+  height:8px;border-radius:5px;
+  background:#103328;margin-top:9px;
+  overflow:hidden
+}
+.bar i{
+  display:block;height:100%;
+  width:0;background:#21ff4d
 }
 
-.cardTitle{
-    font-size:17px;
-    font-weight:bold;
-    padding:12px;
-    border-bottom:1px solid #1c4758;
+/* BOTÕES */
+.actions{
+  position:absolute;z-index:8;
+  right:18px;top:18px;
+  display:flex;gap:7px
+}
+.btn{
+  border:1px solid #20566d;
+  border-radius:9px;padding:9px 12px;
+  color:#fff;background:#061824
+}
+.btn.active{
+  background:#087d3b;
+  border-color:#21ff4d
 }
 
-.abCard{
-    left:12px;
-    top:14px;
-    width:280px;
+/* JANELA */
+.modal{
+  display:none;
+  position:absolute;z-index:30;
+  top:95px;left:50%;
+  transform:translateX(-50%);
+  width:min(520px,90vw);
+  background:#061720f7;
+  border:1px solid #1bd2ff;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 20px 50px #000d
+}
+.modal.show{display:block}
+.modal h2{margin:0 0 14px}
+.modal input{
+  width:100%;padding:11px;
+  border-radius:8px;
+  border:1px solid #2a6077;
+  background:#06131c;color:#fff;
+  margin-bottom:10px
+}
+.modal button{
+  padding:10px 14px;
+  border-radius:8px;
+  border:1px solid #20ff4d;
+  background:#087c3b;color:#fff
 }
 
-.abRow{
-    display:flex;
-    justify-content:space-between;
-    padding:7px 12px;
+/* TABLET */
+@media(max-width:950px){
+
+.top{
+  height:68px;
+  padding:5px 8px;
+  gap:7px
 }
 
-.abRow b{
-    font-size:17px;
+.logo{width:190px}
+.logoIcon{font-size:27px}
+.logo b{font-size:19px}
+.logo small{display:none}
+
+.lightbar{
+  height:36px;
+  gap:5px
+}
+.l{
+  width:11px;
+  height:11px
 }
 
-.infoCard{
-    right:14px;
-    top:14px;
-    width:285px;
+.stats{gap:8px}
+.accuracy,.speed,.time{font-size:16px}
+.fix{font-size:13px}
+.compass{font-size:18px}
+.date{font-size:9px}
+
+.side{width:105px}
+.side.closed.left{transform:translateX(-105px)}
+.side.closed.right{transform:translateX(105px)}
+
+.item{height:72px}
+.ico{font-size:24px}
+.item span:last-child{font-size:11px}
+
+.coverage{left:112px}
+.rightCards{right:112px}
+
+.card{
+  min-width:160px;
+  padding:10px
 }
+.card .value{font-size:21px}
+.rightCards .card{min-width:145px}
 
-.infoRow{
-    display:flex;
-    justify-content:space-between;
-    padding:6px 12px;
-    color:#c8d6dc;
+.deviation{
+  min-width:230px;
+  padding:7px 16px
 }
-
-.infoRow strong{
-    color:white;
-    font-size:17px;
-}
-
-.implementCard{
-    right:14px;
-    top:225px;
-    width:285px;
-}
-
-.coverCard{
-    left:14px;
-    bottom:22px;
-    width:220px;
-}
-
-.coverBar{
-    height:18px;
-    margin:8px 12px;
-    background:linear-gradient(90deg,#1eff42,#11b935);
-    border-radius:5px;
-}
-
-/* ================= RIGHT ================= */
-
-#rightPanel{
-    width:92px;
-    min-width:92px;
-    background:linear-gradient(180deg,#061421,#030a11);
-    border-left:1px solid #15465c;
-    z-index:10;
-    transition:.25s;
-}
-
-#rightPanel.hidden{
-    width:0;
-    min-width:0;
-    overflow:hidden;
-}
-
-.rightBtn{
-    width:100%;
-    height:70px;
-    color:#e2edf2;
-    background:transparent;
-    border-bottom:1px solid #123748;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:5px;
-}
-
-.rightBtn .ico{
-    font-size:25px;
-}
-
-/* ================= TOGGLE ================= */
-
-.panelToggle{
-    position:absolute;
-    z-index:30;
-    top:50%;
-    transform:translateY(-50%);
-    width:26px;
-    height:75px;
-    border-radius:0 10px 10px 0;
-    background:#087f3a;
-    color:white;
-    font-size:18px;
-}
-
-#toggleLeft{
-    left:0;
-}
-
-#toggleRight{
-    right:0;
-    border-radius:10px 0 0 10px;
-}
-
-/* ================= BOTTOM ================= */
-
-#bottom{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    height:115px;
-    background:linear-gradient(180deg,rgba(2,12,19,.72),#020b13);
-    border-top:1px solid #1b5368;
-    z-index:18;
-    display:flex;
-    align-items:center;
-    padding:10px;
-    gap:10px;
-}
-
-.bottomBtn{
-    height:88px;
-    min-width:105px;
-    border-radius:10px;
-    border:1px solid #18516b;
-    background:#061b2b;
-    color:white;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    gap:7px;
-}
-
-.bottomBtn .ico{
-    font-size:25px;
-}
-
-.bottomBtn:hover{
-    background:#0c3045;
-}
-
-.rateBox{
-    flex:1;
-    min-width:180px;
-    height:88px;
-    border:1px solid #1a6c42;
-    background:#041810;
-    border-radius:10px;
-    padding:10px;
-}
-
-.rateTitle{
-    color:#b9d7c3;
-    font-size:12px;
-}
-
-.rateValue{
-    font-size:23px;
-    color:#36ff65;
-    font-weight:bold;
-}
-
-.progress{
-    margin-top:7px;
-    height:8px;
-    border-radius:5px;
-    background:#092a19;
-    overflow:hidden;
-}
-
-.progress div{
-    height:100%;
-    width:70%;
-    background:#28ef54;
-}
-
-.modeBox{
-    display:flex;
-    gap:4px;
-}
-
-.modeBtn{
-    width:90px;
-    height:78px;
-    background:#061a2a;
-    border:1px solid #184e65;
-    color:white;
-    border-radius:10px;
-    font-size:15px;
-}
-
-.modeBtn.active{
-    background:#087f3a;
-    border-color:#31ff62;
-}
-
-/* ================= FOOTER ================= */
-
-#footer{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    height:27px;
-    z-index:25;
-    background:#020b13;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 15px;
-    font-size:12px;
-    color:#c9d8df;
-}
-
-/* ================= MODAL ================= */
-
-#modal{
-    position:absolute;
-    inset:0;
-    background:rgba(0,0,0,.7);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:100;
-}
-
-#modal.show{
-    display:flex;
-}
-
-.modalBox{
-    width:min(500px,90vw);
-    max-height:90vh;
-    overflow:auto;
-    background:#061521;
-    border:1px solid #23728e;
-    border-radius:15px;
-    padding:20px;
-    box-shadow:0 15px 50px #000;
-}
-
-.modalBox h2{
-    margin-bottom:15px;
-}
-
-.formGroup{
-    margin-bottom:14px;
-}
-
-.formGroup label{
-    display:block;
-    margin-bottom:5px;
-    color:#c8d5db;
-}
-
-.formGroup input,
-.formGroup select{
-    width:100%;
-    height:42px;
-    border-radius:8px;
-    border:1px solid #276178;
-    background:#020d15;
-    color:white;
-    padding:0 10px;
-    font-size:16px;
-}
-
-.modalActions{
-    display:flex;
-    gap:8px;
-    margin-top:18px;
-}
-
-.modalActions button{
-    flex:1;
-    height:45px;
-    border-radius:8px;
-    background:#087f3a;
-    color:white;
-    font-weight:bold;
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media(max-width:900px){
-
-    .logo{
-        width:210px;
-    }
-
-    .logoText{
-        font-size:19px;
-    }
-
-    .status{
-        min-width:100px;
-    }
-
-    .statusTitle{
-        display:none;
-    }
-
-    #leftPanel{
-        width:90px;
-        min-width:90px;
-    }
-
-    #rightPanel{
-        width:75px;
-        min-width:75px;
-    }
-
-    .abCard{
-        width:220px;
-    }
-
-    .infoCard,
-    .implementCard{
-        width:220px;
-    }
-
-    .bottomBtn{
-        min-width:75px;
-    }
-}
-
-.hiddenUI{
-    display:none !important;
+.devnum{font-size:24px}
 }
 </style>
 </head>
 
 <body>
 
-<div id="app">
+<div class="app">
 
-<header id="header">
+<header class="top">
 
-    <div class="logo">
-        <div class="logoIcon">🛰️🌱</div>
-        <div>
-            <div class="logoText">
-                Portal Sat <span>GPS</span>
-            </div>
-            <div class="logoSub">
-                AGRÍCOLA • PRECISÃO QUE PLANTA RESULTADOS
-            </div>
-        </div>
-    </div>
+<div class="logo">
+  <div class="logoIcon">🛰️</div>
+  <div>
+    <b>Portal Sat <span>GPS</span></b>
+    <small>AGRÍCOLA • PRECISÃO QUE PLANTA RESULTADOS</small>
+  </div>
+</div>
 
-    <div class="statusArea">
+<div class="lightbar" id="lights"></div>
 
-        <div class="status">
-            <div class="statusIcon">🛰️</div>
-            <div>
-                <div class="statusTitle">Satélites</div>
-                <div class="statusValue" id="satellites">18/20</div>
-            </div>
-        </div>
+<div class="stats">
 
-        <div class="status">
-            <div class="statusIcon green">📡</div>
-            <div>
-                <div class="statusTitle">RTK</div>
-                <div class="statusValue green" id="rtk">FIX</div>
-            </div>
-        </div>
+  <div class="fix">🛰️ FIX</div>
 
-        <div class="status">
-            <div class="statusIcon cyan">🎯</div>
-            <div>
-                <div class="statusTitle">Precisão</div>
-                <div class="statusValue cyan" id="precision">± 2 cm</div>
-            </div>
-        </div>
+  <div class="accuracy">
+    ±<span id="acc">2</span> cm
+  </div>
 
-        <div class="status">
-            <div class="statusIcon cyan">◉</div>
-            <div>
-                <div class="statusTitle">Velocidade</div>
-                <div class="statusValue" id="speed">8,4 km/h</div>
-            </div>
-        </div>
+  <div class="compass" id="heading">N</div>
 
-        <div class="clock">
-            <div id="clock">--:--</div>
-            <div class="date" id="date">--/--/----</div>
-        </div>
+  <div class="speed" id="speed">
+    0,0 km/h
+  </div>
 
-    </div>
+  <div class="time">
+    <span id="clock">00:00</span>
+    <div class="date" id="date"></div>
+  </div>
 
+</div>
 </header>
 
-<div id="body">
 
-    <!-- ESQUERDA -->
+<main class="main">
 
-    <aside id="leftPanel">
+<canvas id="scene"></canvas>
 
-        <button class="menuBtn active" onclick="setSection('trabalho')">
-            <span class="ico">🚜</span>
-            Trabalho
-        </button>
 
-        <button class="menuBtn" onclick="openModal('talhao')">
-            <span class="ico">🌾</span>
-            Talhão/Lote
-        </button>
+<!-- MENU ESQUERDO -->
 
-        <button class="menuBtn" onclick="centerTractor()">
-            <span class="ico">📍</span>
-            Mapa
-        </button>
+<aside class="side left" id="L">
 
-        <button class="menuBtn" onclick="createAB()">
-            <span class="ico">📐</span>
-            Linhas A-B
-        </button>
+<button class="handle" onclick="toggle('L')">‹</button>
 
-        <button class="menuBtn" onclick="toggleCoverage()">
-            <span class="ico">▦</span>
-            Cobertura
-        </button>
+<button class="item" onclick="panel('talhao')">
+<span class="ico">🗺️</span>
+<span>Talhão</span>
+</button>
 
-        <button class="menuBtn" onclick="openModal('config')">
-            <span class="ico">⚙️</span>
-            Config.
-        </button>
+<button class="item" onclick="mark('A')">
+<span class="ico">A</span>
+<span>Linha A-B</span>
+</button>
 
-        <button class="menuBtn" onclick="openModal('implemento')">
-            <span class="ico">🔧</span>
-            Implemento
-        </button>
+<button class="item" onclick="panel('veiculo')">
+<span class="ico">🚜</span>
+<span>Veículo</span>
+</button>
 
-        <button class="menuBtn" onclick="openRecords()">
-            <span class="ico">📋</span>
-            Registros
-        </button>
+<button class="item" onclick="panel('implemento')">
+<span class="ico">↔</span>
+<span>Implemento</span>
+</button>
 
-        <button class="menuBtn" onclick="location.reload()">
-            <span class="ico">🚪</span>
-            Sair
-        </button>
+<button class="item" onclick="panel('config')">
+<span class="ico">⚙️</span>
+<span>Configurações</span>
+</button>
 
-    </aside>
+</aside>
 
-    <!-- MAPA -->
 
-    <main id="workArea">
+<!-- MENU DIREITO -->
 
-        <div id="field">
+<aside class="side right" id="R">
 
-            <div class="fieldLines"></div>
+<button class="handle" onclick="toggle('R')">›</button>
 
-            <canvas id="coverageCanvas"></canvas>
+<button class="item" onclick="panel('relatorios')">
+<span class="ico">📊</span>
+<span>Relatórios</span>
+</button>
 
-            <div id="lineAB"></div>
+<button class="item" onclick="panel('mapas')">
+<span class="ico">🗺️</span>
+<span>Mapas</span>
+</button>
 
-            <div id="lineA">A</div>
-            <div id="lineB">B</div>
+<button class="item" onclick="panel('talhoes')">
+<span class="ico">🌾</span>
+<span>Talhões</span>
+</button>
 
-            <!-- TRATOR -->
+<button class="item" onclick="panel('ferramentas')">
+<span class="ico">🔧</span>
+<span>Ferramentas</span>
+</button>
 
-            <div id="tractor">
+<button class="item" onclick="panel('mais')">
+<span class="ico">☰</span>
+<span>Mais</span>
+</button>
 
-                <div class="roof"></div>
-                <div class="cabin"></div>
-                <div class="tractorBody"></div>
+</aside>
 
-                <div class="wheel left"></div>
-                <div class="wheel right"></div>
 
-                <div class="wheelSmall left"></div>
-                <div class="wheelSmall right"></div>
+<!-- DESVIO -->
 
-                <div class="implement">
-                    <div class="implementBar"></div>
+<div class="deviation">
 
-                    <div class="row r1"></div>
-                    <div class="row r2"></div>
-                    <div class="row r3"></div>
-                    <div class="row r4"></div>
-                    <div class="row r5"></div>
-                    <div class="row r6"></div>
-                    <div class="row r7"></div>
-                </div>
+<div class="devnum" id="dev">
+0,12 m
+</div>
 
-            </div>
-
-        </div>
-
-        <!-- BARRA DE LUZ -->
-
-        <div id="lightbar">
-
-            <div class="light"></div>
-            <div class="light"></div>
-            <div class="light"></div>
-            <div class="light"></div>
-
-            <div class="light yellow"></div>
-            <div class="light red"></div>
-            <div class="light red"></div>
-
-            <div class="light"></div>
-            <div class="light"></div>
-            <div class="light"></div>
-
-        </div>
-
-        <div id="crossTrack">0,00 m</div>
-
-        <!-- CARTÃO A/B -->
-
-        <div class="card abCard">
-
-            <div class="cardTitle">🔗 Linha A-B</div>
-
-            <div class="abRow">
-                <b>A</b>
-                <span id="pointA">0+00,000 m</span>
-            </div>
-
-            <div class="abRow">
-                <b class="cyan">B</b>
-                <span id="pointB">0+00,000 m</span>
-            </div>
-
-            <div class="abRow">
-                <span>📏 Espaçamento</span>
-                <strong id="spacingDisplay">12,0 m</strong>
-            </div>
-
-        </div>
-
-        <!-- INFORMAÇÕES -->
-
-        <div class="card infoCard">
-
-            <div class="cardTitle">📊 Informações de Trabalho</div>
-
-            <div class="infoRow">
-                <span>Área trabalhada</span>
-                <strong id="workedArea">0,00 ha</strong>
-            </div>
-
-            <div class="infoRow">
-                <span>Área do talhão</span>
-                <strong id="fieldArea">0,00 ha</strong>
-            </div>
-
-            <div class="infoRow">
-                <span>Tempo de trabalho</span>
-                <strong id="workTime">00:00:00</strong>
-            </div>
-
-            <div class="infoRow">
-                <span>Rendimento</span>
-                <strong id="yield">0,00 ha/h</strong>
-            </div>
-
-            <div class="infoRow">
-                <span>Heading</span>
-                <strong id="heading">0°</strong>
-            </div>
-
-        </div>
-
-        <!-- IMPLEMENTO -->
-
-        <div class="card implementCard">
-
-            <div class="cardTitle">🚜 Implemento</div>
-
-            <div class="infoRow">
-                <span>Modelo</span>
-                <strong id="implementName">
-                    Plantadeira
-                </strong>
-            </div>
-
-            <div class="infoRow">
-                <span>Largura</span>
-                <strong id="widthDisplay">
-                    12,0 m
-                </strong>
-            </div>
-
-            <div class="infoRow">
-                <span>Taxa aplicação</span>
-                <strong id="rateDisplay">
-                    85 kg/ha
-                </strong>
-            </div>
-
-        </div>
-
-        <!-- COBERTURA -->
-
-        <div class="card coverCard">
-
-            <div class="cardTitle">🌱 Cobertura de Passada</div>
-
-            <div class="coverBar"></div>
-
-            <div class="infoRow">
-                <span>100%</span>
-                <strong id="coveragePercent">0%</strong>
-            </div>
-
-        </div>
-
-        <!-- DIREITA -->
-
-        <aside id="rightPanel">
-
-            <button class="rightBtn" onclick="toggleLeft()">
-                <span class="ico">☰</span>
-                Painéis
-            </button>
-
-            <button class="rightBtn" onclick="toggle3D()">
-                <span class="ico">◇</span>
-                Mapa 3D
-            </button>
-
-            <button class="rightBtn" onclick="zoomIn()">
-                <span class="ico">🔍+</span>
-                Ampliar
-            </button>
-
-            <button class="rightBtn" onclick="zoomOut()">
-                <span class="ico">🔍−</span>
-                Diminuir
-            </button>
-
-            <button class="rightBtn" onclick="centerTractor()">
-                <span class="ico">🎯</span>
-                Centralizar
-            </button>
-
-            <button class="rightBtn" onclick="toggleNight()">
-                <span class="ico">🌙</span>
-                Noturna
-            </button>
-
-            <button class="rightBtn" onclick="fullscreen()">
-                <span class="ico">⛶</span>
-                Tela Cheia
-            </button>
-
-        </aside>
-
-        <!-- ABAS LATERAIS -->
-
-        <button class="panelToggle" id="toggleLeft" onclick="toggleLeft()">‹</button>
-
-        <button class="panelToggle" id="toggleRight" onclick="toggleRight()">›</button>
-
-        <!-- BOTTOM -->
-
-        <div id="bottom">
-
-            <button class="bottomBtn" onclick="openModal('talhao')">
-                <span class="ico">🌾</span>
-                Criar Talhão
-            </button>
-
-            <button class="bottomBtn" onclick="loadField()">
-                <span class="ico">📁</span>
-                Carregar
-            </button>
-
-            <button class="bottomBtn" onclick="saveField()">
-                <span class="ico">💾</span>
-                Salvar
-            </button>
-
-            <button class="bottomBtn" onclick="openRecords()">
-                <span class="ico">📄</span>
-                Gerenciar
-            </button>
-
-            <div class="rateBox">
-
-                <div class="rateTitle">
-                    🌱 Taxa de Aplicação
-                </div>
-
-                <div class="rateValue" id="bottomRate">
-                    85,0 kg/ha
-                </div>
-
-                <div class="progress">
-                    <div id="rateProgress"></div>
-                </div>
-
-            </div>
-
-            <div class="rateBox">
-
-                <div class="rateTitle">
-                    💨 Pressão
-                </div>
-
-                <div class="rateValue">
-                    2,8 bar
-                </div>
-
-            </div>
-
-            <div class="modeBox">
-
-                <button class="modeBtn active"
-                        onclick="set2D()">
-                    🗺️<br>2D
-                </button>
-
-                <button class="modeBtn"
-                        onclick="set3D()">
-                    ◇<br>3D
-                </button>
-
-                <button class="modeBtn"
-                        onclick="toggleNight()">
-                    🌙<br>Noturna
-                </button>
-
-            </div>
-
-        </div>
-
-        <footer id="footer">
-
-            <span id="gpsStatus">
-                🟢 Conectado ao GPS do aparelho
-            </span>
-
-            <span>
-                Portal Sat GPS • Agricultura de Precisão
-            </span>
-
-        </footer>
-
-    </main>
+<div class="devlabel">
+Desvio da linha
+</div>
 
 </div>
 
-<!-- MODAL -->
 
-<div id="modal">
+<!-- COBERTURA -->
 
-    <div class="modalBox">
+<div class="bottom coverage card">
 
-        <h2 id="modalTitle">
-            Configuração
-        </h2>
+<div class="title">
+🌱 Cobertura
+</div>
 
-        <div id="modalContent"></div>
+<div class="value">
+<span id="cov">100</span>%
+</div>
 
-        <div class="modalActions">
-
-            <button onclick="closeModal()">
-                Cancelar
-            </button>
-
-            <button onclick="applyModal()">
-                Aplicar
-            </button>
-
-        </div>
-
-    </div>
+<div class="bar">
+<i id="bar"></i>
+</div>
 
 </div>
+
+
+<!-- ÁREA / IMPLEMENTO -->
+
+<div class="bottom rightCards">
+
+<div class="card">
+
+<div class="title">
+▥ Área trabalhada
+</div>
+
+<div class="value">
+<span id="area">12,6</span> ha
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="title">
+↔ Largura do implemento
+</div>
+
+<div class="value">
+<span id="width">12,0</span> m
+</div>
+
+</div>
+
+</div>
+
+
+<!-- AÇÕES -->
+
+<div class="actions">
+
+<button class="btn" id="run" onclick="run()">
+▶ Iniciar
+</button>
+
+<button class="btn" onclick="resetWork()">
+↺ Zerar
+</button>
+
+<button class="btn" onclick="panel('salvar')">
+💾 Salvar
+</button>
+
+</div>
+
+
+<!-- JANELA DE CONFIGURAÇÃO -->
+
+<div class="modal" id="modal"></div>
+
+</main>
+
+</div>
+
 
 <script>
 
-/* =====================================================
-   PORTAL SAT GPS AGRÍCOLA
-   MOTOR PRINCIPAL
-===================================================== */
+const canvas=document.getElementById('scene');
+const ctx=canvas.getContext('2d');
 
-let state = {
+let W,H;
+let go=false;
+let t=0;
+let dev=.12;
+let cov=100;
+let area=12.6;
+let width=12;
+let A=null;
 
-    spacing:12,
-    implementWidth:12,
-    rate:85,
 
-    heading:0,
+/* TAMANHO */
 
-    speed:8.4,
+function size(){
 
-    coverage:true,
+W=canvas.width=canvas.clientWidth;
+H=canvas.height=canvas.clientHeight;
 
-    mode3D:false,
+}
 
-    night:false,
+addEventListener('resize',size);
+size();
 
-    zoom:1,
 
-    areaWorked:0,
+/* BARRA DE LUZ */
 
-    fieldArea:0,
+for(let i=0;i<19;i++){
 
-    workSeconds:0,
+let d=document.createElement('i');
 
-    tractorX:50,
+d.className='l '+
+(i==8?'y':
+(i==9||i==10?'r':''));
 
-    tractorY:58,
+document.getElementById('lights').appendChild(d);
 
-    pointA:null,
+}
 
-    pointB:null,
 
-    fieldName:"Talhão 01",
+/* DESENHO DA LAVOURA */
 
-    running:true
+function draw(){
+
+ctx.clearRect(0,0,W,H);
+
+
+/* CÉU E CAMPO */
+
+let sky=ctx.createLinearGradient(0,0,0,H);
+
+sky.addColorStop(0,'#4aa9df');
+sky.addColorStop(.30,'#79c76c');
+sky.addColorStop(1,'#147027');
+
+ctx.fillStyle=sky;
+ctx.fillRect(0,0,W,H);
+
+ctx.fillStyle='#255e2b';
+ctx.fillRect(0,H*.28,W,H*.72);
+
+
+/* LINHAS */
+
+let cx=W/2;
+let hy=H*.28;
+
+for(let n=-6;n<=6;n++){
+
+ctx.strokeStyle=
+n==0?'#ffffff':'#19f14b';
+
+ctx.lineWidth=n==0?4:2;
+
+ctx.beginPath();
+
+ctx.moveTo(cx+n*25,hy);
+
+ctx.lineTo(cx+n*150,H);
+
+ctx.stroke();
+
+}
+
+
+/* COBERTURA */
+
+ctx.fillStyle='rgba(18,255,64,.40)';
+
+ctx.fillRect(
+cx-190,
+H*.56,
+380,
+H*.44
+);
+
+
+/* TRATOR */
+
+let tx=cx+dev*45;
+let ty=H*.67;
+
+ctx.save();
+
+ctx.translate(tx,ty);
+
+
+/* RODAS */
+
+ctx.fillStyle='#111a1d';
+
+ctx.beginPath();
+ctx.ellipse(-50,25,18,48,0,0,7);
+ctx.fill();
+
+ctx.beginPath();
+ctx.ellipse(50,25,18,48,0,0,7);
+ctx.fill();
+
+
+/* CORPO */
+
+ctx.fillStyle='#20b93c';
+ctx.fillRect(-44,-8,88,62);
+
+
+/* CABINE */
+
+ctx.fillStyle='#80bdd7';
+ctx.fillRect(-27,-48,54,37);
+
+ctx.fillStyle='#10232b';
+ctx.fillRect(-22,-43,44,27);
+
+
+/* IMPLEMENTO */
+
+ctx.fillStyle='#1ddd49';
+ctx.fillRect(-82,52,164,9);
+
+ctx.restore();
+
+
+/* LINHA CENTRAL */
+
+ctx.strokeStyle='#fff';
+ctx.lineWidth=4;
+
+ctx.beginPath();
+ctx.moveTo(cx,H*.50);
+ctx.lineTo(cx,H);
+ctx.stroke();
+
+}
+
+
+/* SIMULAÇÃO */
+
+function loop(){
+
+if(go){
+
+t+=.02;
+
+dev=Math.sin(t)*.32;
+
+document.getElementById('dev').textContent=
+Math.abs(dev).toFixed(2).replace('.',',')+' m';
+
+let sp=8.4+Math.sin(t*.7);
+
+document.getElementById('speed').textContent=
+sp.toFixed(1).replace('.',',')+' km/h';
+
+document.getElementById('heading').textContent=
+['N','NE','E','SE','S','SW','W','NW']
+[Math.floor((t*10)%8)];
+
+}
+
+draw();
+
+requestAnimationFrame(loop);
+
+}
+
+loop();
+
+
+/* INICIAR */
+
+function run(){
+
+go=!go;
+
+let b=document.getElementById('run');
+
+b.textContent=
+go?'⏸ Pausar':'▶ Iniciar';
+
+b.classList.toggle('active',go);
+
+}
+
+
+/* ZERAR */
+
+function resetWork(){
+
+go=false;
+t=0;
+dev=.12;
+
+document.getElementById('run').textContent='▶ Iniciar';
+
+document.getElementById('run')
+.classList.remove('active');
+
+}
+
+
+/* ABRIR / FECHAR LATERAIS */
+
+function toggle(id){
+
+document.getElementById(id)
+.classList.toggle('closed');
+
+}
+
+
+/* A-B */
+
+function mark(p){
+
+if(p==='A'){
+
+A=Date.now();
+
+alert(
+'Ponto A registrado.\
+\
+Avance na direção desejada e registre o ponto B.'
+);
+
+}else{
+
+if(!A){
+
+alert('Registre o ponto A primeiro.');
+
+return;
+
+}
+
+alert(
+'Ponto B registrado.\
+\
+Linhas paralelas criadas.'
+);
+
+}
+
+}
+
+
+/* PAINÉIS */
+
+function panel(type){
+
+let modal=document.getElementById('modal');
+
+modal.classList.add('show');
+
+let titles={
+
+talhao:'Talhão / Lote',
+veiculo:'Veículo',
+implemento:'Implemento',
+config:'Configurações',
+relatorios:'Relatórios',
+mapas:'Mapas',
+talhoes:'Talhões',
+ferramentas:'Ferramentas',
+mais:'Mais',
+salvar:'Salvar trabalho'
 
 };
 
-let gpsWatch=null;
+let field=
+type==='implemento'
+?
+`<input id="input"
+value="${width}"
+placeholder="Largura do implemento (m)">`
+:
+`<input id="input"
+placeholder="${
+type==='salvar'
+?'Nome do trabalho'
+:'Configuração'
+}">`;
 
-let lastTime=Date.now();
+modal.innerHTML=`
 
-let modalMode="";
+<h2>${titles[type]||'Portal Sat GPS'}</h2>
 
-/* =====================================================
-   ELEMENTOS
-===================================================== */
+${field}
 
-const tractor=document.getElementById("tractor");
-const field=document.getElementById("field");
-const canvas=document.getElementById("coverageCanvas");
-const ctx=canvas.getContext("2d");
+<br>
 
-/* =====================================================
-   RELÓGIO
-===================================================== */
+<button onclick="savePanel('${type}')">
+Salvar
+</button>
 
-function updateClock(){
+<button onclick="closePanel()">
+Fechar
+</button>
 
-    const d=new Date();
-
-    document.getElementById("clock")
-        .textContent=
-        d.toLocaleTimeString("pt-BR",
-        {
-            hour:"2-digit",
-            minute:"2-digit"
-        });
-
-    document.getElementById("date")
-        .textContent=
-        d.toLocaleDateString("pt-BR");
+`;
 
 }
 
-setInterval(updateClock,1000);
 
-updateClock();
+/* FECHAR PAINEL */
 
-/* =====================================================
-   CANVAS
-===================================================== */
+function closePanel(){
 
-function resizeCanvas(){
-
-    canvas.width=field.clientWidth;
-    canvas.height=field.clientHeight;
+document.getElementById('modal')
+.classList.remove('show');
 
 }
 
-window.addEventListener("resize",resizeCanvas);
 
-resizeCanvas();
+/* SALVAR CONFIGURAÇÃO */
 
-/* =====================================================
-   COBERTURA
-===================================================== */
+function savePanel(type){
 
-let coverage=[];
+let v=document.getElementById('input').value;
 
-function drawCoverage(){
+if(type==='implemento'){
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    if(!state.coverage) return;
-
-    coverage.forEach(c=>{
-
-        ctx.save();
-
-        ctx.translate(c.x,c.y);
-
-        ctx.rotate(c.angle);
-
-        ctx.fillStyle="rgba(20,255,45,.38)";
-
-        ctx.fillRect(
-            -c.width/2,
-            -c.length/2,
-            c.width,
-            c.length
-        );
-
-        ctx.restore();
-
-    });
-
-    document.getElementById("coveragePercent")
-        .textContent=
-        Math.min(
-            100,
-            Math.round(coverage.length/4)
-        )+"%";
-
-}
-
-/* =====================================================
-   REGISTRA COBERTURA
-===================================================== */
-
-function addCoverage(){
-
-    if(!state.coverage) return;
-
-    const x=
-        field.clientWidth*
-        state.tractorX/100;
-
-    const y=
-        field.clientHeight*
-        state.tractorY/100;
-
-    const width=
-        Math.max(
-            20,
-            state.implementWidth*12
-        );
-
-    coverage.push({
-
-        x:x,
-
-        y:y+45,
-
-        width:width,
-
-        length:Math.max(
-            15,
-            state.speed*1.2
-        ),
-
-        angle:
-            state.heading*Math.PI/180
-
-    });
-
-    if(coverage.length>1200){
-        coverage.shift();
-    }
-
-    drawCoverage();
-
-}
-
-/* =====================================================
-   MOVIMENTO DO TRATOR
-===================================================== */
-
-function moveTractor(){
-
-    if(!state.running) return;
-
-    const now=Date.now();
-
-    const dt=(now-lastTime)/1000;
-
-    lastTime=now;
-
-    state.workSeconds+=dt;
-
-    const pixels=
-        state.speed*
-        0.0035*
-        dt;
-
-    const rad=
-        state.heading*
-        Math.PI/180;
-
-    state.tractorX+=
-        Math.sin(rad)*pixels;
-
-    state.tractorY-=
-        Math.cos(rad)*pixels;
-
-    if(state.tractorX<15){
-        state.tractorX=15;
-    }
-
-    if(state.tractorX>85){
-        state.tractorX=85;
-    }
-
-    if(state.tractorY<15){
-        state.tractorY=15;
-    }
-
-    if(state.tractorY>80){
-        state.tractorY=80;
-    }
-
-    tractor.style.left=
-        state.tractorX+"%";
-
-    tractor.style.top=
-        state.tractorY+"%";
-
-    tractor.style.transform=
-        "translate(-50%,-50%) rotate("+state.heading+"deg)";
-
-    addCoverage();
-
-    updateStats();
-
-    requestAnimationFrame(moveTractor);
-
-}
-
-/* =====================================================
-   ESTATÍSTICAS
-===================================================== */
-
-function updateStats(){
-
-    document.getElementById("speed")
-        .textContent=
-        state.speed.toFixed(1)
-        .replace(".",",")
-        +" km/h";
-
-    document.getElementById("heading")
-        .textContent=
-        Math.round(state.heading)+"°";
-
-    document.getElementById("spacingDisplay")
-        .textContent=
-        state.spacing.toFixed(1)
-        .replace(".",",")+" m";
-
-    document.getElementById("widthDisplay")
-        .textContent=
-        state.implementWidth
-        .toFixed(1)
-        .replace(".",",")+" m";
-
-    document.getElementById("rateDisplay")
-        .textContent=
-        state.rate
-        .toFixed(0)+" kg/ha";
-
-    document.getElementById("bottomRate")
-        .textContent=
-        state.rate
-        .toFixed(1)
-        .replace(".",",")+" kg/ha";
-
-    document.getElementById("workedArea")
-        .textContent=
-        state.areaWorked
-        .toFixed(2)
-        .replace(".",",")+" ha";
-
-    document.getElementById("fieldArea")
-        .textContent=
-        state.fieldArea
-        .toFixed(2)
-        .replace(".",",")+" ha";
-
-    let h=
-        Math.floor(state.workSeconds/3600);
-
-    let m=
-        Math.floor(
-            (state.workSeconds%3600)/60
-        );
-
-    let s=
-        Math.floor(
-            state.workSeconds%60
-        );
-
-    document.getElementById("workTime")
-        .textContent=
-        String(h).padStart(2,"0")+":"+
-        String(m).padStart(2,"0")+":"+
-        String(s).padStart(2,"0");
-
-    document.getElementById("yield")
-        .textContent=
-        (
-            state.speed*
-            state.implementWidth/100
-        )
-        .toFixed(2)
-        .replace(".",",")
-        +" ha/h";
-
-}
-
-/* =====================================================
-   LINHA A/B
-===================================================== */
-
-function createAB(){
-
-    if(!state.pointA){
-
-        state.pointA={
-            x:state.tractorX,
-            y:state.tractorY,
-            heading:state.heading
-        };
-
-        document.getElementById("pointA")
-            .textContent=
-            "A registrado";
-
-        return;
-
-    }
-
-    if(!state.pointB){
-
-        state.pointB={
-            x:state.tractorX,
-            y:state.tractorY,
-            heading:state.heading
-        };
-
-        document.getElementById("pointB")
-            .textContent=
-            "B registrado";
-
-        generateParallelLines();
-
-        return;
-
-    }
-
-    state.pointA=null;
-    state.pointB=null;
-
-    document.getElementById("pointA")
-        .textContent="0+00,000 m";
-
-    document.getElementById("pointB")
-        .textContent="0+00,000 m";
-
-    generateParallelLines();
-
-}
-
-/* =====================================================
-   LINHAS PARALELAS
-===================================================== */
-
-function generateParallelLines(){
-
-    document.querySelectorAll(".guideline")
-        .forEach(e=>e.remove());
-
-    if(!state.pointA || !state.pointB) return;
-
-    const angle=
-        Math.atan2(
-            state.pointB.x-state.pointA.x,
-            -(state.pointB.y-state.pointA.y)
-        );
-
-    state.heading=
-        angle*180/Math.PI;
-
-    for(let i=-12;i<=12;i++){
-
-        const line=
-            document.createElement("div");
-
-        line.className="guideline";
-
-        const spacing=
-            i*
-            state.spacing*
-            0.25;
-
-        line.style.left=
-            `calc(50% + ${spacing}%)`;
-
-        line.style.transform=
-            `rotate(${state.heading}deg)`;
-
-        field.appendChild(line);
-
-    }
-
-    document.getElementById("crossTrack")
-        .textContent=
-        "0,00 m";
-
-}
-
-/* =====================================================
-   PAINÉIS
-===================================================== */
-
-function toggleLeft(){
-
-    document
-        .getElementById("leftPanel")
-        .classList.toggle("hidden");
-
-}
-
-function toggleRight(){
-
-    document
-        .getElementById("rightPanel")
-        .classList.toggle("hidden");
-
-}
-
-/* =====================================================
-   COBERTURA
-===================================================== */
-
-function toggleCoverage(){
-
-    state.coverage=
-        !state.coverage;
-
-    drawCoverage();
-
-}
-
-/* =====================================================
-   3D
-===================================================== */
-
-function set3D(){
-
-    state.mode3D=true;
-
-    field.classList.add("mode3d");
-
-    field.style.transform=
-        "perspective(850px) rotateX(48deg) scale(1.18)";
-
-    document
-        .querySelectorAll(".modeBtn")
-        .forEach(b=>b.classList.remove("active"));
-
-    document
-        .querySelectorAll(".modeBtn")[1]
-        .classList.add("active");
-
-}
-
-function set2D(){
-
-    state.mode3D=false;
-
-    field.classList.remove("mode3d");
-
-    field.style.transform=
-        "none";
-
-    document
-        .querySelectorAll(".modeBtn")
-        .forEach(b=>b.classList.remove("active"));
-
-    document
-        .querySelectorAll(".modeBtn")[0]
-        .classList.add("active");
-
-}
-
-function toggle3D(){
-
-    state.mode3D?
-        set2D():
-        set3D();
-
-}
-
-/* =====================================================
-   ZOOM
-===================================================== */
-
-function zoomIn(){
-
-    state.zoom=
-        Math.min(2.5,state.zoom+.15);
-
-    field.style.transform=
-        state.mode3D?
-        `perspective(850px) rotateX(48deg) scale(${state.zoom})`:
-        `scale(${state.zoom})`;
-
-}
-
-function zoomOut(){
-
-    state.zoom=
-        Math.max(.6,state.zoom-.15);
-
-    field.style.transform=
-        state.mode3D?
-        `perspective(850px) rotateX(48deg) scale(${state.zoom})`:
-        `scale(${state.zoom})`;
-
-}
-
-/* =====================================================
-   CENTRALIZAR
-===================================================== */
-
-function centerTractor(){
-
-    state.tractorX=50;
-    state.tractorY=58;
-
-    tractor.style.left="50%";
-    tractor.style.top="58%";
-
-}
-
-/* =====================================================
-   NOTURNO
-===================================================== */
-
-function toggleNight(){
-
-    state.night=
-        !state.night;
-
-    document.body.style.filter=
-        state.night?
-        "brightness(.65) contrast(1.1)":
-        "none";
-
-}
-
-/* =====================================================
-   TELA CHEIA
-===================================================== */
-
-function fullscreen(){
-
-    if(!document.fullscreenElement){
-
-        document.documentElement
-            .requestFullscreen()
-            .catch(()=>{});
-
-    }else{
-
-        document.exitFullscreen();
-
-    }
-
-}
-
-/* =====================================================
-   MODAL
-===================================================== */
-
-function openModal(type){
-
-    modalMode=type;
-
-    const modal=
-        document.getElementById("modal");
-
-    const title=
-        document.getElementById("modalTitle");
-
-    const content=
-        document.getElementById("modalContent");
-
-    if(type==="config"){
-
-        title.textContent=
-            "⚙️ Configurações GPS";
-
-        content.innerHTML=`
-
-        <div class="formGroup">
-            <label>Velocidade simulada</label>
-            <input id="inputSpeed"
-                   type="number"
-                   step=".1"
-                   value="${state.speed}">
-        </div>
-
-        <div class="formGroup">
-            <label>Espaçamento entre linhas (m)</label>
-            <input id="inputSpacing"
-                   type="number"
-                   step=".1"
-                   value="${state.spacing}">
-        </div>
-
-        <div class="formGroup">
-            <label>Satélites</label>
-            <input id="inputSat"
-                   type="number"
-                   value="18">
-        </div>
-
-        `;
-
-    }
-
-    if(type==="implemento"){
-
-        title.textContent=
-            "🔧 Configuração do Implemento";
-
-        content.innerHTML=`
-
-        <div class="formGroup">
-            <label>Nome do implemento</label>
-            <input id="inputImplement"
-                   value="${document.getElementById("implementName").textContent.trim()}">
-        </div>
-
-        <div class="formGroup">
-            <label>Largura de trabalho (m)</label>
-            <input id="inputWidth"
-                   type="number"
-                   step=".1"
-                   value="${state.implementWidth}">
-        </div>
-
-        <div class="formGroup">
-            <label>Taxa de aplicação (kg/ha)</label>
-            <input id="inputRate"
-                   type="number"
-                   step=".1"
-                   value="${state.rate}">
-        </div>
-
-        `;
-
-    }
-
-    if(type==="talhao"){
-
-        title.textContent=
-            "🌾 Criar Talhão / Lote";
-
-        content.innerHTML=`
-
-        <div class="formGroup">
-            <label>Nome do talhão</label>
-            <input id="inputFieldName"
-                   value="${state.fieldName}">
-        </div>
-
-        <div class="formGroup">
-            <label>Área do talhão (ha)</label>
-            <input id="inputFieldArea"
-                   type="number"
-                   step=".01"
-                   value="${state.fieldArea}">
-        </div>
-
-        `;
-
-    }
-
-    modal.classList.add("show");
-
-}
-
-function closeModal(){
-
-    document
-        .getElementById("modal")
-        .classList.remove("show");
-
-}
-
-function applyModal(){
-
-    if(modalMode==="config"){
-
-        state.speed=
-            Number(
-                document.getElementById("inputSpeed").value
-            )||8.4;
-
-        state.spacing=
-            Number(
-                document.getElementById("inputSpacing").value
-            )||12;
-
-        document.getElementById("satellites")
-            .textContent=
-            document.getElementById("inputSat").value+
-            "/20";
-
-    }
-
-    if(modalMode==="implemento"){
-
-        state.implementWidth=
-            Number(
-                document.getElementById("inputWidth").value
-            )||12;
-
-        state.rate=
-            Number(
-                document.getElementById("inputRate").value
-            )||85;
-
-        document.getElementById("implementName")
-            .textContent=
-            document.getElementById("inputImplement").value
-            ||"Implemento";
-
-        if(state.pointA && state.pointB)
-            generateParallelLines();
-
-    }
-
-    if(modalMode==="talhao"){
-
-        state.fieldName=
-            document.getElementById("inputFieldName").value
-            ||"Talhão";
-
-        state.fieldArea=
-            Number(
-                document.getElementById("inputFieldArea").value
-            )||0;
-
-    }
-
-    updateStats();
-
-    closeModal();
-
-}
-
-/* =====================================================
-   SALVAR TALHÃO
-===================================================== */
-
-function saveField(){
-
-    const data={
-        state:state,
-        coverage:coverage
-    };
-
-    localStorage.setItem(
-        "portalSatGPSField",
-        JSON.stringify(data)
-    );
-
-    alert("Talhão salvo neste aparelho.");
-
-}
-
-/* =====================================================
-   CARREGAR TALHÃO
-===================================================== */
-
-function loadField(){
-
-    const raw=
-        localStorage.getItem(
-            "portalSatGPSField"
-        );
-
-    if(!raw){
-
-        alert("Nenhum talhão salvo.");
-
-        return;
-
-    }
-
-    try{
-
-        const data=
-            JSON.parse(raw);
-
-        state=data.state||state;
-
-        coverage=data.coverage||[];
-
-        updateStats();
-
-        drawCoverage();
-
-        alert("Talhão carregado.");
-
-    }catch(e){
-
-        alert("Erro ao carregar talhão.");
-
-    }
-
-}
-
-/* =====================================================
-   REGISTROS
-===================================================== */
-
-function openRecords(){
-
-    alert(
-        "REGISTROS\n\n"+
-        "Talhão: "+state.fieldName+
-        "\nÁrea trabalhada: "+
-        state.areaWorked.toFixed(2)+" ha"+
-        "\nCobertura: "+
-        coverage.length+" registros"
-    );
-
-}
-
-/* =====================================================
-   GPS DO APARELHO
-===================================================== */
-
-function startGPS(){
-
-    if(!navigator.geolocation){
-
-        document.getElementById("gpsStatus")
-            .textContent=
-            "🔴 GPS não disponível no navegador";
-
-        return;
-
-    }
-
-    gpsWatch=
-        navigator.geolocation.watchPosition(
-
-            position=>{
-
-                const accuracy=
-                    position.coords.accuracy;
-
-                document.getElementById("gpsStatus")
-                    .textContent=
-                    "🟢 GPS conectado • "+
-                    "±"+Math.round(accuracy)+" m";
-
-                if(position.coords.speed!=null){
-
-                    const kmh=
-                        Math.max(
-                            0,
-                            position.coords.speed*3.6
-                        );
-
-                    state.speed=
-                        kmh>0.2?
-                        kmh:
-                        state.speed;
-
-                }
-
-                if(position.coords.heading!=null &&
-                   !isNaN(position.coords.heading)){
-
-                    state.heading=
-                        position.coords.heading;
-
-                }
-
-            },
-
-            error=>{
-
-                document.getElementById("gpsStatus")
-                    .textContent=
-                    "🟠 GPS aguardando sinal";
-
-            },
-
-            {
-                enableHighAccuracy:true,
-                maximumAge:1000,
-                timeout:5000
-            }
-
-        );
-
-}
-
-/* =====================================================
-   ORIENTAÇÃO DO APARELHO
-===================================================== */
-
-window.addEventListener(
-    "deviceorientationabsolute",
-    e=>{
-
-        if(e.alpha!=null){
-
-            state.heading=
-                e.alpha;
-
-        }
-
-    }
+let n=parseFloat(
+v.replace(',','.')
 );
 
-/* =====================================================
-   CONTROLE POR TECLADO
-===================================================== */
+if(n>0){
 
-document.addEventListener(
-    "keydown",
-    e=>{
+width=n;
 
-        if(e.key==="ArrowLeft")
-            state.heading-=2;
+document.getElementById('width')
+.textContent=
+n.toFixed(1).replace('.',',');
 
-        if(e.key==="ArrowRight")
-            state.heading+=2;
+}
 
-        if(e.key==="ArrowUp")
-            state.speed+=.2;
+}
 
-        if(e.key==="ArrowDown")
-            state.speed=Math.max(
-                0,
-                state.speed-.2
-            );
+if(type==='salvar'){
 
-        if(e.key===" ")
-            toggleCoverage();
+localStorage.setItem(
+'PortalSatGPS',
+JSON.stringify({
 
-    }
+area:area,
+cobertura:cov,
+largura:width,
+data:new Date().toISOString()
+
+})
 );
 
-/* =====================================================
-   ÁREA TRABALHADA
-===================================================== */
+alert('Trabalho salvo neste aparelho.');
 
-setInterval(()=>{
+}
 
-    if(state.running){
+closePanel();
 
-        state.areaWorked +=
-            state.speed*
-            state.implementWidth/
-            100000;
+}
 
-    }
 
-},1000);
+/* RELÓGIO */
 
-/* =====================================================
-   INICIALIZAÇÃO
-===================================================== */
+function clock(){
 
-updateStats();
+let d=new Date();
 
-startGPS();
+document.getElementById('clock')
+.textContent=
+d.toLocaleTimeString(
+'pt-BR',
+{
+hour:'2-digit',
+minute:'2-digit'
+}
+);
 
-requestAnimationFrame(moveTractor);
+document.getElementById('date')
+.textContent=
+d.toLocaleDateString('pt-BR');
+
+}
+
+setInterval(clock,1000);
+
+clock();
 
 </script>
 
