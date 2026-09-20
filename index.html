@@ -28,11 +28,19 @@
             padding: 0 12px; border-bottom: 2px solid #2E7D32;
         }
         .logo { font-size: 14px; font-weight: bold; color: #4ade80; display: flex; align-items: center; gap: 6px; }
-        .status-gps { display: flex; gap: 12px; font-size: 11px; align-items: center; }
+        .status-gps { display: flex; gap: 10px; font-size: 11px; align-items: center; }
         .bolinha { width: 10px; height: 10px; border-radius: 50%; background: #333; }
         .bolinha.verde { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
         .bolinha.amarela { background: #eab308; box-shadow: 0 0 6px #eab308; }
         .bolinha.vermelha { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+        /* ✅ BOTÃO DE FONTE GPS */
+        .btn-fonte {
+            background: #152238; color: #fff; border: 1px solid #2E7D32;
+            padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: pointer;
+            display: flex; align-items: center; gap: 5px; transition: all 0.2s;
+        }
+        .btn-fonte.antena-externa { background: rgba(34,197,94,0.2); border-color: #22c55e; }
+        .btn-fonte:active { transform: scale(0.95); }
         .barra-luz {
             position: absolute; top: 55px; left: 50%; transform: translateX(-50%);
             width: 340px; height: 24px; background: #0f0f0f; border: 2px solid #333; border-radius: 12px;
@@ -100,36 +108,29 @@
             background: rgba(234,179,8,0.95); color: #000; padding: 8px 20px;
             border-radius: 25px; font-weight: bold; font-size: 14px; z-index: 600; display: none;
         }
-
-        /* ✅ Botão de pintura movido para canto inferior direito */
         .btn-pintar-flutuante {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            z-index: 600;
-            width: 56px;
-            height: 56px;
-            font-size: 24px;
-            border-radius: 12px;
-            background: #152238;
-            color: #fff;
-            border: 2px solid #2E7D32;
+            position: absolute; bottom: 10px; right: 10px; z-index: 600;
+            width: 56px; height: 56px; font-size: 24px; border-radius: 12px;
+            background: #152238; color: #fff; border: 2px solid #2E7D32;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.15s;
         }
-        .btn-pintar-flutuante:active {
-            transform: scale(0.9);
-            background: #2E7D32;
+        .btn-pintar-flutuante:active { transform: scale(0.9); background: #2E7D32; }
+        .btn-pintar-flutuante.pintando { background: #16a34a; animation: piscar 1s infinite; }
+        /* ✅ MENU DE FONTE GPS */
+        .menu-fonte {
+            position: absolute; top: 45px; left: 50%; transform: translateX(-50%);
+            background: #0f1a2e; border: 2px solid #2E7D32; border-radius: 12px;
+            padding: 12px; z-index: 800; display: none; min-width: 220px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
         }
-        .btn-pintar-flutuante.pintando {
-            background: #16a34a;
-            animation: piscar 1s infinite;
+        .menu-fonte div {
+            padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px;
+            transition: background 0.15s;
         }
-
+        .menu-fonte div:hover { background: #152238; }
+        .menu-fonte div.ativo { background: rgba(34,197,94,0.2); border-left: 3px solid #22c55e; }
         .modal {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.95); z-index: 999; display: none;
@@ -159,11 +160,21 @@
     <div class="topo">
         <div class="logo">🛰️ PORTAL SAT GPS</div>
         <div class="status-gps">
+            <!-- ✅ BOTÃO PARA ESCOLHER FONTE GPS -->
+            <button class="btn-fonte" id="btnFonteGPS" onclick="alternarMenuFonte()">
+                <span id="iconeFonte">📡</span>
+                <span id="textoFonte">Interna</span>
+            </button>
             <div><span id="bolinhaGps" class="bolinha"></span> GNSS</div>
-            <div>📡 <span id="satNum">--</span></div>
             <div>🧭 <span id="dRumo">---°</span></div>
             <div>⏱️ <span id="hora">00:00:00</span></div>
         </div>
+    </div>
+
+    <!-- ✅ MENU DE SELEÇÃO DE FONTE -->
+    <div class="menu-fonte" id="menuFonte">
+        <div class="ativo" onclick="selecionarFonte('interna')" id="opcInterna">📱 Localização do Dispositivo</div>
+        <div onclick="selecionarFonte('externa')" id="opcExterna">📡 Antena Externa GNSS</div>
     </div>
 
     <div class="barra-luz" id="barraLuz">
@@ -176,7 +187,6 @@
     <div class="aviso-distancia" id="avisoDistancia">📍 Anda 5m para liberar Ponto B</div>
 
     <div class="painel-esq">
-        <!-- ✅ Botão de pintar REMOVIDO daqui -->
         <button class="btn" id="btnA" onclick="criarPontoA()" title="Ponto A">📍</button>
         <button class="btn" id="btnB" onclick="criarPontoB()" title="Ponto B" disabled>🎯</button>
         <button class="btn" onclick="centralizarMapa()" title="Centralizar">🎯</button>
@@ -191,10 +201,7 @@
             <button class="btn-mapa" onclick="trocarCamada('terreno')">⛰️</button>
             <button class="btn-mapa" id="btn3d" onclick="alternar3D()">2D</button>
         </div>
-
-        <!-- ✅ Botão de pintura movido para dentro do mapa, canto inferior direito -->
         <button class="btn-pintar-flutuante" id="btnPintar" onclick="alternarPintura()" title="Cobertura">🖌️</button>
-
         <div id="mapaReal"></div>
         <div class="ponto-a" id="pontoA">A</div>
         <div class="ponto-b" id="pontoB">B</div>
@@ -246,6 +253,7 @@
 let mapaReal, marcadorTrator, linhaGuia, cobertura;
 let camadaPadrao, camadaSatelite, camadaTerreno;
 let modo3D = false;
+let watchID = null;
 
 const ESTADO = {
     lat: -26.341234, lon: -54.687901,
@@ -258,7 +266,8 @@ const ESTADO = {
     distPercorrida: 0, area: 0,
     nomeTalhao: 'Talhão 1', maxDesvio: 0.5,
     pintando: false, ultimoPonto: null,
-    caminho: []
+    caminho: [],
+    fonteGPS: 'interna' // ✅ 'interna' ou 'externa'
 };
 
 const btnB = document.getElementById('btnB');
@@ -270,6 +279,51 @@ setInterval(() => {
     const h = new Date();
     document.getElementById('hora').textContent = h.toLocaleTimeString('pt-BR', {hour12: false});
 }, 1000);
+
+// ✅ MENU DE FONTE GPS
+function alternarMenuFonte() {
+    const menu = document.getElementById('menuFonte');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function selecionarFonte(tipo) {
+    ESTADO.fonteGPS = tipo;
+    document.getElementById('menuFonte').style.display = 'none';
+    
+    // Atualiza visual do botão
+    const btn = document.getElementById('btnFonteGPS');
+    const icone = document.getElementById('iconeFonte');
+    const texto = document.getElementById('textoFonte');
+    const opcInterna = document.getElementById('opcInterna');
+    const opcExterna = document.getElementById('opcExterna');
+    
+    if (tipo === 'externa') {
+        btn.classList.add('antena-externa');
+        icone.textContent = '📡';
+        texto.textContent = 'Externa';
+        opcInterna.classList.remove('ativo');
+        opcExterna.classList.add('ativo');
+        alert('📡 Antena Externa GNSS ATIVADA! Alta precisão.');
+    } else {
+        btn.classList.remove('antena-externa');
+        icone.textContent = '📱';
+        texto.textContent = 'Interna';
+        opcInterna.classList.add('ativo');
+        opcExterna.classList.remove('ativo');
+        alert('📱 Usando Localização do Dispositivo.');
+    }
+    
+    // Reinicia o GPS com a nova fonte
+    if (watchID !== null) navigator.geolocation.clearWatch(watchID);
+    iniciarGPS();
+}
+
+// Fecha menu ao clicar fora
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.btn-fonte') && !e.target.closest('.menu-fonte')) {
+        document.getElementById('menuFonte').style.display = 'none';
+    }
+});
 
 function iniciarMapa() {
     camadaPadrao = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 20, attribution: '© OpenStreetMap'});
@@ -344,10 +398,8 @@ function atualizarFlecha() {
     }
 }
 
-// ✅ Linha verde removida: função criarLinhaGuia não cria mais nada
 function criarLinhaGuia() {
     if (linhaGuia) { mapaReal.removeLayer(linhaGuia); linhaGuia = null; }
-    // Não cria mais linha verde
 }
 
 function desenharCobertura() {
@@ -448,7 +500,8 @@ function confirmarESalvar() {
     
     localStorage.setItem('portalSatGPS', JSON.stringify({
         largura: ESTADO.largura, larguraLinha: ESTADO.larguraLinha,
-        nome: ESTADO.nomeTalhao, maxDesvio: ESTADO.maxDesvio
+        nome: ESTADO.nomeTalhao, maxDesvio: ESTADO.maxDesvio,
+        fonteGPS: ESTADO.fonteGPS
     }));
     
     document.getElementById('dLargura').textContent = ESTADO.larguraLinha.toFixed(1) + 'm';
@@ -500,6 +553,7 @@ function limparTudo() {
     alert('✅ Limpo!');
 }
 
+// ✅ INICIALIZAÇÃO GPS COM FONTE SELECIONADA
 function iniciarGPS() {
     if (!navigator.geolocation) { alert("⚠️ GPS não disponível!"); return; }
 
@@ -509,7 +563,12 @@ function iniciarGPS() {
         });
     }
 
-    navigator.geolocation.watchPosition(
+    // Configurações diferentes conforme a fonte
+    const opcoesGPS = ESTADO.fonteGPS === 'externa' 
+        ? { enableHighAccuracy: true, maximumAge: 100, timeout: 2000 }  // 📡 Antena Externa: máxima precisão
+        : { enableHighAccuracy: true, maximumAge: 500, timeout: 3000 }; // 📱 Interna: padrão
+
+    watchID = navigator.geolocation.watchPosition(
         pos => {
             ESTADO.latAnt = ESTADO.lat; ESTADO.lonAnt = ESTADO.lon;
             ESTADO.lat = pos.coords.latitude;
@@ -540,8 +599,13 @@ function iniciarGPS() {
             atualizarTela();
             desenharCobertura();
         },
-        erro => { alert("❌ Erro GPS! Verifique permissões e antena."); },
-        {enableHighAccuracy: true, maximumAge: 500, timeout: 3000}
+        erro => { 
+            const msg = ESTADO.fonteGPS === 'externa' 
+                ? "❌ Erro Antena Externa! Verifique conexão e permissões." 
+                : "❌ Erro Localização! Verifique permissões.";
+            alert(msg); 
+        },
+        opcoesGPS
     );
 }
 
@@ -590,6 +654,16 @@ window.onload = () => {
         ESTADO.larguraLinha = c.larguraLinha || 24;
         ESTADO.nomeTalhao = c.nome || 'Talhão 1';
         ESTADO.maxDesvio = c.maxDesvio || 0.5;
+        if (c.fonteGPS) {
+            ESTADO.fonteGPS = c.fonteGPS;
+            if (ESTADO.fonteGPS === 'externa') {
+                document.getElementById('btnFonteGPS').classList.add('antena-externa');
+                document.getElementById('iconeFonte').textContent = '📡';
+                document.getElementById('textoFonte').textContent = 'Externa';
+                document.getElementById('opcInterna').classList.remove('ativo');
+                document.getElementById('opcExterna').classList.add('ativo');
+            }
+        }
     }
     document.getElementById('dLargura').textContent = ESTADO.larguraLinha.toFixed(1) + 'm';
     iniciarMapa();
