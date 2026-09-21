@@ -3,636 +3,299 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0a2b16">
-<title>Portal Sat GPS • Verdão 2</title>
+<meta name="theme-color" content="#06120b">
+<title>Portal Sat GPS — Verdão 2</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{
-  --green:#1fd65b;--green2:#0d8f3d;--dark:#07110b;--panel:#0b1710;
-  --panel2:#102219;--border:#285b36;--text:#f3fff5;--muted:#91a89a;
-  --amber:#ffd34e;--red:#ff4b4b;--blue:#4aa3ff;
+ --bg:#06110b;--panel:#071a12;--panel2:#0b2418;--line:#1f6840;
+ --green:#16f06b;--green2:#0bb94d;--lime:#b9ff31;--cyan:#4fd6ff;
+ --white:#f5fff8;--muted:#8ca69a;--yellow:#ffd93d;--red:#ff493e;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body,#app{width:100%;height:100%;height:100dvh;overflow:hidden;background:#050906;color:var(--text);font-family:Inter,system-ui,Arial,sans-serif}
-button,input,select{font:inherit}
-button{cursor:pointer;-webkit-tap-highlight-color:transparent}
-#map{position:absolute;inset:0;z-index:1;background:#0b160d}
-.map-shade{position:absolute;inset:0;z-index:250;pointer-events:none;background:rgba(22,82,35,.08);mix-blend-mode:multiply}
-body.view3d #map{transform:perspective(1100px) rotateX(22deg) scale(1.08);transform-origin:50% 55%;filter:saturate(1.08)}
-/* TOP */
-.topbar{
- position:absolute;left:0;right:0;top:0;height:58px;z-index:800;
- display:flex;align-items:center;gap:9px;padding:7px 10px;
- background:linear-gradient(180deg,rgba(4,12,7,.97),rgba(4,12,7,.72));
- border-bottom:1px solid #28663a;backdrop-filter:blur(8px)
-}
-.brand{font-size:13px;font-weight:950;letter-spacing:.3px;white-space:nowrap}
-.brand small{display:block;font-size:8px;color:#7fa68a;letter-spacing:1px;margin-top:1px}
-.status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;color:#cfe7d4}
-.dot{width:9px;height:9px;border-radius:50%;background:#68746b}
-.dot.ok{background:#27e06a;box-shadow:0 0 9px #27e06a}
-.dot.warn{background:var(--amber);box-shadow:0 0 8px var(--amber)}
-.dot.bad{background:var(--red);box-shadow:0 0 8px var(--red)}
-.topbtn{
- width:40px;height:40px;border-radius:12px;border:1px solid #315c3c;
- background:rgba(10,28,16,.9);color:#fff;font-size:18px
-}
-#sourceBadge{padding:7px 9px;border:1px solid #315c3c;border-radius:16px;background:#0c1d11;font-weight:800;font-size:9px}
+*{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden;background:#06110b;color:var(--white);font-family:Inter,Arial,sans-serif}
+button,input,select{font:inherit}button{border:0;cursor:pointer;color:white}
+#map{position:absolute;inset:0;z-index:1}
+.mapTint{position:absolute;inset:0;z-index:200;pointer-events:none;background:rgba(0,55,20,.08);mix-blend-mode:multiply}
+body.mode3d #map{transform:perspective(1100px) rotateX(19deg) scale(1.08);transform-origin:50% 58%}
+
+/* HEADER */
+.header{position:absolute;left:0;right:0;top:0;height:92px;z-index:900;background:linear-gradient(180deg,#04100a 0%,rgba(4,16,10,.96) 82%,rgba(4,16,10,.72));border-bottom:1px solid #1c6a3e;display:flex;align-items:center;padding:14px 28px;gap:20px}
+.logo{display:flex;align-items:center;gap:13px;min-width:340px}
+.logoMark{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#0b5c2e,#13ee68);display:grid;place-items:center;font-size:28px;box-shadow:0 0 25px #10e95c33}
+.logoText{font-weight:950;font-size:29px;letter-spacing:-1px}.logoText i{color:var(--green);font-style:normal}.sub{display:block;color:#91aa9b;font-size:11px;letter-spacing:2px;margin-top:2px}
+.headerCenter{margin-left:auto;display:flex;height:48px;border:1px solid #285d43;border-radius:25px;background:#071b12;overflow:hidden}
+.hChip{padding:0 17px;display:flex;align-items:center;gap:8px;border-right:1px solid #28533e;font-size:14px;font-weight:800}.hChip:last-child{border:0}.okDot{width:12px;height:12px;border-radius:50%;background:#1df06b;box-shadow:0 0 10px #1df06b}
+.topIcon{width:42px;height:42px;border-radius:13px;background:#081a11;border:1px solid #315e47;font-size:21px}
+.menuTop{font-size:27px;margin-left:5px}
+
 /* LIGHTBAR */
-#lightbar{
- position:absolute;top:68px;left:50%;transform:translateX(-50%);z-index:700;
- width:min(500px,68vw);height:31px;border:1px solid #40564a;border-radius:18px;
- background:rgba(3,8,5,.91);display:flex;align-items:center;justify-content:center;
- box-shadow:0 5px 18px #0008
-}
-.lb{height:17px;width:43%;opacity:0;border-radius:4px}
-.lb.left{transform-origin:right;background:linear-gradient(90deg,#ff3030,#ffb51b,#28df67)}
-.lb.right{transform-origin:left;background:linear-gradient(90deg,#28df67,#ffb51b,#ff3030)}
-.lb.center{width:4px;height:25px;background:#fff;border-radius:2px;opacity:1}
-#lbText{position:absolute;top:34px;font-size:11px;font-weight:900;color:var(--amber);text-shadow:0 1px 4px #000}
-/* WORK SCREEN */
-.dock{position:absolute;z-index:760;display:flex;gap:7px}
-.leftdock{left:8px;top:74px;flex-direction:column}
-.rightdock{right:8px;top:74px;flex-direction:column}
-.tool{
- width:45px;height:45px;border:1px solid #315b3c;border-radius:13px;
- background:rgba(7,18,11,.91);color:#fff;font-size:18px;
- box-shadow:0 4px 14px #0008
-}
-.tool.active{background:#126b30;border-color:#46dd70}
-.tool.record{background:#7f2926;border-color:#b94741}
-#bottomInfo{
- position:absolute;left:50%;bottom:11px;transform:translateX(-50%);z-index:760;
- display:flex;align-items:center;gap:12px;padding:9px 13px;border:1px solid #315d3c;
- border-radius:18px;background:rgba(4,12,7,.91);backdrop-filter:blur(8px);
- box-shadow:0 5px 18px #0008;white-space:nowrap;font-size:10px
-}
-.metric b{color:#70e996;font-size:10px}.metric span{color:#fff;font-weight:800}
-#cleanBtn{
- position:absolute;right:60px;bottom:12px;z-index:780;border:1px solid #315d3c;
- background:rgba(5,14,8,.9);color:#dff4e4;border-radius:18px;padding:8px 11px;font-size:10px
-}
+.lightbar{position:absolute;z-index:850;left:50%;top:112px;transform:translateX(-50%);width:min(52vw,840px);height:53px;border:2px solid #275b3f;border-radius:28px;background:#06110cdd;box-shadow:0 8px 30px #0009;display:flex;align-items:center;padding:0 20px}
+.lbseg{height:17px;flex:1;margin:0 2px;border-radius:4px;background:linear-gradient(90deg,#0acb51,#b5ed28,#ffd52c,#ff3e35);opacity:.95}.lbseg.green{background:#10a94c}.lbCenter{position:absolute;left:50%;top:4px;transform:translateX(-50%);width:8px;height:44px;background:white;border-radius:5px;box-shadow:0 0 8px white}
+.lbValue{position:absolute;left:50%;top:59px;transform:translateX(-50%);background:#071b12;border:1px solid #287346;padding:5px 12px;border-radius:17px;font-weight:950;color:white;font-size:13px}
+
+/* LEFT TOOLBAR */
+.leftTools{position:absolute;left:20px;top:112px;z-index:850;display:flex;flex-direction:column;gap:10px}
+.tool{width:58px;height:58px;border-radius:17px;background:#071a12dd;border:1px solid #285e43;box-shadow:0 6px 18px #0008;font-size:25px}
+.tool.active{background:linear-gradient(145deg,#19ec69,#087c3c);border-color:#42ff87;box-shadow:0 0 20px #16ee6750}
+.tool.big{width:64px;height:64px}
+.toolText{font-size:12px;font-weight:950}
+
+/* RIGHT MENU */
+.side{position:absolute;right:18px;top:100px;bottom:92px;width:330px;z-index:880;background:linear-gradient(180deg,#061812f5,#04110cf5);border:1px solid #28704a;border-radius:22px;box-shadow:0 18px 45px #000b;padding:15px;overflow:auto}
+.sideHead{display:flex;align-items:center;justify-content:space-between;padding:4px 3px 12px;font-size:18px;font-weight:950}
+.sideClose{background:transparent;font-size:28px;color:#d8e8dd}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.menuCard{min-height:86px;border-radius:15px;border:1px solid #2a5260;background:#081b18;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:900}
+.menuCard span{font-size:28px}.menuCard.sel{background:linear-gradient(160deg,#064d2a,#0b8d43);border-color:#29e96c}
+.infoRow{margin-top:10px;border:1px solid #23523e;background:#071b13;border-radius:15px;padding:11px;display:flex;align-items:center;justify-content:space-between}
+.infoRow small{display:block;color:#91a99c;font-size:10px}.infoRow b{font-size:14px}
+.plus{color:#bfff35;font-size:24px}
+
+/* BOTTOM BAR */
+.bottom{position:absolute;left:20px;right:20px;bottom:17px;height:74px;z-index:890;display:flex;align-items:center;gap:0;border:1px solid #28714a;border-radius:24px;background:#04120ceF;box-shadow:0 8px 30px #000b;overflow:hidden}
+.metric{height:52px;flex:1;display:flex;align-items:center;justify-content:center;gap:12px;border-right:1px solid #24513c}
+.metric:last-child{border:0}.metricIcon{font-size:28px}.metric small{display:block;color:#90aa9c;font-size:10px;font-weight:900}.metric b{font-size:17px}
+.bottomModes{display:flex;gap:0;margin-left:auto;height:100%;align-items:center;padding:7px 9px}
+.mode{height:48px;padding:0 22px;background:#081b14;border:1px solid #28533d;font-weight:950;font-size:15px}.mode:first-child{border-radius:13px 0 0 13px}.mode:last-child{border-radius:0 13px 13px 0}.mode.active{background:#11a94f;border-color:#4cff89}
+.hideTabs{height:48px;border-radius:13px;background:#0b8f45;padding:0 17px;margin-left:9px;font-weight:950}
+
+/* FIELD CARD */
+.fieldCard{position:absolute;left:20px;bottom:105px;z-index:850;background:#04140dF2;border:1px solid #1acb5d;border-radius:18px;padding:12px 18px;min-width:280px;box-shadow:0 8px 25px #0009}
+.fieldCard small{color:#91a99c}.fieldCard b{display:block;margin-top:3px}
+
 /* PANELS */
-#menu{
- position:absolute;right:59px;top:66px;z-index:900;display:none;flex-direction:column;gap:7px;
- width:170px
+.panel{display:none;position:absolute;z-index:1200;right:365px;top:100px;width:360px;max-height:calc(100dvh - 190px);overflow:auto;background:#06150df8;border:1px solid #2c754b;border-radius:20px;padding:17px;box-shadow:0 20px 50px #000d}
+.panel.open{display:block}.panel h2{margin:0 0 14px;font-size:18px}.close{float:right;background:#10261a;border:1px solid #315b42;border-radius:10px;width:35px;height:35px;font-size:22px}
+label{display:block;color:#94aa9c;font-size:10px;margin:11px 0 5px}input,select{width:100%;padding:11px;border-radius:11px;border:1px solid #315c45;background:#07150d;color:white;outline:none}
+.action{width:100%;padding:12px;margin-top:9px;border-radius:11px;background:#0c9144;font-weight:950}.action.alt{background:#10291c;border:1px solid #315d43}.machineGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.machine{padding:10px;border-radius:12px;background:#0a1d13;border:1px solid #28573d;text-align:center}.machine.active{border-color:#36ed72;background:#0c3a20}.machine svg{width:100%;height:55px}.statGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{padding:10px;border:1px solid #254f39;border-radius:11px}.stat small{display:block;color:#8ea697}.stat b{font-size:13px}
+
+/* A/B AND COVERAGE */
+.abline{filter:drop-shadow(0 0 3px #008cff)}
+.coverage{filter:drop-shadow(0 0 4px #15ed6a)}
+.abBadge{font-weight:1000;font-size:14px;color:#fff;text-shadow:0 2px 4px #000;background:#078d43;border:2px solid white;border-radius:50%;width:38px;height:38px;display:grid;place-items:center}
+.abBadge.b{background:#0878e6}
+.machineMarker{width:70px;height:70px;transform-origin:center;filter:drop-shadow(0 6px 5px #000b)}
+.machineMarker svg{width:100%;height:100%}
+.toast{position:absolute;z-index:1400;left:50%;bottom:100px;transform:translateX(-50%);display:none;background:#06170d;border:1px solid #2b7448;padding:10px 17px;border-radius:20px;font-size:12px;font-weight:900}
+.leaflet-control-attribution{font-size:7px!important;background:#0007!important;color:#ddd!important}
+
+@media(max-width:900px){
+ .header{height:66px;padding:7px 10px;gap:8px}.logo{min-width:auto;gap:7px}.logoMark{width:36px;height:36px;font-size:20px}.logoText{font-size:17px}.sub{font-size:7px;letter-spacing:1px}.headerCenter{display:none}
+ .lightbar{top:78px;width:62vw;height:38px}.lbseg{height:12px}.lbCenter{height:32px}.lbValue{top:43px;font-size:10px}
+ .leftTools{left:8px;top:84px}.tool{width:45px;height:45px;border-radius:13px;font-size:19px}
+ .side{right:8px;top:74px;width:300px;bottom:82px}.panel{right:8px;top:74px;width:calc(100vw - 16px)}
+ .bottom{left:8px;right:8px;bottom:8px;height:58px;border-radius:17px}.metric{height:42px;gap:5px}.metricIcon{font-size:18px}.metric b{font-size:11px}.metric small{font-size:7px}.metric:nth-child(4){display:none}.bottomModes{display:none}.hideTabs{display:none}.fieldCard{left:8px;bottom:73px;min-width:230px;padding:8px 12px;font-size:10px}
 }
-#menu.open{display:flex}
-.menuBtn{
- border:1px solid #315c3c;border-radius:12px;padding:10px 12px;text-align:left;
- background:rgba(6,17,10,.97);color:#fff;font-size:11px;font-weight:850
-}
-.panel{
- position:absolute;right:59px;top:64px;z-index:1000;width:min(390px,calc(100vw - 75px));
- max-height:calc(100dvh - 76px);overflow:auto;display:none;padding:15px;
- border:1px solid #315f3c;border-radius:18px;background:rgba(6,16,10,.985);
- box-shadow:0 18px 45px #000b;backdrop-filter:blur(12px)
-}
-.panel.open{display:block}
-.panelHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
-.panel h2{font-size:16px}.panel h2 small{display:block;color:var(--muted);font-size:9px;font-weight:500;margin-top:3px}
-.close{width:34px;height:34px;border-radius:10px;border:1px solid #315c3c;background:#0c1b11;color:#fff}
-label{display:block;color:#a9b9ad;font-size:9px;margin:10px 0 5px}
-input,select{
- width:100%;padding:10px 11px;border-radius:10px;border:1px solid #31563b;
- background:#08140c;color:#fff;outline:none
-}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.action{
- width:100%;border:0;border-radius:10px;padding:11px;margin-top:9px;
- background:linear-gradient(180deg,#19a94b,#087a34);color:#fff;font-weight:900
-}
-.action.secondary{background:#17301f;border:1px solid #2d5736}
-.action.blue{background:#145a91}.action.danger{background:#7e2927}
-.card{padding:10px;border:1px solid #244b2e;border-radius:11px;background:#0c1a10}
-.fieldRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid #203824;font-size:11px}
-.fieldRow small{color:var(--muted)}
-.machineGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.machine{
- padding:10px 6px;border:1px solid #284e31;border-radius:12px;background:#0a170e;color:#fff;
- text-align:center
-}
-.machine.active{border-color:#39df69;background:#10351c;box-shadow:0 0 0 1px #39df6933}
-.machine svg{width:48px;height:34px;display:block;margin:0 auto 6px}
-.machine b{font-size:10px}
-.statusGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.stat{padding:10px;border:1px solid #244a2d;border-radius:10px;background:#0b190f}
-.stat small{display:block;color:var(--muted);font-size:8px}.stat b{font-size:12px}
-/* TOAST */
-#toast{
- position:absolute;left:50%;bottom:63px;transform:translateX(-50%);z-index:1200;display:none;
- padding:9px 14px;border:1px solid #386747;border-radius:18px;background:#0b1710;
- font-size:10px;box-shadow:0 8px 22px #0009
-}
-/* LEAFLET */
-.leaflet-control-attribution{font-size:7px!important;background:rgba(0,0,0,.45)!important;color:#ddd!important}
-.leaflet-control-zoom{display:none}
-.vehicleIcon{width:54px;height:54px;transform-origin:center;filter:drop-shadow(0 3px 4px #000b)}
-.vehicleIcon svg{width:100%;height:100%}
-.abLabel{font-size:11px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000}
-@media(max-width:700px){
- .brand{font-size:11px}.status{display:none}.topbar{height:53px}
- #lightbar{top:61px;width:63vw;height:29px}.leftdock{top:66px}.rightdock{top:66px}
- .tool{width:42px;height:42px}.panel{right:8px;top:58px;width:calc(100vw - 16px);max-height:78dvh}
- #menu{right:8px;top:58px}.cleanBtn{right:8px}
- #cleanBtn{right:8px;bottom:56px}
- #bottomInfo{bottom:8px;max-width:86vw;overflow:hidden;gap:8px;font-size:9px}
- .metric:nth-child(3),.metric:nth-child(4){display:none}
-}
-body.clean .leftdock,body.clean .rightdock{display:none}
-body.clean #cleanBtn{display:none}
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="map"></div>
-  <div class="map-shade"></div>
+ <div id="map"></div><div class="mapTint"></div>
 
-  <header class="topbar">
-    <div class="brand">🛰️ PORTAL SAT GPS<small>VERDÃO 2 • GUIA DE CAMPO</small></div>
-    <div class="status"><span id="gpsDot" class="dot"></span><span id="gpsText">Aguardando GNSS</span><span id="accText">± -- m</span></div>
-    <span id="sourceBadge">📡 INTERNA</span>
-    <button class="topbtn" id="menuBtn" title="Ferramentas">☰</button>
-  </header>
-
-  <div id="lightbar">
-    <div id="lbLeft" class="lb left"></div><div class="lb center"></div><div id="lbRight" class="lb right"></div>
-    <div id="lbText">0.00 m</div>
+ <header class="header">
+  <button class="topIcon menuTop" id="menuToggle">☰</button>
+  <div class="logo"><div class="logoMark">🌿</div><div><div class="logoText">PORTAL <i>SAT GPS</i></div><span class="sub">VERDÃO 2 • GUIA DE CAMPO</span></div></div>
+  <div class="headerCenter">
+   <div class="hChip">🔌 Antena Via Cabo</div><div class="hChip"><span class="okDot"></span> GNSS</div><div class="hChip">RTK</div>
   </div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:8px"><button class="topIcon" id="satCount">🛰️</button><button class="topIcon">▥</button><button class="topIcon">⌁</button><button class="topIcon" id="openSettings">⚙</button></div>
+ </header>
 
-  <div class="dock leftdock">
-    <button class="tool" id="aBtn" title="Marcar A">A</button>
-    <button class="tool" id="bBtn" title="Marcar B" disabled>B</button>
-    <button class="tool" id="centerBtn" title="Centralizar">⌖</button>
-    <button class="tool" id="followBtn" title="Seguir máquina">◎</button>
-    <button class="tool" id="zoomIn">＋</button>
-    <button class="tool" id="zoomOut">−</button>
+ <div class="lightbar"><div class="lbseg"></div><div class="lbseg green"></div><div class="lbseg green"></div><div class="lbseg"></div><div class="lbCenter"></div><div class="lbValue" id="lbValue">0.00 m</div></div>
+
+ <div class="leftTools">
+  <button class="tool" id="aBtn">A</button><button class="tool" id="bBtn" disabled>B</button>
+  <button class="tool" id="centerBtn">⌖</button><button class="tool" id="followBtn">◎</button>
+  <button class="tool" id="recordBtn">●</button><button class="tool" id="zoomIn">＋</button><button class="tool" id="zoomOut">−</button>
+ </div>
+
+ <aside class="side" id="side">
+  <div class="sideHead"><span>⌄ &nbsp;Menu</span><button class="sideClose" id="sideClose">×</button></div>
+  <div class="grid">
+   <button class="menuCard sel" data-panel="fields"><span>🌾</span>Talhões</button>
+   <button class="menuCard" data-panel="machine"><span>🚜</span>Máquina</button>
+   <button class="menuCard" data-panel="operation"><span>🌱</span>Operação</button>
+   <button class="menuCard" data-panel="map"><span>🗺️</span>Mapa</button>
+   <button class="menuCard" data-panel="gps"><span>📡</span>GNSS</button>
+   <button class="menuCard" data-panel="settings"><span>⚙️</span>Configurações</button>
   </div>
+  <div class="infoRow"><span><small>Cultura</small><b id="cultureView">Soja</b></span><span>›</span></div>
+  <div class="infoRow"><span><small>Operação</small><b id="operationView">Plantio</b></span><span>›</span></div>
+  <div class="infoRow"><span><small>Produto</small><b id="productView">Soja</b></span><span>›</span></div>
+  <div class="infoRow"><span><small>Largura do implemento</small><b id="widthView">24,0 m</b></span><span>›</span></div>
+  <div class="infoRow"><span><small>Rendimento (opcional)</small><b id="yieldView">—</b></span><span>›</span></div>
+  <button class="infoRow" id="newField" style="width:100%;text-align:left"><span><b class="plus">＋</b> &nbsp; Novo Talhão</span><span>›</span></button>
+ </aside>
 
-  <div class="dock rightdock">
-    <button class="tool" id="recordBtn" title="Gravar cobertura">▶</button>
-    <button class="tool" id="fieldBtn" title="Talhões">🌾</button>
-    <button class="tool" id="machineBtn" title="Máquina">🚜</button>
-    <button class="tool" id="mapBtn" title="Mapa">🗺️</button>
-    <button class="tool" id="gpsBtn" title="GNSS">📡</button>
-    <button class="tool" id="settingsBtn" title="Configurações">⚙️</button>
-  </div>
+ <div class="fieldCard"><small>Talhão: <b id="fieldView">Fazenda São José</b></small><b>Área atual: <span id="areaCard">0.00</span> ha</b></div>
 
-  <button id="cleanBtn">☰ Mostrar ferramentas</button>
+ <div class="bottom">
+  <div class="metric"><span class="metricIcon">🚜</span><div><small>VEL</small><b id="speed">0,0 km/h</b></div></div>
+  <div class="metric"><span class="metricIcon">🧭</span><div><small>RUMO</small><b id="heading">0°</b></div></div>
+  <div class="metric"><span class="metricIcon">⌁</span><div><small>DESVIO</small><b id="cross">0,00 m</b></div></div>
+  <div class="metric"><span class="metricIcon">🌾</span><div><small>ÁREA</small><b id="area">0,00 ha</b></div></div>
+  <div class="metric"><span class="metricIcon">🌱</span><div><small>RENDIMENTO</small><b id="yieldBottom">—</b></div></div>
+  <div class="bottomModes"><button class="mode active" id="mode2d">2D</button><button class="mode" id="mode3d">3D</button><button class="hideTabs" id="hideTabs">◉ Ocultar abas</button></div>
+ </div>
 
-  <div id="bottomInfo">
-    <div class="metric"><b>VEL</b> <span id="speed">0.0 km/h</span></div>
-    <div class="metric"><b>RUMO</b> <span id="heading">0°</span></div>
-    <div class="metric"><b>DESVIO</b> <span id="cross">0.00 m</span></div>
-    <div class="metric"><b>ÁREA</b> <span id="area">0.00 ha</span></div>
-  </div>
+ <!-- PANELS -->
+ <section class="panel" id="panel-fields"><button class="close">×</button><h2>🌾 Talhões</h2>
+  <label>Nome do talhão</label><input id="fieldName" value="Fazenda São José">
+  <button class="action" id="saveField">💾 Salvar talhão</button><button class="action" id="newField2">＋ Novo talhão</button>
+  <div id="fieldsList"></div>
+ </section>
 
-  <div id="menu">
-    <button class="menuBtn" data-panel="fields">🌾 Talhões</button>
-    <button class="menuBtn" data-panel="machine">🚜 Máquina</button>
-    <button class="menuBtn" data-panel="operation">🌱 Cultura / operação</button>
-    <button class="menuBtn" data-panel="map">🗺️ Mapa e 2D/3D</button>
-    <button class="menuBtn" data-panel="gps">📡 GNSS / Wi‑Fi</button>
-    <button class="menuBtn" data-panel="settings">⚙️ Configurações</button>
-  </div>
+ <section class="panel" id="panel-machine"><button class="close">×</button><h2>🚜 Máquina</h2><div class="machineGrid" id="machineGrid"></div>
+  <label>Largura do implemento (m)</label><input id="widthInput" type="number" value="24" step=".1"><button class="action" id="saveMachine">Salvar</button>
+ </section>
 
-  <section class="panel" id="panel-fields">
-    <div class="panelHead"><h2>🌾 Talhões<small>Crie vários campos e volte neles quando quiser.</small></h2><button class="close">×</button></div>
-    <label>Nome do talhão atual</label><input id="fieldName" value="Talhão 1">
-    <button class="action" id="newField">＋ Criar novo talhão</button>
-    <div id="fieldList" style="margin-top:10px"></div>
-    <button class="action secondary" id="saveField">💾 Salvar talhão atual</button>
-    <button class="action secondary" id="exportField">⬇️ Exportar dados</button>
-    <button class="action danger" id="clearWork">🗑️ Limpar trabalho atual</button>
-  </section>
+ <section class="panel" id="panel-operation"><button class="close">×</button><h2>🌱 Cultura / Operação</h2>
+  <label>Cultura</label><select id="culture"><option>Soja</option><option>Milho</option><option>Trigo</option><option>Aveia</option><option>Algodão</option><option>Feijão</option></select>
+  <label>Operação</label><select id="operation"><option>Plantio</option><option>Pulverização</option><option>Adubação</option><option>Colheita</option><option>Preparo do solo</option></select>
+  <label>Produto</label><input id="product" value="Soja"><label>Rendimento opcional</label><input id="yield" type="number" placeholder="60"><select id="yieldUnit"><option>sc/ha</option><option>kg/ha</option><option>t/ha</option></select>
+  <button class="action" id="saveOperation">Salvar operação</button>
+ </section>
 
-  <section class="panel" id="panel-machine">
-    <div class="panelHead"><h2>🚜 Máquina<small>O desenho do veículo gira conforme o rumo.</small></h2><button class="close">×</button></div>
-    <div class="machineGrid" id="machineGrid"></div>
-    <label>Largura de trabalho / implemento</label><input id="implementWidth" type="number" min=".1" step=".1" value="24">
-    <div class="row2">
-      <button class="action" id="saveMachine">Salvar máquina</button>
-      <button class="action secondary" id="compassBtn">🧭 Bússola</button>
-    </div>
-  </section>
+ <section class="panel" id="panel-map"><button class="close">×</button><h2>🗺️ Mapa</h2>
+  <button class="action" data-layer="satellite">🛰️ Satélite</button><button class="action alt" data-layer="standard">🗺️ Estradas</button><button class="action alt" data-layer="terrain">⛰️ Terreno</button>
+  <div style="display:flex;gap:8px"><button class="action" id="p2d">2D</button><button class="action alt" id="p3d">3D</button></div>
+ </section>
 
-  <section class="panel" id="panel-operation">
-    <div class="panelHead"><h2>🌱 Cultura e operação<small>Registre o que está sendo feito no talhão.</small></h2><button class="close">×</button></div>
-    <label>Cultura / produto</label>
-    <select id="product"><option>Soja</option><option>Milho</option><option>Trigo</option><option>Aveia</option><option>Algodão</option><option>Feijão</option><option>Pastagem</option><option>Outro</option></select>
-    <label>Operação</label>
-    <select id="operation"><option>Plantio</option><option>Pulverização</option><option>Adubação</option><option>Colheita</option><option>Preparo do solo</option><option>Outra</option></select>
-    <div class="row2">
-      <div><label>Rendimento opcional</label><input id="yield" type="number" step=".01" placeholder="62.5"></div>
-      <div><label>Unidade</label><select id="yieldUnit"><option>sc/ha</option><option>kg/ha</option><option>t/ha</option></select></div>
-    </div>
-    <button class="action" id="saveOperation">Salvar operação</button>
-  </section>
+ <section class="panel" id="panel-gps"><button class="close">×</button><h2>📡 GNSS / Antena via cabo</h2>
+  <div class="statGrid"><div class="stat"><small>Fonte</small><b id="gpsSource">GPS interno</b></div><div class="stat"><small>Precisão</small><b id="accuracy">—</b></div><div class="stat"><small>Latitude</small><b id="lat">—</b></div><div class="stat"><small>Longitude</small><b id="lon">—</b></div></div>
+  <button class="action" id="internal">📱 GPS interno</button>
+  <div class="stat" style="margin-top:10px">🔌 <b>Antena via cabo</b><br><small>USB/Serial/OTG: esta versão deixa a entrada preparada. O protocolo da antena será ligado conforme o modelo.</small></div>
+ </section>
 
-  <section class="panel" id="panel-map">
-    <div class="panelHead"><h2>🗺️ Mapa<small>Escolha a visão para trabalhar.</small></h2><button class="close">×</button></div>
-    <div class="row2">
-      <button class="action" data-layer="standard">🗺️ Estrada</button>
-      <button class="action" data-layer="satellite">🛰️ Satélite</button>
-    </div>
-    <div class="row2">
-      <button class="action secondary" data-layer="terrain">⛰️ Terreno</button>
-      <button class="action secondary" id="fieldView">🌿 Campo</button>
-    </div>
-    <div class="row2">
-      <button class="action secondary" id="view2d">2D</button>
-      <button class="action secondary" id="view3d">3D</button>
-    </div>
-    <button class="action secondary" id="followMap">◎ Seguir máquina: <span id="followState">SIM</span></button>
-  </section>
+ <section class="panel" id="panel-settings"><button class="close">×</button><h2>⚙️ Configurações</h2>
+  <label>Desvio máximo do lightbar (m)</label><input id="maxError" type="number" value=".5" step=".1">
+  <label>Distância mínima A → B (m)</label><input id="minAB" type="number" value="5" step=".5">
+  <button class="action" id="saveSettings">Salvar configurações</button>
+  <button class="action alt" id="compass">🧭 Ativar bússola</button>
+  <button class="action alt" id="wake">🔆 Manter tela ligada</button>
+ </section>
 
-  <section class="panel" id="panel-gps">
-    <div class="panelHead"><h2>📡 GNSS<small>GPS interno ou receptor externo por Wi‑Fi/WebSocket.</small></h2><button class="close">×</button></div>
-    <div class="statusGrid">
-      <div class="stat"><small>Fonte</small><b id="gpsSource">Interna</b></div>
-      <div class="stat"><small>Precisão</small><b id="precision">-- m</b></div>
-      <div class="stat"><small>Latitude</small><b id="lat">--</b></div>
-      <div class="stat"><small>Longitude</small><b id="lon">--</b></div>
-    </div>
-    <button class="action" id="internalGps">📱 Usar GPS interno</button>
-    <label>Endereço WebSocket do receptor / ponte NMEA</label>
-    <input id="wsUrl" placeholder="ws://192.168.4.1:xxxx">
-    <button class="action blue" id="connectGnss">📡 Conectar GNSS externo</button>
-    <div class="card" style="margin-top:10px;font-size:9px;color:#9db0a2">
-      O receptor externo precisa fornecer NMEA por WebSocket ou por uma ponte compatível. A tela mostra a posição recebida e o estado do fix.
-    </div>
-  </section>
-
-  <section class="panel" id="panel-settings">
-    <div class="panelHead"><h2>⚙️ Configurações<small>Ajustes da orientação e da tela.</small></h2><button class="close">×</button></div>
-    <div class="row2">
-      <div><label>Largura (m)</label><input id="setWidth" type="number" min=".1" step=".1" value="24"></div>
-      <div><label>Desvio máximo (m)</label><input id="maxError" type="number" min=".1" step=".1" value=".5"></div>
-    </div>
-    <label>Distância mínima A → B (m)</label><input id="abDistance" type="number" min="1" step=".5" value="5">
-    <button class="action" id="saveSettings">Salvar configurações</button>
-    <button class="action secondary" id="requestWake">🔆 Manter tela ligada</button>
-    <button class="action secondary" id="resetApp">↺ Restaurar configurações</button>
-  </section>
-
-  <div id="toast"></div>
+ <div class="toast" id="toast"></div>
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
+const S={lat:null,lon:null,prev:null,speed:0,heading:0,accuracy:999,A:null,B:null,cross:0,width:24,maxError:.5,minAB:5,distA:0,record:false,path:[],area:0,follow:true,machine:"tractor",field:"Fazenda São José",culture:"Soja",operation:"Plantio",product:"Soja",yield:null,yieldUnit:"sc/ha"};
+let map,marker,abLine,coverage,watch,layers={},wake=null;
 
-const state = {
-  lat:null, lon:null, prevLat:null, prevLon:null, speed:0, heading:0, compass:null, accuracy:999,
-  A:null, B:null, cross:0, distanceA:0, abDistance:5,
-  width:24, maxError:.5, coverage:false, path:[], area:0,
-  machine:"tractor", fieldName:"Talhão 1", fields:{},
-  product:"Soja", operation:"Plantio", yield:null, yieldUnit:"sc/ha",
-  follow:true, clean:true
-};
-
-const machines = {
-  tractor:["tractor","Trator"], combine:["combine","Colheitadeira"], sprayer:["sprayer","Pulverizador"],
-  planter:["planter","Plantadeira"], truck:["truck","Caminhão"], machine:["machine","Máquina"]
-};
-
-let map, marker, lineAB=null, coverageLine=null, parallelLines=[], watchId=null, ws=null;
-let layers={}, activeLayer="satellite", menuOpen=false;
-let wakeLock=null;
-
-const tile = {
-  standard:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20,attribution:"© OpenStreetMap"}),
-  satellite:L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"© Esri"}),
-  terrain:L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"© OpenTopoMap"})
-};
-
-function toast(msg){
-  $("toast").textContent=msg;$("toast").style.display="block";
-  clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").style.display="none",2300);
+function toast(t){$("toast").textContent=t;$("toast").style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").style.display="none",2200)}
+function machineSVG(t){
+ if(t==="combine")return `<svg viewBox="0 0 100 70"><path fill="#d9b536" d="M34 17h38v30H34zM23 10h27v10H23z"/><path fill="#788e86" d="M10 36h25v13H10z"/><circle cx="43" cy="55" r="10" fill="#111"/><circle cx="75" cy="55" r="8" fill="#111"/><path d="M5 34h30M7 48h22" stroke="#fff" stroke-width="3"/></svg>`;
+ if(t==="sprayer")return `<svg viewBox="0 0 100 70"><rect x="36" y="20" width="30" height="27" rx="5" fill="#e8e8e8"/><circle cx="42" cy="56" r="9" fill="#111"/><circle cx="70" cy="56" r="9" fill="#111"/><path d="M36 24H7M36 42H7M66 24h28M66 42h28M5 21v28M95 21v28" stroke="#fff" stroke-width="3"/></svg>`;
+ return `<svg viewBox="0 0 100 70"><path fill="#3ea95b" d="M30 20h38v28H30z"/><path fill="#82c3df" d="M48 11h20v18H48z"/><circle cx="37" cy="55" r="11" fill="#101713"/><circle cx="72" cy="55" r="8" fill="#101713"/><path d="M30 42H12v14h18" fill="#2e7944" stroke="#fff" stroke-width="3"/></svg>`;
 }
-
-function initMap(){
-  map=L.map("map",{zoomControl:false,attributionControl:true}).setView([-25.45,-54.65],16);
-  layers=tile;
-  tile.satellite.addTo(map);
-
-  marker=L.marker([-25.45,-54.65],{icon:vehicleIcon(),zIndexOffset:1000}).addTo(map);
-}
-
-function svgMachine(type){
-  const common='fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"';
-  if(type==="combine") return `<svg viewBox="0 0 80 55"><rect x="22" y="16" width="34" height="25" rx="5" fill="#d6b24a"/><path d="M56 23h12v18H56M25 16V9h18v7M18 41h48"/><circle cx="31" cy="45" r="6" fill="#18251c"/><circle cx="57" cy="45" r="6" fill="#18251c"/><path d="M5 29h15v9H5z" fill="#6c8d68"/><path d="M2 28h22" ${common}/></svg>`;
-  if(type==="sprayer") return `<svg viewBox="0 0 80 55"><rect x="28" y="17" width="24" height="22" rx="4" fill="#e8e8e8"/><circle cx="35" cy="44" r="6" fill="#18251c"/><circle cx="53" cy="44" r="6" fill="#18251c"/><path d="M28 21H8M28 35H8M52 21h20M52 35h20" ${common}/><path d="M4 18v20M76 18v20" ${common}/></svg>`;
-  if(type==="planter") return `<svg viewBox="0 0 80 55"><rect x="27" y="16" width="25" height="22" rx="4" fill="#4f9e61"/><circle cx="34" cy="44" r="6" fill="#18251c"/><circle cx="53" cy="44" r="6" fill="#18251c"/><path d="M27 20H8v22M52 20h20v22" ${common}/><path d="M10 42l-3 7M22 42l-3 7M62 42l-3 7M74 42l-3 7" ${common}/></svg>`;
-  if(type==="truck") return `<svg viewBox="0 0 80 55"><rect x="15" y="15" width="42" height="26" rx="3" fill="#4b8fc7"/><path d="M57 25h10l9 9v7H57z" fill="#d0d7dc"/><circle cx="27" cy="45" r="6" fill="#18251c"/><circle cx="64" cy="45" r="6" fill="#18251c"/></svg>`;
-  if(type==="machine") return `<svg viewBox="0 0 80 55"><rect x="24" y="16" width="30" height="24" rx="4" fill="#a75bd1"/><circle cx="32" cy="44" r="6" fill="#18251c"/><circle cx="55" cy="44" r="6" fill="#18251c"/><path d="M54 22h14v18H54M15 35h9" ${common}/></svg>`;
-  return `<svg viewBox="0 0 80 55"><rect x="25" y="17" width="30" height="23" rx="5" fill="#3f8c58"/><rect x="39" y="9" width="14" height="12" rx="2" fill="#78b8d4"/><circle cx="32" cy="45" r="7" fill="#18251c"/><circle cx="57" cy="45" r="5" fill="#18251c"/><path d="M25 38H12v7h13" ${common}/></svg>`;
-}
-
+const machineNames={tractor:"Trator",combine:"Colheitadeira",sprayer:"Pulverizador"};
 function vehicleIcon(){
-  return L.divIcon({
-    className:"",
-    iconSize:[54,54],iconAnchor:[27,27],
-    html:`<div class="vehicleIcon" id="vehicleVisual" style="transform:rotate(${state.heading}deg)">${svgMachine(state.machine)}</div>`
-  });
+ return L.divIcon({className:"",iconSize:[70,70],iconAnchor:[35,35],html:`<div class="machineMarker" id="machineMarker" style="transform:rotate(${S.heading}deg)">${machineSVG(S.machine)}</div>`})
 }
-function rotateVehicle(){
-  const el=document.getElementById("vehicleVisual");
-  if(el)el.style.transform=`rotate(${state.heading||0}deg)`;
-}
+function hav(a,b){const R=6371000,p=a.lat*Math.PI/180,q=b.lat*Math.PI/180,dl=(b.lon-a.lon)*Math.PI/180,dp=(b.lat-a.lat)*Math.PI/180;return 2*R*Math.asin(Math.sqrt(Math.sin(dp/2)**2+Math.cos(p)*Math.cos(q)*Math.sin(dl/2)**2))}
+function bear(a,b){const p=a.lat*Math.PI/180,q=b.lat*Math.PI/180,d=(b.lon-a.lon)*Math.PI/180;return (Math.atan2(Math.sin(d)*Math.cos(q),Math.cos(p)*Math.sin(q)-Math.sin(p)*Math.cos(q)*Math.cos(d))*180/Math.PI+360)%360}
+function cross(p,a,b){const k=111320,c=Math.cos(a.lat*Math.PI/180),bx=(b.lon-a.lon)*k*c,by=(b.lat-a.lat)*k,px=(p.lon-a.lon)*k*c,py=(p.lat-a.lat)*k;return (bx*py-by*px)/(Math.hypot(bx,by)||1)}
+function smooth(a,b,f=.3){let d=((b-a+540)%360)-180;return(a+d*f+360)%360}
+function point(lat,lon){return L.latLng(lat,lon)}
 
-function hav(a,b){
-  const R=6371000, p1=a.lat*Math.PI/180,p2=b.lat*Math.PI/180;
-  const dp=(b.lat-a.lat)*Math.PI/180,dl=(b.lon-a.lon)*Math.PI/180;
-  const q=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
-  return 2*R*Math.asin(Math.sqrt(q));
-}
-function bearing(a,b){
-  const p1=a.lat*Math.PI/180,p2=b.lat*Math.PI/180,dl=(b.lon-a.lon)*Math.PI/180;
-  return (Math.atan2(Math.sin(dl)*Math.cos(p2),Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl))*180/Math.PI+360)%360;
-}
-function signedCross(p,a,b){
-  const k=111320,lat=a.lat*Math.PI/180;
-  const ax=0,ay=0,bx=(b.lon-a.lon)*k*Math.cos(lat),by=(b.lat-a.lat)*k;
-  const px=(p.lon-a.lon)*k*Math.cos(lat),py=(p.lat-a.lat)*k;
-  const den=Math.hypot(bx,by)||1;
-  return (bx*py-by*px)/den;
-}
-function offsetPoint(p,angDeg,meters){
-  const a=angDeg*Math.PI/180,k=111320;
-  return {lat:p.lat+Math.cos(a)*meters/k,lon:p.lon+Math.sin(a)*meters/(k*Math.cos(p.lat*Math.PI/180))};
-}
+function init(){
+ map=L.map("map",{zoomControl:false}).setView([-25.45,-54.65],17);
+ layers.standard=L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:20,attribution:"© OpenStreetMap"});
+ layers.satellite=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"© Esri"});
+ layers.terrain=L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"© OpenTopoMap"});
+ layers.satellite.addTo(map);
 
+ // Demonstração visual: A/B e cobertura aparecem imediatamente.
+ const demoA=[-25.4488,-54.6520],demoB=[-25.4530,-54.6508];
+ drawAB(demoA,demoB,true);
+ S.A={lat:demoA[0],lon:demoA[1]};S.B={lat:demoB[0],lon:demoB[1]};
+ const mid=[-25.4510,-54.6514];
+ marker=L.marker(mid,{icon:vehicleIcon(),zIndexOffset:1000}).addTo(map);
+ S.lat=mid[0];S.lon=mid[1];S.heading=bear(S.A,S.B);
+ marker.setIcon(vehicleIcon());
+ // faixa de cobertura de demonstração
+ const pts=[];for(let i=0;i<=22;i++)pts.push([demoA[0]+(demoB[0]-demoA[0])*i/22,demoA[1]+(demoB[1]-demoA[1])*i/22]);
+ S.path=pts;drawCoverage();
+ update();
+ navigator.geolocation && startGPS();
+ renderMachines();
+}
+function drawAB(a,b,demo=false){
+ if(abLine)abLine.remove();
+ abLine=L.polyline([a,b],{color:"#087ff5",weight:7,opacity:1,className:"abline"}).addTo(map);
+ L.marker(a,{icon:L.divIcon({className:"",iconSize:[38,38],iconAnchor:[19,19],html:'<div class="abBadge">A</div>'})}).addTo(map);
+ L.marker(b,{icon:L.divIcon({className:"",iconSize:[38,38],iconAnchor:[19,19],html:'<div class="abBadge b">B</div>'})}).addTo(map);
+ // linha central branca
+ L.polyline([a,b],{color:"#fff",weight:2,opacity:.9,dashArray:"8 9"}).addTo(map);
+ if(!demo)toast("Linha A → B criada");
+}
+function drawCoverage(){
+ if(coverage)coverage.remove();
+ if(!S.path.length)return;
+ coverage=L.polyline(S.path,{color:"#13ef62",weight:Math.max(14,Math.min(38,S.width*.9)),opacity:.48,lineCap:"round",className:"coverage"}).addTo(map);
+}
+function update(){
+ $("speed").textContent=S.speed.toFixed(1).replace(".",",")+" km/h";$("heading").textContent=Math.round(S.heading)+"°";$("cross").textContent=S.cross.toFixed(2).replace(".",",")+" m";$("area").textContent=S.area.toFixed(2).replace(".",",")+" ha";$("areaCard").textContent=S.area.toFixed(2).replace(".",",");
+ $("widthView").textContent=S.width.toFixed(1).replace(".",",")+" m";$("cultureView").textContent=S.culture;$("operationView").textContent=S.operation;$("productView").textContent=S.product;
+ $("yieldView").textContent=S.yield?S.yield+" "+S.yieldUnit:"—";$("yieldBottom").textContent=S.yield?S.yield+" "+S.yieldUnit:"—";
+ $("lbValue").textContent=S.cross.toFixed(2)+" m";$("accuracy").textContent=S.accuracy<999?S.accuracy.toFixed(1)+" m":"—";$("lat").textContent=S.lat?.toFixed(7)||"—";$("lon").textContent=S.lon?.toFixed(7)||"—";
+ const m=$("machineMarker");if(m)m.style.transform=`rotate(${S.heading}deg)`;
+}
+function gpsPosition(pos){
+ const c=pos.coords,old=S.lat!=null?{lat:S.lat,lon:S.lon}:null;S.prev=old;S.lat=c.latitude;S.lon=c.longitude;S.accuracy=c.accuracy||999;
+ if(c.speed>=0)S.speed=c.speed*3.6;
+ if(c.heading>=0 && S.speed>.7)S.heading=smooth(S.heading,c.heading,.35);else if(old&&hav(old,{lat:S.lat,lon:S.lon})>.5)S.heading=smooth(S.heading,bear(old,{lat:S.lat,lon:S.lon}),.3);
+ if(S.A&&!S.B){S.distA=hav(S.A,{lat:S.lat,lon:S.lon});$("bBtn").disabled=S.distA<S.minAB}
+ if(S.A&&S.B)S.cross=cross({lat:S.lat,lon:S.lon},S.A,S.B);
+ marker.setLatLng([S.lat,S.lon]);update();
+ if(S.follow)map.panTo([S.lat,S.lon],{animate:true,duration:.2});
+ if(S.record)addCoveragePoint();
+}
+function startGPS(){if(watch)navigator.geolocation.clearWatch(watch);watch=navigator.geolocation.watchPosition(gpsPosition,()=>{}, {enableHighAccuracy:true,maximumAge:300,timeout:6000})}
+function addCoveragePoint(){
+ const last=S.path[S.path.length-1];if(last&&hav({lat:last[0],lon:last[1]},{lat:S.lat,lon:S.lon})<.7)return;
+ S.path.push([S.lat,S.lon]);let d=0;for(let i=1;i<S.path.length;i++)d+=hav({lat:S.path[i-1][0],lon:S.path[i-1][1]},{lat:S.path[i][0],lon:S.path[i][1]});S.area=d*S.width/10000;drawCoverage();update()
+}
 function setA(){
-  if(state.lat==null)return toast("Aguardando posição GNSS");
-  state.A={lat:state.lat,lon:state.lon};state.B=null;state.cross=0;state.path=[];
-  if(lineAB)lineAB.remove();if(coverageLine)coverageLine.remove();lineAB=null;coverageLine=null;
-  parallelLines.forEach(x=>x.remove());parallelLines=[];
-  $("bBtn").disabled=true;$("bBtn").classList.remove("active");
-  $("aBtn").classList.add("active");toast("Ponto A marcado");
+ if(S.lat==null)return toast("Aguardando GNSS");
+ S.A={lat:S.lat,lon:S.lon};S.B=null;$("bBtn").disabled=true;toast("Ponto A marcado");
 }
 function setB(){
-  if(!state.A||state.lat==null)return;
-  if(state.distanceA<state.abDistance)return toast(`Afaste pelo menos ${state.abDistance.toFixed(1)} m do A`);
-  state.B={lat:state.lat,lon:state.lon};$("bBtn").classList.add("active");
-  drawGuidance();toast("Linha A-B criada");
-}
-function drawGuidance(){
-  if(!state.A||!state.B)return;
-  if(lineAB)lineAB.remove();parallelLines.forEach(x=>x.remove());parallelLines=[];
-  lineAB=L.polyline([[state.A.lat,state.A.lon],[state.B.lat,state.B.lon]],{color:"#ffe04b",weight:4,dashArray:"12 8"}).addTo(map);
-  const ang=bearing(state.A,state.B);
-  for(let i=-6;i<=6;i++){
-    if(i===0)continue;
-    const a=offsetPoint(state.A,ang+90,i*state.width);
-    const b=offsetPoint(state.B,ang+90,i*state.width);
-    parallelLines.push(L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{color:"#7de29a",weight:2,opacity:.45,dashArray:"7 9"}).addTo(map));
-  }
-}
-function toggleCoverage(){
-  if(state.lat==null)return toast("Aguardando GNSS");
-  state.coverage=!state.coverage;
-  $("recordBtn").classList.toggle("record",state.coverage);
-  $("recordBtn").textContent=state.coverage?"■":"▶";
-  if(state.coverage && state.path.length===0)state.path=[[state.lat,state.lon]];
-  toast(state.coverage?"Cobertura gravando":"Cobertura pausada");
-}
-function addCoverage(){
-  if(!state.coverage||state.lat==null)return;
-  const last=state.path[state.path.length-1];
-  if(last && hav({lat:last[0],lon:last[1]},{lat:state.lat,lon:state.lon})<0.5)return;
-  state.path.push([state.lat,state.lon]);
-  let dist=0;
-  for(let i=1;i<state.path.length;i++)dist+=hav({lat:state.path[i-1][0],lon:state.path[i-1][1]},{lat:state.path[i][0],lon:state.path[i][1]});
-  state.area=dist*state.width/10000;
-  if(!coverageLine)coverageLine=L.polyline(state.path,{color:"#24d15f",weight:Math.max(6,Math.min(20,state.width*.75)),opacity:.58,lineCap:"round",lineJoin:"round"}).addTo(map);
-  else coverageLine.setLatLngs(state.path);
-}
-function onPosition(pos){
-  const c=pos.coords;
-  const old={lat:state.lat,lon:state.lon};
-  state.prevLat=state.lat;state.prevLon=state.lon;state.lat=c.latitude;state.lon=c.longitude;
-  state.accuracy=Number.isFinite(c.accuracy)?c.accuracy:999;
-  state.speed=Number.isFinite(c.speed)&&c.speed>=0?c.speed*3.6:0;
-  if(Number.isFinite(c.heading)&&c.heading>=0&&state.speed>0.7)state.heading=smoothHeading(state.heading,c.heading,.35);
-  else if(old.lat!=null && hav(old,{lat:state.lat,lon:state.lon})>.7)state.heading=smoothHeading(state.heading,bearing(old,{lat:state.lat,lon:state.lon}),.3);
-  updatePosition();
-}
-function updatePosition(){
-  if(state.A&&!state.B){
-    state.distanceA=hav(state.A,{lat:state.lat,lon:state.lon});
-    $("bBtn").disabled=state.distanceA<state.abDistance;
-  }
-  if(state.A&&state.B)state.cross=signedCross({lat:state.lat,lon:state.lon},state.A,state.B);
-  marker.setLatLng([state.lat,state.lon]);rotateVehicle();addCoverage();
-  if(state.follow)map.panTo([state.lat,state.lon],{animate:true,duration:.25});
-  updateUI();
-}
-function smoothHeading(a,b,f){
-  let d=((b-a+540)%360)-180;return (a+d*f+360)%360;
-}
-function setGPSStatus(kind){
-  const dot=$("gpsDot");
-  dot.className="dot "+(kind==="ok"?"ok":kind==="warn"?"warn":"bad");
-  $("gpsText").textContent=kind==="ok"?"GNSS ativo":kind==="warn"?"GNSS fraco":"Sem GNSS";
-}
-function startGPS(){
-  if(!navigator.geolocation)return setGPSStatus("bad");
-  if(watchId!==null)navigator.geolocation.clearWatch(watchId);
-  watchId=navigator.geolocation.watchPosition(onPosition,err=>{
-    setGPSStatus("bad");$("gpsText").textContent=err.message||"Sem sinal";
-  },{enableHighAccuracy:true,maximumAge:250,timeout:5000});
-}
-function requestCompass(){
-  if(!("DeviceOrientationEvent" in window))return toast("Bússola não disponível neste aparelho");
-  const start=()=>{
-    window.addEventListener("deviceorientationabsolute",e=>{
-      if(e.alpha==null||state.speed>1.2)return;
-      const h=(360-e.alpha)%360;
-      state.compass=h;state.heading=smoothHeading(state.heading,h,.16);rotateVehicle();updateUI();
-    },true);
-    toast("Bússola ativada");
-  };
-  if(typeof DeviceOrientationEvent.requestPermission==="function"){
-    DeviceOrientationEvent.requestPermission().then(r=>r==="granted"?start():toast("Permissão da bússola negada")).catch(()=>toast("Não foi possível ativar a bússola"));
-  }else start();
-}
-function parseCoord(v,h){
-  if(!v)return null;const x=parseFloat(v);if(!Number.isFinite(x))return null;
-  const d=Math.floor(x/100);let out=d+(x-d*100)/60;if(h==="S"||h==="W")out=-out;return out;
-}
-function parseNMEA(line){
-  line=String(line).trim();if(!line.startsWith("$"))return;
-  const body=line.split("*")[0],p=body.split(","),type=p[0].slice(-3);
-  if(type==="RMC" && p[2]==="A"){
-    const la=parseCoord(p[3],p[4]),lo=parseCoord(p[5],p[6]);
-    if(la!=null&&lo!=null){state.lat=la;state.lon=lo;state.speed=(parseFloat(p[7])||0)*1.852;state.heading=Number.isFinite(parseFloat(p[8]))?parseFloat(p[8]):state.heading;state.accuracy=Math.min(state.accuracy,3);updatePosition();}
-  }
-  if(type==="GGA"){
-    const la=parseCoord(p[2],p[3]),lo=parseCoord(p[4],p[5]),fix=Number(p[6]||0),acc=parseFloat(p[8]);
-    if(la!=null&&lo!=null&&fix>0){state.lat=la;state.lon=lo;if(Number.isFinite(acc))state.accuracy=acc;updatePosition();}
-  }
-}
-function connectGNSS(){
-  const url=$("wsUrl").value.trim();if(!url)return toast("Informe o endereço WebSocket");
-  try{
-    if(ws)ws.close();ws=new WebSocket(url);
-    ws.onopen=()=>{setSource("Externa");setGPSStatus("ok");toast("GNSS externo conectado")};
-    ws.onmessage=e=>String(e.data).split(/\r?\n/).forEach(parseNMEA);
-    ws.onerror=()=>{setGPSStatus("bad");toast("Falha no GNSS externo")};
-    ws.onclose=()=>{if($("gpsSource").textContent==="Externa")setSource("Interna")};
-  }catch(e){toast("Endereço WebSocket inválido")}
-}
-function setSource(s){
-  $("gpsSource").textContent=s;$("sourceBadge").textContent=s==="Externa"?"📡 EXTERNA":"📡 INTERNA";
-}
-function useInternal(){if(ws){try{ws.close()}catch(e){}}ws=null;setSource("Interna");startGPS();toast("GPS interno selecionado")}
-function updateUI(){
-  $("speed").textContent=state.speed.toFixed(1)+" km/h";
-  $("heading").textContent=Math.round(state.heading)+"°";
-  $("cross").textContent=state.cross.toFixed(2)+" m";
-  $("area").textContent=state.area.toFixed(2)+" ha";
-  $("precision").textContent=state.accuracy<999?state.accuracy.toFixed(1)+" m":"-- m";
-  $("accText").textContent=state.accuracy<999?"± "+state.accuracy.toFixed(1)+" m":"± -- m";
-  $("lat").textContent=state.lat==null?"--":state.lat.toFixed(7);
-  $("lon").textContent=state.lon==null?"--":state.lon.toFixed(7);
-  const e=Math.min(Math.abs(state.cross)/Math.max(.1,state.maxError),1);
-  $("lbLeft").style.opacity=state.cross<-.02?e:0;
-  $("lbRight").style.opacity=state.cross>.02?e:0;
-  $("lbText").textContent=state.cross.toFixed(2)+" m";
-  if(state.accuracy<=2)setGPSStatus("ok");else if(state.accuracy<10)setGPSStatus("warn");
-  $("followState").textContent=state.follow?"SIM":"NÃO";
+ if(!S.A||S.lat==null)return;if(hav(S.A,{lat:S.lat,lon:S.lon})<S.minAB)return toast("Afaste mais para marcar B");
+ S.B={lat:S.lat,lon:S.lon};drawAB([S.A.lat,S.A.lon],[S.B.lat,S.B.lon]);$("bBtn").disabled=true
 }
 function renderMachines(){
-  const g=$("machineGrid");g.innerHTML="";
-  Object.entries(machines).forEach(([id,m])=>{
-    const b=document.createElement("button");b.className="machine"+(state.machine===id?" active":"");
-    b.innerHTML=svgMachine(id)+`<b>${m[1]}</b>`;
-    b.onclick=()=>{state.machine=id;marker.setIcon(vehicleIcon());rotateVehicle();renderMachines();saveLocal();toast("Máquina: "+m[1])};
-    g.appendChild(b);
-  });
+ const g=$("machineGrid");g.innerHTML="";
+ Object.entries(machineNames).forEach(([id,n])=>{const b=document.createElement("button");b.className="machine"+(S.machine===id?" active":"");b.innerHTML=machineSVG(id)+`<b>${n}</b>`;b.onclick=()=>{S.machine=id;marker.setIcon(vehicleIcon());renderMachines();toast("Máquina: "+n)};g.appendChild(b)})
 }
-function saveMachine(){
-  state.width=parseFloat($("implementWidth").value)||24;saveLocal();drawGuidance();updateUI();toast("Máquina salva");
-}
-function saveOperation(){
-  state.product=$("product").value;state.operation=$("operation").value;
-  state.yield=parseFloat($("yield").value)||null;state.yieldUnit=$("yieldUnit").value;saveLocal();toast("Operação salva");
-}
-function saveSettings(){
-  state.width=parseFloat($("setWidth").value)||24;state.maxError=parseFloat($("maxError").value)||.5;
-  state.abDistance=parseFloat($("abDistance").value)||5;$("implementWidth").value=state.width;saveLocal();drawGuidance();updateUI();toast("Configurações salvas");
-}
-function resetWork(){
-  state.A=null;state.B=null;state.path=[];state.area=0;state.cross=0;state.coverage=false;
-  if(lineAB)lineAB.remove();if(coverageLine)coverageLine.remove();lineAB=null;coverageLine=null;
-  parallelLines.forEach(x=>x.remove());parallelLines=[];
-  $("aBtn").classList.remove("active");$("bBtn").classList.remove("active");$("bBtn").disabled=true;
-  $("recordBtn").classList.remove("record");$("recordBtn").textContent="▶";updateUI();toast("Trabalho atual limpo");
-}
-function newField(){
-  const name=$("fieldName").value.trim()||"Talhão "+(Object.keys(state.fields).length+1);
-  state.fieldName=name;resetWork();$("fieldName").value=name;saveLocal();renderFields();toast("Novo talhão: "+name);
-}
-function saveCurrentField(){
-  state.fieldName=$("fieldName").value.trim()||state.fieldName;
-  state.fields[state.fieldName]={
-    name:state.fieldName,A:state.A,B:state.B,path:state.path,area:state.area,width:state.width,
-    product:state.product,operation:state.operation,yield:state.yield,yieldUnit:state.yieldUnit,
-    machine:state.machine,lat:state.lat,lon:state.lon
-  };
-  saveLocal();renderFields();toast("Talhão salvo");
-}
-function renderFields(){
-  const box=$("fieldList");box.innerHTML="";
-  const arr=Object.values(state.fields);
-  if(!arr.length){box.innerHTML='<div class="card" style="font-size:10px;color:#91a89a">Nenhum talhão salvo ainda.</div>';return}
-  arr.forEach(f=>{
-    const d=document.createElement("div");d.className="fieldRow";
-    d.innerHTML=`<span>🌾 <b>${escapeHtml(f.name)}</b><br><small>${Number(f.area||0).toFixed(2)} ha · ${escapeHtml(f.product||"—")}</small></span>`;
-    const b=document.createElement("button");b.className="action secondary";b.style.cssText="width:auto;margin:0;padding:7px 10px";b.textContent="Abrir";b.onclick=()=>loadField(f.name);
-    d.appendChild(b);box.appendChild(d);
-  });
-}
-function loadField(name){
-  const f=state.fields[name];if(!f)return;
-  state.fieldName=f.name||name;state.A=f.A||null;state.B=f.B||null;state.path=f.path||[];state.area=f.area||0;
-  state.width=f.width||24;state.product=f.product||"Soja";state.operation=f.operation||"Plantio";state.yield=f.yield??null;state.yieldUnit=f.yieldUnit||"sc/ha";state.machine=f.machine||"tractor";
-  $("fieldName").value=state.fieldName;$("implementWidth").value=state.width;$("setWidth").value=state.width;$("product").value=state.product;$("operation").value=state.operation;$("yield").value=state.yield||"";$("yieldUnit").value=state.yieldUnit;
-  if(lineAB)lineAB.remove();if(coverageLine)coverageLine.remove();parallelLines.forEach(x=>x.remove());lineAB=null;coverageLine=null;parallelLines=[];
-  if(state.A&&state.B)drawGuidance();
-  if(state.path.length)coverageLine=L.polyline(state.path,{color:"#24d15f",weight:Math.max(6,Math.min(20,state.width*.75)),opacity:.58,lineCap:"round"}).addTo(map);
-  renderMachines();updateUI();toast("Talhão carregado: "+name);
-}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function saveLocal(){
-  localStorage.setItem("portal_sat_gps_v2",JSON.stringify({
-    width:state.width,maxError:state.maxError,abDistance:state.abDistance,machine:state.machine,
-    fields:state.fields,product:state.product,operation:state.operation,yield:state.yield,yieldUnit:state.yieldUnit,
-    follow:state.follow
-  }));
-}
-function loadLocal(){
-  try{
-    const x=JSON.parse(localStorage.getItem("portal_sat_gps_v2")||"{}");
-    state.width=x.width||24;state.maxError=x.maxError||.5;state.abDistance=x.abDistance||5;state.machine=x.machine||"tractor";
-    state.fields=x.fields||{};state.product=x.product||"Soja";state.operation=x.operation||"Plantio";state.yield=x.yield??null;state.yieldUnit=x.yieldUnit||"sc/ha";state.follow=x.follow!==false;
-  }catch(e){}
-  $("implementWidth").value=state.width;$("setWidth").value=state.width;$("maxError").value=state.maxError;$("abDistance").value=state.abDistance;
-  $("product").value=state.product;$("operation").value=state.operation;$("yield").value=state.yield||"";$("yieldUnit").value=state.yieldUnit;
-}
-function openPanel(name){
-  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("open"));
-  $("menu").classList.remove("open");
-  const p=$("panel-"+name);if(p)p.classList.add("open");
-}
-function closePanels(){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("open"))}
-function toggleMenu(){$("menu").classList.toggle("open")}
-function setLayer(name){
-  Object.values(tile).forEach(l=>{if(map.hasLayer(l))map.removeLayer(l)});
-  tile[name].addTo(map);activeLayer=name;document.querySelector(".map-shade").style.opacity=name==="satellite"?"1":"0.6";toast("Mapa: "+name);
-}
-function toggleClean(){
-  state.clean=!state.clean;document.body.classList.toggle("clean",state.clean);
-  $("cleanBtn").textContent=state.clean?"☰ Mostrar ferramentas":"✕ Ocultar ferramentas";
-}
-function toggle3d(on){document.body.classList.toggle("view3d",on)}
-async function requestWake(){
-  try{
-    if("wakeLock" in navigator){wakeLock=await navigator.wakeLock.request("screen");toast("Tela configurada para permanecer ligada")}
-    else toast("Este aparelho/navegador não suporta manter a tela ligada");
-  }catch(e){toast("Não foi possível manter a tela ligada")}
-}
-function exportData(){
-  const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),state:{fieldName:state.fieldName,A:state.A,B:state.B,path:state.path,area:state.area,width:state.width,product:state.product,operation:state.operation,yield:state.yield,yieldUnit:state.yieldUnit,machine:state.machine}},null,2)],{type:"application/json"});
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(state.fieldName||"talhao")+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  toast("Arquivo exportado");
-}
-
+function openPanel(name){document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));$("side").style.display="none";$("panel-"+name).classList.add("open")}
+function closePanels(){document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));$("side").style.display="block"}
 function bind(){
-  $("aBtn").onclick=setA;$("bBtn").onclick=setB;$("centerBtn").onclick=()=>state.lat!=null&&map.setView([state.lat,state.lon],18);
-  $("followBtn").onclick=()=>{state.follow=!state.follow;$("followBtn").classList.toggle("active",state.follow);updateUI();saveLocal()};
-  $("zoomIn").onclick=()=>map.zoomIn();$("zoomOut").onclick=()=>map.zoomOut();
-  $("recordBtn").onclick=toggleCoverage;$("fieldBtn").onclick=()=>openPanel("fields");$("machineBtn").onclick=()=>openPanel("machine");
-  $("mapBtn").onclick=()=>openPanel("map");$("gpsBtn").onclick=()=>openPanel("gps");$("settingsBtn").onclick=()=>openPanel("settings");
-  $("cleanBtn").onclick=toggleClean;$("menuBtn").onclick=toggleMenu;
-  document.querySelectorAll(".close").forEach(b=>b.onclick=closePanels);
-  document.querySelectorAll(".menuBtn").forEach(b=>b.onclick=()=>openPanel(b.dataset.panel));
-  $("newField").onclick=newField;$("saveField").onclick=saveCurrentField;$("clearWork").onclick=()=>{if(confirm("Limpar o trabalho atual?"))resetWork()};
-  $("exportField").onclick=exportData;$("saveMachine").onclick=saveMachine;$("compassBtn").onclick=requestCompass;
-  $("saveOperation").onclick=saveOperation;$("internalGps").onclick=useInternal;$("connectGnss").onclick=connectGNSS;
-  $("saveSettings").onclick=saveSettings;$("requestWake").onclick=requestWake;
-  $("resetApp").onclick=()=>{if(confirm("Restaurar as configurações deste dispositivo?")){localStorage.removeItem("portal_sat_gps_v2");location.reload()}};
-  document.querySelectorAll("[data-layer]").forEach(b=>b.onclick=()=>setLayer(b.dataset.layer));
-  $("fieldView").onclick=()=>{setLayer("satellite");document.querySelector(".map-shade").style.opacity="1";toast("Visão de campo ativada")};
-  $("view2d").onclick=()=>toggle3d(false);$("view3d").onclick=()=>toggle3d(true);
-  $("followMap").onclick=()=>{state.follow=!state.follow;updateUI();saveLocal()};
+ $("menuToggle").onclick=()=>{$("side").style.display=$("side").style.display==="none"?"block":"none"};
+ $("sideClose").onclick=()=>{$("side").style.display="none"};
+ document.querySelectorAll(".menuCard").forEach(b=>b.onclick=()=>openPanel(b.dataset.panel));
+ document.querySelectorAll(".close").forEach(b=>b.onclick=closePanels);
+ $("aBtn").onclick=setA;$("bBtn").onclick=setB;$("centerBtn").onclick=()=>S.lat&&map.setView([S.lat,S.lon],18);
+ $("followBtn").onclick=()=>{S.follow=!S.follow;$("followBtn").classList.toggle("active",S.follow);toast(S.follow?"Seguindo máquina":"Seguir máquina desligado")};
+ $("recordBtn").onclick=()=>{S.record=!S.record;$("recordBtn").classList.toggle("active",S.record);$("recordBtn").textContent=S.record?"■":"●";toast(S.record?"Cobertura gravando":"Cobertura pausada")};
+ $("zoomIn").onclick=()=>map.zoomIn();$("zoomOut").onclick=()=>map.zoomOut();
+ $("saveMachine").onclick=()=>{S.width=parseFloat($("widthInput").value)||24;drawCoverage();update();toast("Máquina salva")};
+ $("saveOperation").onclick=()=>{S.culture=$("culture").value;S.operation=$("operation").value;S.product=$("product").value;S.yield=parseFloat($("yield").value)||null;S.yieldUnit=$("yieldUnit").value;update();toast("Operação salva")};
+ $("saveSettings").onclick=()=>{S.maxError=parseFloat($("maxError").value)||.5;S.minAB=parseFloat($("minAB").value)||5;toast("Configurações salvas")};
+ $("saveField").onclick=()=>{S.field=$("fieldName").value||"Talhão";$("fieldView").textContent=S.field;toast("Talhão salvo")};
+ $("newField").onclick=$("newField2").onclick=()=>{S.field="Novo Talhão";$("fieldName").value=S.field;$("fieldView").textContent=S.field;S.A=S.B=null;S.path=[];S.area=0;if(coverage)coverage.remove();toast("Novo talhão criado")};
+ $("internal").onclick=()=>{startGPS();$("gpsSource").textContent="GPS interno";toast("GPS interno selecionado")};
+ document.querySelectorAll("[data-layer]").forEach(b=>b.onclick=()=>{Object.values(layers).forEach(l=>map.removeLayer(l));layers[b.dataset.layer].addTo(map)});
+ $("mode2d").onclick=$("p2d").onclick=()=>{document.body.classList.remove("mode3d");$("mode2d").classList.add("active");$("mode3d").classList.remove("active")};
+ $("mode3d").onclick=$("p3d").onclick=()=>{document.body.classList.add("mode3d");$("mode3d").classList.add("active");$("mode2d").classList.remove("active")};
+ $("hideTabs").onclick=()=>{$("side").style.display="none";$("hideTabs").textContent="☰ Mostrar abas"};
+ $("openSettings").onclick=()=>openPanel("settings");
+ $("compass").onclick=()=>{if("DeviceOrientationEvent"in window){const f=()=>window.addEventListener("deviceorientationabsolute",e=>{if(e.alpha!=null&&S.speed<1.5)S.heading=smooth(S.heading,(360-e.alpha)%360,.15)});if(DeviceOrientationEvent.requestPermission)DeviceOrientationEvent.requestPermission().then(x=>x==="granted"&&f());else f();toast("Bússola ativada")}else toast("Bússola não disponível")};
+ $("wake").onclick=async()=>{try{if("wakeLock"in navigator){wake=await navigator.wakeLock.request("screen");toast("Tela ficará ligada")}else toast("Não suportado neste navegador")}catch(e){toast("Não foi possível ativar")}}
 }
-
-window.addEventListener("load",()=>{
-  initMap();loadLocal();renderMachines();renderFields();bind();startGPS();updateUI();
-  document.body.classList.add("clean");$("followBtn").classList.add("active");
-});
+window.addEventListener("load",()=>{init();bind();update()});
 </script>
 </body>
 </html>
